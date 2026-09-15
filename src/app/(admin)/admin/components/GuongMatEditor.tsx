@@ -93,10 +93,10 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
     };
 
     if (articleToEdit && articleToEdit.id) {
-      updateArticle(articleToEdit.id, articleData);
+      await updateArticle(articleToEdit.id, articleData);
       alert('Cập nhật Gương mặt thành công!');
     } else {
-      addArticle(articleData);
+      await addArticle(articleData);
       alert('Đăng Gương mặt thành công!');
     }
     

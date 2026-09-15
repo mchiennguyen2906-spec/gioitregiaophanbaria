@@ -1,18 +1,30 @@
 "use client";
-import React from 'react';
+import { useState, useEffect } from 'react';
+import { getWordOfGodsFromStore, WordOfGod } from '../utils/store';
 
-// Dữ liệu mô phỏng Lời Chúa trong tuần
-const bibleVerses = [
-  { day: "Thứ Hai", verse: '"Chúa là mục tử chăn dắt tôi, tôi chẳng thiếu thốn gì." (Tv 23,1)' },
-  { day: "Thứ Ba", verse: '"Tất cả những ai đang vất vả mang gánh nặng nề, hãy đến cùng tôi, tôi sẽ cho nghỉ ngơi bồi dưỡng." (Mt 11,28)' },
-  { day: "Thứ Tư", verse: '"Thầy để lại bình an cho anh em, Thầy ban cho anh em bình an của Thầy." (Ga 14,27)' },
-  { day: "Thứ Năm", verse: '"Anh em hãy yêu thương nhau như Thầy đã yêu thương anh em." (Ga 15,12)' },
-  { day: "Thứ Sáu", verse: '"Phúc thay ai xót thương người, vì họ sẽ được Thiên Chúa xót thương." (Mt 5,7)' },
-  { day: "Thứ Bảy", verse: '"Bởi vì đối với Thiên Chúa, không có gì là không thể làm được." (Lc 1,37)' },
-  { day: "Chúa Nhật", verse: '"Này Thầy ở cùng anh em mọi ngày cho đến tận thế." (Mt 28,20)' }
-];
+const dayNames = ["", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chúa Nhật"];
 
 export default function BibleTicker() {
+  const [bibleVerses, setBibleVerses] = useState<{day: string, verse: string}[]>([]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const loadWords = async () => {
+      const words = await getWordOfGodsFromStore();
+      const sorted = words.sort((a, b) => a.dayOfWeek - b.dayOfWeek);
+      setBibleVerses(sorted.map(w => ({
+        day: dayNames[w.dayOfWeek],
+        verse: `"${w.quote}" (${w.source})`
+      })));
+    };
+    loadWords();
+    window.addEventListener('storage_update', loadWords);
+    return () => window.removeEventListener('storage_update', loadWords);
+  }, []);
+
+  if (!mounted || bibleVerses.length === 0) return null;
+
   return (
     <div className="mass-ticker-wrapper">
       {/* Cột nhãn cố định */}

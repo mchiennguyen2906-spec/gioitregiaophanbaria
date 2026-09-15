@@ -105,7 +105,7 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
     reader.readAsDataURL(file);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!name || !targetAmount) {
       alert('Vui lòng nhập Tên chương trình và Số tiền mục tiêu!');
       return;
@@ -123,10 +123,10 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
     };
 
     if (donationToEdit) {
-      updateDonation(donationToEdit.id, data);
+      await updateDonation(donationToEdit.id, data);
       alert('Đã cập nhật chương trình!');
     } else {
-      addDonation(data);
+      await addDonation(data);
       alert('Đã tạo chương trình quyên góp mới!');
     }
     onSave();
