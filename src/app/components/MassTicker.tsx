@@ -10,7 +10,7 @@ export default function MassTicker() {
     setMounted(true);
     
     // Hàm cập nhật giờ lễ
-    const updateMasses = () => {
+    const updateMasses = async () => {
       const now = new Date();
       // Test mode: Bạn có thể đổi now.setHours(...) để test
       // now.setHours(16, 0, 0); 
@@ -19,7 +19,7 @@ export default function MassTicker() {
       const currentM = now.getMinutes();
       const currentHHMM = `${currentH.toString().padStart(2, '0')}:${currentM.toString().padStart(2, '0')}`;
 
-      const schedules = getMassSchedulesFromStore();
+      const schedules = await getMassSchedulesFromStore();
       
       let upcomingList: { name: string, times: string[] }[] = [];
 

@@ -64,18 +64,35 @@ CREATE TABLE public.word_of_gods (
     reference TEXT
 );
 
+-- Bảng Settings (Cài đặt chung như Radio Link, v.v.)
+CREATE TABLE public.settings (
+    id TEXT PRIMARY KEY,
+    value TEXT
+);
+
+-- Bảng Mass Schedules (Giờ lễ)
+CREATE TABLE public.mass_schedules (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    parish_name TEXT NOT NULL,
+    times JSONB DEFAULT '[]'::jsonb
+);
+
 -- Cấp quyền truy cập công khai (RLS) cho người dùng chỉ đọc
 ALTER TABLE public.articles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.donation_programs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.footer_config ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.word_of_gods ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.mass_schedules ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Cho phép tất cả mọi người đọc bài viết" ON public.articles FOR SELECT USING (true);
 CREATE POLICY "Cho phép tất cả mọi người đọc chương trình từ thiện" ON public.donation_programs FOR SELECT USING (true);
 CREATE POLICY "Cho phép thêm câu hỏi ẩn danh" ON public.questions FOR INSERT WITH CHECK (true);
 CREATE POLICY "Cho phép tất cả mọi người đọc footer" ON public.footer_config FOR SELECT USING (true);
 CREATE POLICY "Cho phép tất cả mọi người đọc lời chúa" ON public.word_of_gods FOR SELECT USING (true);
+CREATE POLICY "Cho phép tất cả mọi người đọc cài đặt" ON public.settings FOR SELECT USING (true);
+CREATE POLICY "Cho phép tất cả mọi người đọc giờ lễ" ON public.mass_schedules FOR SELECT USING (true);
 
 -- (Bỏ qua cấu hình RLS bảo mật Admin để đơn giản hóa trong dự án này)
 CREATE POLICY "Cho phép admin full quyền" ON public.articles FOR ALL USING (true) WITH CHECK (true);
@@ -83,3 +100,5 @@ CREATE POLICY "Cho phép admin full quyền" ON public.questions FOR ALL USING (
 CREATE POLICY "Cho phép admin full quyền" ON public.donation_programs FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Cho phép admin full quyền" ON public.footer_config FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Cho phép admin full quyền" ON public.word_of_gods FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Cho phép admin full quyền" ON public.settings FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Cho phép admin full quyền" ON public.mass_schedules FOR ALL USING (true) WITH CHECK (true);

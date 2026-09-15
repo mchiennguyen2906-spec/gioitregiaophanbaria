@@ -7,7 +7,8 @@ export default function RadioManager() {
   const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
-    setLink(getRadioLinkFromStore());
+    const load = async () => setLink(await getRadioLinkFromStore());
+    load();
   }, []);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -27,7 +28,7 @@ export default function RadioManager() {
       const result = await res.json();
       if (result.success) {
         setLink(result.url);
-        saveRadioLinkToStore(result.url); // Tự động lưu sau khi upload
+        await saveRadioLinkToStore(result.url); // Tự động lưu sau khi upload
         alert('Tải file MP3 thành công và đã tự động lưu!');
       } else {
         alert('Lỗi khi tải file lên: ' + result.message);
@@ -40,8 +41,8 @@ export default function RadioManager() {
     }
   };
 
-  const handleSave = () => {
-    saveRadioLinkToStore(link);
+  const handleSave = async () => {
+    await saveRadioLinkToStore(link);
     alert('Đã cập nhật link Radio Lời Chúa thành công!');
   };
 

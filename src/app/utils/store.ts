@@ -101,22 +101,6 @@ export const defaultArticles: Article[] = [
   }
 ];
 
-// Seeder logic to inject dummy data once
-if (typeof window !== 'undefined') {
-  if (!localStorage.getItem('brvt_seeded_v1')) {
-    const existing = localStorage.getItem('brvt_articles');
-    let parsed: Article[] = [];
-    if (existing) {
-      try { parsed = JSON.parse(existing); } catch (e) {}
-    }
-    const existingIds = new Set(parsed.map(a => a.id));
-    const missingDefaults = defaultArticles.filter(a => !existingIds.has(a.id));
-    if (missingDefaults.length > 0) {
-      localStorage.setItem('brvt_articles', JSON.stringify([...parsed, ...missingDefaults]));
-    }
-    localStorage.setItem('brvt_seeded_v1', 'true');
-  }
-}
 
 // Khởi tạo và đọc dữ liệu từ Supabase
 export const getArticlesFromStore = async (): Promise<Article[]> => {
@@ -376,29 +360,39 @@ const defaultMassSchedules: MassSchedule[] = [
   { id: 'm-4', parishName: 'Giáo xứ Hòa Bình', times: ['04:45', '17:45'] }
 ];
 
-export const getMassSchedulesFromStore = (): MassSchedule[] => {
+export const getMassSchedulesFromStore = async (): Promise<MassSchedule[]> => {
   if (typeof window === 'undefined') return defaultMassSchedules;
-  const data = localStorage.getItem('brvt_mass_schedules');
-  return data ? JSON.parse(data) : defaultMassSchedules;
+  const { data, error } = await supabase.from('mass_schedules').select('*');
+  if (error || !data || data.length === 0) return defaultMassSchedules;
+  return data.map((m: any) => ({
+    id: m.id,
+    parishName: m.parish_name,
+    times: m.times || []
+  }));
 };
 
-export const saveMassSchedulesToStore = (schedules: MassSchedule[]) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('brvt_mass_schedules', JSON.stringify(schedules));
-  }
+export const saveMassSchedulesToStore = async (schedules: MassSchedule[]) => {
+  // Clear all and insert new
+  await supabase.from('mass_schedules').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+  const payload = schedules.map(s => ({
+    parish_name: s.parishName,
+    times: s.times
+  }));
+  await supabase.from('mass_schedules').insert(payload);
+  notifyUpdate();
 };
 
 // ================= RADIO LỜI CHÚA =================
-export const getRadioLinkFromStore = (): string => {
+export const getRadioLinkFromStore = async (): Promise<string> => {
   if (typeof window === 'undefined') return '';
-  return localStorage.getItem('brvt_radio_link') || '';
+  const { data, error } = await supabase.from('settings').select('value').eq('id', 'radio_link').single();
+  if (error || !data) return '';
+  return data.value;
 };
 
-export const saveRadioLinkToStore = (link: string) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('brvt_radio_link', link);
-    window.dispatchEvent(new Event('storage_update'));
-  }
+export const saveRadioLinkToStore = async (link: string) => {
+  const { error } = await supabase.from('settings').upsert({ id: 'radio_link', value: link });
+  if (!error) notifyUpdate();
 };
 
 // ================= FOOTER CONFIG =================

@@ -10,7 +10,7 @@ export default function RadioPlayer() {
 
   useEffect(() => {
     const loadData = async () => {
-      setRadioLink(getRadioLinkFromStore());
+      setRadioLink(await getRadioLinkFromStore());
       
       const words = await getWordOfGodsFromStore();
       const nowDay = new Date().getDay();

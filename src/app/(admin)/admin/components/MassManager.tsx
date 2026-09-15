@@ -5,7 +5,8 @@ export default function MassManager() {
   const [schedules, setSchedules] = useState<MassSchedule[]>([]);
 
   useEffect(() => {
-    setSchedules(getMassSchedulesFromStore());
+    const load = async () => setSchedules(await getMassSchedulesFromStore());
+    load();
   }, []);
 
   const handleAdd = () => {
@@ -25,13 +26,13 @@ export default function MassManager() {
     setSchedules(schedules.filter(s => s.id !== id));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Validate
     if (schedules.some(s => !s.parishName || s.times.length === 0)) {
       alert('Vui lòng điền đầy đủ Tên Giáo xứ và Giờ lễ cho tất cả các dòng!');
       return;
     }
-    saveMassSchedulesToStore(schedules);
+    await saveMassSchedulesToStore(schedules);
     alert('Đã cập nhật Giờ Lễ!');
   };
 
