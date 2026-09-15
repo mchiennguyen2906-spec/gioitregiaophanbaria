@@ -169,6 +169,8 @@ export const addArticle = async (article: Omit<Article, 'id' | 'date'> & { date?
     parish: article.parish,
     thumbnail_url: article.thumbnailUrl,
     audio_url: article.audioUrl,
+    attachment_url: article.attachmentUrl,
+    attachment_name: article.attachmentName,
     status: article.status,
     is_featured: article.isFeatured,
     is_priority: article.isPriority,
@@ -176,7 +178,6 @@ export const addArticle = async (article: Omit<Article, 'id' | 'date'> & { date?
     is_home_priority: article.isHomePriority
   };
 
-  // Note: attachment_url and attachment_name are temporarily omitted to prevent DB crash because the columns don't exist yet.
   if (article.date) payload.date = article.date;
 
   const { error } = await supabase.from('articles').insert([payload]);
@@ -196,14 +197,14 @@ export const updateArticle = async (id: string, updatedFields: Partial<Article>)
   if (updatedFields.parish !== undefined) payload.parish = updatedFields.parish;
   if (updatedFields.thumbnailUrl !== undefined) payload.thumbnail_url = updatedFields.thumbnailUrl;
   if (updatedFields.audioUrl !== undefined) payload.audio_url = updatedFields.audioUrl;
+  if (updatedFields.attachmentUrl !== undefined) payload.attachment_url = updatedFields.attachmentUrl;
+  if (updatedFields.attachmentName !== undefined) payload.attachment_name = updatedFields.attachmentName;
   if (updatedFields.date !== undefined) payload.date = updatedFields.date;
   if (updatedFields.status !== undefined) payload.status = updatedFields.status;
   if (updatedFields.isFeatured !== undefined) payload.is_featured = updatedFields.isFeatured;
   if (updatedFields.isPriority !== undefined) payload.is_priority = updatedFields.isPriority;
   if (updatedFields.isHomeFeatured !== undefined) payload.is_home_featured = updatedFields.isHomeFeatured;
   if (updatedFields.isHomePriority !== undefined) payload.is_home_priority = updatedFields.isHomePriority;
-  
-  // Note: attachment_url and attachment_name are temporarily omitted
 
   const { error } = await supabase.from('articles').update(payload).eq('id', id);
   if (error) throw error;
