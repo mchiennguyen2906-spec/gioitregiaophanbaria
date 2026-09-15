@@ -91,6 +91,7 @@ export default function AdminDashboard() {
           <ArticleEditor 
             articleToEdit={articleToEdit}
             defaultCategory={activeCategory}
+            allowedCategories={categories}
             onSave={() => setActiveMenu('PREVIEW')} 
             onPublish={() => {
               setArticleToEdit(null);
@@ -272,6 +273,9 @@ export default function AdminDashboard() {
           
           <div style={{ maxHeight: '400px', overflowY: 'auto', background: '#0f172a' }}>
             {Object.entries(categoryHierarchy || {}).map(([parentKey, childrenKeys]) => {
+              const allowedChildren = childrenKeys.filter(childKey => categories.some(c => c.id === childKey));
+              if (allowedChildren.length === 0) return null;
+              
               const isExpanded = expandedFolder === parentKey;
               return (
                 <div key={parentKey}>
@@ -288,7 +292,7 @@ export default function AdminDashboard() {
                   </button>
                   {isExpanded && (
                     <div style={{ background: '#0f172a', paddingBottom: '10px' }}>
-                      {childrenKeys.map(childKey => {
+                      {allowedChildren.map(childKey => {
                         const childName = slugMap[childKey] || childKey;
                         return (
                           <button 
@@ -314,17 +318,19 @@ export default function AdminDashboard() {
             })}
           </div>
 
-          {/* Menu Admin (Chỉ Super Admin mới thấy) */}
-          {userRole?.role === 'super_admin' && (
+          {/* Menu Admin (Super Admin hoặc người có quyền Hệ Thống) */}
+          {(userRole?.role === 'super_admin' || userRole?.allowed_categories?.includes('he-thong')) && (
             <div style={menuSectionStyle}>
               <div style={menuSectionTitleStyle}>HỆ THỐNG</div>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                <li 
-                  onClick={() => setActiveMenu('MANAGE_USERS')}
-                  style={menuItemStyle(activeMenu === 'MANAGE_USERS')}
-                >
-                  👥 Quản lý Tài khoản (RBAC)
-                </li>
+                {userRole?.role === 'super_admin' && (
+                  <li 
+                    onClick={() => setActiveMenu('MANAGE_USERS')}
+                    style={menuItemStyle(activeMenu === 'MANAGE_USERS')}
+                  >
+                    👥 Quản lý Tài khoản (RBAC)
+                  </li>
+                )}
                 <li 
                   onClick={() => setActiveMenu('MANAGE_FOOTER')}
                   style={menuItemStyle(activeMenu === 'MANAGE_FOOTER')}

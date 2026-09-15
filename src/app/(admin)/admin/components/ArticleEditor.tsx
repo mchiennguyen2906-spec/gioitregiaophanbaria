@@ -12,11 +12,12 @@ const ReactQuill = dynamic(() => import('react-quill-new'), { ssr: false });
 interface ArticleEditorProps {
   articleToEdit?: Article | null;
   defaultCategory?: string | null;
+  allowedCategories?: { id: string, name: string }[];
   onSave: () => void;
   onPublish: () => void;
 }
 
-export default function ArticleEditor({ articleToEdit, defaultCategory, onSave, onPublish }: ArticleEditorProps) {
+export default function ArticleEditor({ articleToEdit, defaultCategory, allowedCategories, onSave, onPublish }: ArticleEditorProps) {
   const [title, setTitle] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [author, setAuthor] = useState('');
@@ -172,7 +173,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, onSave, 
     reader.readAsDataURL(file);
   };
 
-  const categories = Object.keys(slugMap).map(key => ({ id: key, name: slugMap[key] }));
+  const categories = allowedCategories || Object.keys(slugMap).map(key => ({ id: key, name: slugMap[key] }));
 
   // Cấu hình Toolbar cho Quill
   const modules = {
