@@ -33,6 +33,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
   const [isHomePriority, setIsHomePriority] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   
   // File đính kèm
   const [attachmentUrl, setAttachmentUrl] = useState('');
@@ -274,7 +275,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>Soạn Thảo Bài Viết Mới</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={onSave} style={{
+          <button onClick={() => setShowPreview(true)} style={{
             background: '#f1f5f9', color: '#334155', padding: '10px 15px', 
             borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
           }}>Lưu & Xem Trước</button>
@@ -484,6 +485,37 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
 
         </div>
       </div>
+
+      {showPreview && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.5)', zIndex: 1000, overflowY: 'auto', padding: '40px 20px'
+        }}>
+          <div style={{
+            background: 'white', maxWidth: '800px', margin: '0 auto', padding: '40px', 
+            borderRadius: '12px', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)'
+          }}>
+            <div style={{ background: '#fef3c7', color: '#b45309', padding: '15px', borderRadius: '8px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span>⚠️ <b>CHẾ ĐỘ XEM TRƯỚC (PREVIEW)</b></span>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button onClick={() => setShowPreview(false)} style={{ padding: '8px 15px', borderRadius: '4px', border: '1px solid #b45309', background: 'transparent', color: '#b45309', cursor: 'pointer', fontWeight: 'bold' }}>Chỉnh sửa lại</button>
+                <button onClick={() => { setShowPreview(false); handlePublish(); }} style={{ padding: '8px 15px', borderRadius: '4px', border: 'none', background: 'var(--color-brand-cyan)', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>Xác nhận đăng</button>
+              </div>
+            </div>
+
+            <h1 style={{ fontSize: '2.5rem', color: 'var(--color-brand-cyan)', marginBottom: '10px' }}>{title || '[Chưa nhập tiêu đề]'}</h1>
+            <p style={{ color: '#64748b', fontStyle: 'italic', marginBottom: '20px' }}>Người đăng: {author || '[Tác giả]'} {parish ? `- ${parish}` : ''} | Ngày đăng: {publishDate ? new Date(publishDate).toLocaleDateString('vi-VN') : 'Hôm nay'}</p>
+            
+            {thumbnailUrl && (
+              <img src={thumbnailUrl} alt="Cover" style={{ width: '100%', borderRadius: '8px', marginBottom: '20px' }} />
+            )}
+
+            <p style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '30px', color: '#334155' }}>{excerpt || '[Chưa nhập lời dẫn]'}</p>
+            
+            <div className="article-content" dangerouslySetInnerHTML={{ __html: content || '[Chưa nhập nội dung]' }} style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#1e293b' }} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

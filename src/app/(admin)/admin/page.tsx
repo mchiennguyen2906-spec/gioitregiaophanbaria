@@ -143,27 +143,7 @@ export default function AdminDashboard() {
             onPublish={() => setActiveMenu('MANAGE_CATEGORY')} 
           />
         );
-      case 'PREVIEW':
-        return (
-          <div>
-            <div style={{ background: '#fef3c7', color: '#b45309', padding: '15px', borderRadius: '8px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span>⚠️ <b>CHẾ ĐỘ XEM TRƯỚC (PREVIEW)</b> - Đây là giao diện bài viết sẽ hiển thị cho người đọc.</span>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button onClick={() => setActiveMenu('NEW_ARTICLE')} style={{ padding: '8px 15px', borderRadius: '4px', border: '1px solid #b45309', background: 'transparent', color: '#b45309', cursor: 'pointer', fontWeight: 'bold' }}>Chỉnh sửa lại</button>
-                <button onClick={() => alert('Đăng thành công!')} style={{ padding: '8px 15px', borderRadius: '4px', border: 'none', background: 'var(--color-brand-cyan)', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>Xác nhận đăng</button>
-              </div>
-            </div>
-            {/* Giả lập khung preview bài viết */}
-            <div style={{ border: '1px dashed #cbd5e1', padding: '40px', borderRadius: '8px', minHeight: '500px' }}>
-               <h1 style={{ fontSize: '2.5rem', color: 'var(--color-brand-cyan)' }}>[Tiêu đề bài viết]</h1>
-               <p style={{ color: '#64748b', fontStyle: 'italic' }}>Người đăng: [Tên tác giả] - [Giáo xứ] | Ngày đăng: Hôm nay</p>
-               <p style={{ fontWeight: 'bold', fontSize: '1.1rem', marginTop: '20px' }}>[Lời dẫn / Sapo]</p>
-               <div style={{ marginTop: '30px', fontSize: '1.1rem', lineHeight: 1.8 }}>
-                 [Nội dung chi tiết bài viết với hình ảnh, video...]
-               </div>
-            </div>
-          </div>
-        );
+
       case 'MANAGE_CATEGORY':
         return <ArticleManager 
                  categoryId={activeCategory!} 
