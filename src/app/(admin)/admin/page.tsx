@@ -20,8 +20,9 @@ import RadioManager from "./components/RadioManager";
 import FooterManager from "./components/FooterManager";
 import { DonationProgram } from "../../utils/store";
 import UserManager from "./components/UserManager";
+import BieuMauEditor from "./components/BieuMauEditor";
 
-type MenuType = 'DASHBOARD' | 'NEW_ARTICLE' | 'NEW_EVENT' | 'NEW_COURSE' | 'NEW_ALBUM' | 'NEW_VIDEO' | 'NEW_GUONGMAT' | 'MANAGE_DONATION' | 'EDIT_DONATION' | 'MANAGE_CATEGORY' | 'MANAGE_WORD' | 'MANAGE_MASS' | 'MANAGE_RADIO' | 'MANAGE_FOOTER' | 'MANAGE_QUESTIONS' | 'PREVIEW' | 'MANAGE_USERS';
+type MenuType = 'DASHBOARD' | 'NEW_ARTICLE' | 'NEW_EVENT' | 'NEW_COURSE' | 'NEW_ALBUM' | 'NEW_VIDEO' | 'NEW_GUONGMAT' | 'NEW_BIEUMAU' | 'MANAGE_DONATION' | 'EDIT_DONATION' | 'MANAGE_CATEGORY' | 'MANAGE_WORD' | 'MANAGE_MASS' | 'MANAGE_RADIO' | 'MANAGE_FOOTER' | 'MANAGE_QUESTIONS' | 'PREVIEW' | 'MANAGE_USERS';
 
 export default function AdminDashboard() {
   const [activeMenu, setActiveMenu] = useState<MenuType>('DASHBOARD');
@@ -161,6 +162,8 @@ export default function AdminDashboard() {
                    setArticleToEdit(article);
                    if (article.categoryId === 'guong-mat') {
                      setActiveMenu('NEW_GUONGMAT');
+                   } else if (article.categoryId === 'bieu-mau') {
+                     setActiveMenu('NEW_BIEUMAU');
                    } else {
                      setActiveMenu('NEW_ARTICLE');
                    }
@@ -169,12 +172,26 @@ export default function AdminDashboard() {
                    setArticleToEdit(null);
                    if (activeCategory === 'guong-mat') {
                      setActiveMenu('NEW_GUONGMAT');
+                   } else if (activeCategory === 'bieu-mau') {
+                     setActiveMenu('NEW_BIEUMAU');
                    } else {
                      setActiveMenu('NEW_ARTICLE');
                    }
                  }}
                  onViewQuestions={() => setActiveMenu('MANAGE_QUESTIONS')}
                />;
+      case 'NEW_BIEUMAU':
+        return <BieuMauEditor
+                  articleToEdit={articleToEdit}
+                  onSave={() => {
+                    setArticleToEdit(null);
+                    setActiveMenu('MANAGE_CATEGORY');
+                  }}
+                  onCancel={() => {
+                    setArticleToEdit(null);
+                    setActiveMenu('MANAGE_CATEGORY');
+                  }}
+                />;
       case 'MANAGE_QUESTIONS':
         return <QuestionManager />;
       case 'MANAGE_WORD':

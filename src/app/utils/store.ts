@@ -13,11 +13,13 @@ export interface Article {
   date: string; // ISO date string
   thumbnailUrl?: string;
   audioUrl?: string; // Link file MP3
+  attachmentUrl?: string; // Link file đính kèm (PDF, Word, Excel)
+  attachmentName?: string; // Tên file gốc
   status: 'published' | 'hidden';
-  isFeatured?: boolean; // Nổi bật ở trang con
-  isPriority?: boolean; // Ưu tiên ở trang con
-  isHomeFeatured?: boolean; // Nổi bật ở TRANG CHỦ (tối đa 10 bài)
-  isHomePriority?: boolean; // Ưu tiên ở TRANG CHỦ (tối đa 10 bài)
+  isFeatured?: boolean;
+  isPriority?: boolean;
+  isHomeFeatured?: boolean;
+  isHomePriority?: boolean;
 };
 
 // Dữ liệu dummy mặc định nếu localStorage trống
@@ -122,6 +124,8 @@ export const getArticlesFromStore = async (): Promise<Article[]> => {
     date: item.date,
     thumbnailUrl: item.thumbnail_url,
     audioUrl: item.audio_url,
+    attachmentUrl: item.attachment_url,
+    attachmentName: item.attachment_name,
     status: item.status,
     isFeatured: item.is_featured,
     isPriority: item.is_priority,
@@ -148,6 +152,8 @@ export const addArticle = async (article: Omit<Article, 'id' | 'date'>) => {
     parish: article.parish,
     thumbnail_url: article.thumbnailUrl,
     audio_url: article.audioUrl,
+    attachment_url: article.attachmentUrl,
+    attachment_name: article.attachmentName,
     status: article.status,
     is_featured: article.isFeatured,
     is_priority: article.isPriority,
@@ -168,6 +174,8 @@ export const updateArticle = async (id: string, updatedFields: Partial<Article>)
   if (updatedFields.parish !== undefined) payload.parish = updatedFields.parish;
   if (updatedFields.thumbnailUrl !== undefined) payload.thumbnail_url = updatedFields.thumbnailUrl;
   if (updatedFields.audioUrl !== undefined) payload.audio_url = updatedFields.audioUrl;
+  if (updatedFields.attachmentUrl !== undefined) payload.attachment_url = updatedFields.attachmentUrl;
+  if (updatedFields.attachmentName !== undefined) payload.attachment_name = updatedFields.attachmentName;
   if (updatedFields.status !== undefined) payload.status = updatedFields.status;
   if (updatedFields.isFeatured !== undefined) payload.is_featured = updatedFields.isFeatured;
   if (updatedFields.isPriority !== undefined) payload.is_priority = updatedFields.isPriority;

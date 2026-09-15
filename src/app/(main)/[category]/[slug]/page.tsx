@@ -67,6 +67,45 @@ export default function SubPage({ params }: { params: any }) {
 
       {isEventRegistration ? (
         <EventRegistrationForm />
+      ) : slug === 'bieu-mau' ? (
+        <div className="container" style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ color: 'var(--color-brand-cyan)', marginBottom: '20px', fontSize: '1.5rem' }}>Danh sách Biểu mẫu & Văn bản</h2>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+               <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1' }}>
+                 <th style={{ padding: '15px', textAlign: 'left', color: '#334155' }}>Tên văn bản / Biểu mẫu</th>
+                 <th style={{ padding: '15px', textAlign: 'left', color: '#334155' }}>Mô tả</th>
+                 <th style={{ padding: '15px', textAlign: 'left', color: '#334155' }}>Ngày đăng</th>
+                 <th style={{ padding: '15px', textAlign: 'center', color: '#334155' }}>Tải về</th>
+               </tr>
+            </thead>
+            <tbody>
+              {subcategoryArticles.map(article => (
+                 <tr key={article.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                   <td style={{ padding: '15px', fontWeight: 'bold', color: 'var(--color-brand-cyan)' }}>
+                      {article.title}
+                   </td>
+                   <td style={{ padding: '15px', color: '#64748b', fontSize: '0.95rem' }}>{article.excerpt}</td>
+                   <td style={{ padding: '15px', color: '#64748b', fontSize: '0.9rem' }}>{new Date(article.date).toLocaleDateString('vi-VN')}</td>
+                   <td style={{ padding: '15px', textAlign: 'center' }}>
+                      {article.attachmentUrl ? (
+                         <a href={article.attachmentUrl} target="_blank" download style={{ padding: '8px 20px', background: 'var(--color-brand-red)', color: 'white', borderRadius: '6px', textDecoration: 'none', fontWeight: 'bold', display: 'inline-block', fontSize: '0.9rem' }}>
+                           📥 Tải về
+                         </a>
+                      ) : (
+                         <span style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Không có file</span>
+                      )}
+                   </td>
+                 </tr>
+              ))}
+              {subcategoryArticles.length === 0 && (
+                 <tr>
+                   <td colSpan={4} style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Chưa có biểu mẫu nào được đăng.</td>
+                 </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       ) : articleDetail ? (
         <div className="container" style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
           {articleDetail.categoryId === 'guong-mat' ? (

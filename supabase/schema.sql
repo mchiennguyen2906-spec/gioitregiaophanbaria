@@ -10,6 +10,8 @@ CREATE TABLE public.articles (
     date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     thumbnail_url TEXT,
     audio_url TEXT,
+    attachment_url TEXT,
+    attachment_name TEXT,
     status TEXT DEFAULT 'published' CHECK (status IN ('published', 'hidden')),
     is_featured BOOLEAN DEFAULT FALSE,
     is_priority BOOLEAN DEFAULT FALSE,

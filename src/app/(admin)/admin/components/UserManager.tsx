@@ -27,6 +27,20 @@ export default function UserManager() {
     name: slugMap[key]
   }));
 
+  const specialPermissions = [
+    { id: 'tuong-tac', name: '🌟 TƯƠNG TÁC & LỜI CHÚA (Lời Chúa, Hỏi đáp)' },
+    { id: 'muc-vu', name: '⛪ MỤC VỤ & TRUYỀN THÔNG (Giờ Lễ, Radio, Từ thiện)' },
+    { id: 'he-thong', name: '⚙️ HỆ THỐNG (Chân trang)' }
+  ];
+
+  const allPermissions = [...specialPermissions, ...categories];
+
+  const getPermissionName = (id: string) => {
+    const special = specialPermissions.find(p => p.id === id);
+    if (special) return special.name;
+    return slugMap[id] || id;
+  };
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -149,8 +163,12 @@ export default function UserManager() {
               <div>
                 <label style={labelStyle}>Các chuyên mục được phép quản lý</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', background: 'white', padding: '15px', borderRadius: '6px', border: '1px solid #cbd5e1' }}>
-                  {categories.map(cat => (
-                    <label key={cat.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem' }}>
+                  {allPermissions.map(cat => (
+                    <label key={cat.id} style={{ 
+                      display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '0.9rem',
+                      fontWeight: specialPermissions.find(p => p.id === cat.id) ? 'bold' : 'normal',
+                      color: specialPermissions.find(p => p.id === cat.id) ? 'var(--color-brand-cyan)' : 'inherit'
+                    }}>
                       <input 
                         type="checkbox" 
                         checked={allowedCategories.includes(cat.id)}
@@ -206,7 +224,7 @@ export default function UserManager() {
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                       {user.allowed_categories?.map(c => (
                         <span key={c} style={{ background: '#f1f5f9', padding: '3px 6px', borderRadius: '4px', fontSize: '0.8rem' }}>
-                          {slugMap[c] || c}
+                          {getPermissionName(c)}
                         </span>
                       ))}
                     </div>
