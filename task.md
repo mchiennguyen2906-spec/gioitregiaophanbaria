@@ -1,0 +1,5 @@
+- `[x]` 1. Create `app/api/upload/route.ts` for file uploads.
+- `[x]` 2. Update `DonationEditor.tsx` to include image upload and client-side compression.
+- `[x]` 3. Update `RadioManager.tsx` to include MP3 upload and old file deletion.
+- `[x]` 4. Sync Homepage Articles: Update `page.tsx` to use `store.ts` data for Gương Mặt and Sứ Vụ slides.
+- `[x]` 5. Fix Gear Icon in `MainFooter.tsx`: Place it right after "Bà Rịa", make it hidden (opacity 0), and clickable to `/admin/login`.

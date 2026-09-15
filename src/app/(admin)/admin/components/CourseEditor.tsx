@@ -1,0 +1,152 @@
+import React, { useState } from 'react';
+
+export default function CourseEditor({ onSave, onPublish }: { onSave: () => void, onPublish: () => void }) {
+  const [hasArticle, setHasArticle] = useState(false);
+  const [lessons, setLessons] = useState([{ id: 1, title: '', trainer: '', time: '' }]);
+  const [customFields, setCustomFields] = useState([{ id: 1, label: 'Giáo xứ', type: 'text' }]);
+
+  const addLesson = () => setLessons([...lessons, { id: Date.now(), title: '', trainer: '', time: '' }]);
+  const removeLesson = (id: number) => setLessons(lessons.filter(l => l.id !== id));
+
+  const addCustomField = () => setCustomFields([...customFields, { id: Date.now(), label: 'Trường thông tin mới', type: 'text' }]);
+  const removeCustomField = (id: number) => setCustomFields(customFields.filter(f => f.id !== id));
+
+  return (
+    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <h2 style={{ color: 'var(--color-brand-red)', margin: 0 }}>Tạo Khóa Học Đào Tạo Mới</h2>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button onClick={onSave} style={{
+            background: '#f1f5f9', color: '#334155', padding: '10px 15px', 
+            borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
+          }}>Lưu Bản Nháp</button>
+          
+          <button onClick={onPublish} style={{
+            background: 'var(--color-brand-cyan)', color: 'white', padding: '10px 15px', 
+            borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
+          }}>Đăng Khóa Học</button>
+        </div>
+      </div>
+
+      <div style={{ background: '#fef2f2', border: '1px solid #f87171', borderRadius: '8px', padding: '15px', marginBottom: '20px' }}>
+        <h3 style={{ color: '#b91c1c', margin: '0 0 5px 0', fontSize: '1rem' }}>📌 Hướng dẫn tạo Khóa Học</h3>
+        <ul style={{ color: '#7f1d1d', margin: 0, paddingLeft: '20px', fontSize: '0.9rem' }}>
+          <li>Hãy đảm bảo bạn đã viết <strong>Bài Viết Chi Tiết</strong> giới thiệu về khóa học ở mục "Bài viết" trước khi vào đây tạo Form đăng ký.</li>
+          <li>Nội dung lịch trình (các bài học) cần rõ ràng ngày giờ, người phụ trách để học viên tiện theo dõi.</li>
+          <li>Cân nhắc các trường thông tin đăng ký: Chỉ thu thập các dữ liệu thật sự phục vụ cho công tác điểm danh và cấp chứng chỉ.</li>
+        </ul>
+      </div>
+
+      <div style={{ background: '#eff6ff', padding: '20px', borderRadius: '8px', border: '1px solid #bfdbfe', marginBottom: '20px' }}>
+        <h4 style={{ color: '#1e3a8a', marginTop: 0 }}>Bước 1: Liên kết bài viết gốc (Tùy chọn)</h4>
+        <p style={{ fontSize: '0.9rem', color: '#3b82f6' }}>Khóa học có thể liên kết với một bài viết chi tiết để học viên đọc trước khi đăng ký.</p>
+        
+        <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+          <select style={inputStyle} onChange={e => setHasArticle(e.target.value !== "")}>
+            <option value="">-- Có thể chọn bài viết liên kết --</option>
+            <option value="1">Thông báo mở Khóa Kỹ năng Quản trò</option>
+            <option value="2">Khóa Huynh Trưởng cấp 1</option>
+          </select>
+        </div>
+      </div>
+
+      <div style={{ background: 'white', border: '1px solid #e2e8f0', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}>
+        <h4 style={{ marginTop: 0, borderBottom: '1px solid #cbd5e1', paddingBottom: '10px', color: '#1e293b' }}>Bước 2: Cài Đặt Khóa Học</h4>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
+          <div>
+            <label style={labelStyle}>Tên Khóa Học *</label>
+            <input style={inputStyle} type="text" placeholder="Ví dụ: Khóa Huynh trưởng cấp 1..." />
+          </div>
+
+          <div style={{ display: 'flex', gap: '15px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Thời gian khai giảng *</label>
+              <input style={inputStyle} type="date" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Thời gian bế giảng</label>
+              <input style={inputStyle} type="date" />
+            </div>
+          </div>
+
+          <div>
+            <label style={labelStyle}>Địa điểm đào tạo *</label>
+            <input style={inputStyle} type="text" placeholder="Ví dụ: Trung tâm hành hương Bãi Dâu..." />
+          </div>
+
+          <div style={{ display: 'flex', gap: '15px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Số buổi học *</label>
+              <input style={inputStyle} type="number" placeholder="Ví dụ: 8" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={labelStyle}>Loại chứng nhận sau khóa học *</label>
+              <select style={inputStyle}>
+                <option>Cấp Chứng Chỉ (Có phôi chuẩn)</option>
+                <option>Cấp Giấy Xác Nhận</option>
+                <option>Không Cấp</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Lịch trình các bài học */}
+          <div style={{ marginTop: '10px', padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+            <label style={{ ...labelStyle, fontSize: '1rem', color: 'var(--color-brand-cyan)' }}>Lịch trình / Các bài đào tạo</label>
+            
+            {lessons.map((lesson, index) => (
+              <div key={lesson.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', background: 'white', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
+                <span style={{ fontWeight: 'bold', color: '#64748b' }}>#{index + 1}</span>
+                <input style={{ ...inputStyle, flex: 2 }} type="text" placeholder="Tên bài học..." />
+                <input style={{ ...inputStyle, flex: 1.5 }} type="text" placeholder="Giảng viên / Người đào tạo..." />
+                <input style={{ ...inputStyle, flex: 1 }} type="datetime-local" title="Ngày giờ đào tạo" />
+                <button onClick={() => removeLesson(lesson.id)} style={{ padding: '8px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Xóa</button>
+              </div>
+            ))}
+            <button onClick={addLesson} style={{ marginTop: '10px', padding: '8px 15px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>+ Thêm Bài Học</button>
+          </div>
+
+          {/* Cấu hình form đăng ký */}
+          <div style={{ marginTop: '10px', padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+            <label style={{ ...labelStyle, fontSize: '1rem', color: 'var(--color-brand-red)' }}>Cấu hình Form Thu Thập Thông Tin Học Viên</label>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', marginTop: 0 }}>Mặc định đã có: Họ tên, Năm sinh, Số điện thoại. Bạn có thể thêm các trường tùy chỉnh bên dưới.</p>
+            
+            {customFields.map((field, index) => (
+              <div key={field.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px' }}>
+                <input 
+                  style={{ ...inputStyle, flex: 2 }} 
+                  type="text" 
+                  value={field.label} 
+                  onChange={(e) => {
+                    const newFields = [...customFields];
+                    newFields[index].label = e.target.value;
+                    setCustomFields(newFields);
+                  }}
+                />
+                <select 
+                  style={{ ...inputStyle, flex: 1 }}
+                  value={field.type}
+                  onChange={(e) => {
+                    const newFields = [...customFields];
+                    newFields[index].type = e.target.value;
+                    setCustomFields(newFields);
+                  }}
+                >
+                  <option value="text">Văn bản (Chữ ngắn)</option>
+                  <option value="textarea">Đoạn văn (Chữ dài)</option>
+                  <option value="select">Lựa chọn (Dropdown)</option>
+                </select>
+                <button onClick={() => removeCustomField(field.id)} style={{ padding: '10px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>X</button>
+              </div>
+            ))}
+            <button onClick={addCustomField} style={{ marginTop: '10px', padding: '8px 15px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>+ Thêm Trường Tùy Chỉnh</button>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const labelStyle = { display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155', fontSize: '0.9rem' };
+const inputStyle = { width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.95rem', outlineColor: 'var(--color-brand-cyan)' };
