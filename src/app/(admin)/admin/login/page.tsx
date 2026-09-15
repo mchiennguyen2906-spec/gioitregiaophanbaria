@@ -22,8 +22,21 @@ export default function AdminLoginPage() {
       alert('Đăng nhập thất bại: ' + error.message);
       setLoading(false);
     } else {
+      // Check user role status
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('status')
+        .eq('user_id', data.user.id)
+        .single();
+      
+      if (roleData && roleData.status === 'locked') {
+        await supabase.auth.signOut();
+        alert('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
+        setLoading(false);
+        return;
+      }
+
       // Đăng nhập thành công
-      // Redirect to admin
       router.push('/admin');
     }
   };

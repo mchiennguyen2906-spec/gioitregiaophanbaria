@@ -1,22 +1,94 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { addArticle, updateArticle, getArticlesFromStore, Article } from '../../../utils/store';
 
-export default function EventEditor({ onSave, onPublish }: { onSave: () => void, onPublish: () => void }) {
+export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSave: () => void, onPublish: () => void, articleToEdit?: Article }) {
   const [hasArticle, setHasArticle] = useState(false);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [linkedArticleId, setLinkedArticleId] = useState('');
+  
+  // Form fields
+  const [eventName, setEventName] = useState('');
+  const [organizer, setOrganizer] = useState('');
+  const [contactName, setContactName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    const fetchArticles = async () => {
+      const all = await getArticlesFromStore();
+      // Lấy các bài viết thông thường (không phải form/sự kiện) để làm bài liên kết
+      setArticles(all.filter(a => a.categoryId !== 'su-kien' && a.categoryId !== 'bieu-mau'));
+    };
+    fetchArticles();
+  }, []);
+
+  useEffect(() => {
+    if (articleToEdit) {
+      setHasArticle(true);
+      setEventName(articleToEdit.title || '');
+      if (articleToEdit.metadata) {
+        setLinkedArticleId(articleToEdit.metadata.linkedArticleId || '');
+        setOrganizer(articleToEdit.metadata.organizer || '');
+        setContactName(articleToEdit.metadata.contactName || '');
+        setPhone(articleToEdit.metadata.phone || '');
+        setEmail(articleToEdit.metadata.email || '');
+      }
+    }
+  }, [articleToEdit]);
+
+  const handlePublish = async () => {
+    if (!linkedArticleId || !eventName || !organizer || !contactName || !phone) {
+      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc (*)');
+      return;
+    }
+    
+    setIsSaving(true);
+    try {
+      const payload = {
+        title: eventName,
+        categoryId: 'su-kien',
+        author: organizer,
+        content: '',
+        status: 'published' as const,
+        metadata: {
+          linkedArticleId,
+          organizer,
+          contactName,
+          phone,
+          email
+        }
+      };
+
+      if (articleToEdit) {
+        await updateArticle(articleToEdit.id, payload);
+        toast.success('Cập nhật Form Sự Kiện thành công!');
+      } else {
+        await addArticle(payload);
+        toast.success('Đăng Form Sự Kiện thành công!');
+      }
+      onPublish();
+    } catch (err: any) {
+      toast.error('Lỗi khi lưu: ' + err.message);
+    }
+    setIsSaving(false);
+  };
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2 style={{ color: 'var(--color-brand-red)', margin: 0 }}>Tạo Sự Kiện Mới</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={onSave} style={{
+          <button onClick={onSave} disabled={isSaving} style={{
             background: '#f1f5f9', color: '#334155', padding: '10px 15px', 
             borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
-          }}>Lưu & Xem Trước Form</button>
+          }}>Hủy bỏ / Quay lại</button>
           
-          <button onClick={onPublish} style={{
+          <button onClick={handlePublish} disabled={isSaving} style={{
             background: 'var(--color-brand-cyan)', color: 'white', padding: '10px 15px', 
             borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
-          }}>Xác Nhận Đăng Mẫu Đăng Ký</button>
+          }}>{isSaving ? 'Đang lưu...' : 'Xác Nhận Đăng Mẫu Đăng Ký'}</button>
         </div>
       </div>
 
@@ -36,15 +108,19 @@ export default function EventEditor({ onSave, onPublish }: { onSave: () => void,
         <div style={{ marginTop: '15px' }}>
           <label style={{ ...labelStyle, color: '#1e3a8a' }}>Chọn bài viết đã đăng để liên kết *</label>
           <div style={{ display: 'flex', gap: '10px' }}>
-            <select style={inputStyle} onChange={e => setHasArticle(e.target.value !== "")}>
-              <option value="">-- Tìm kiếm & Chọn bài viết --</option>
-              <option value="1">Thư mời Đại hội Giới trẻ Giáo tỉnh</option>
-              <option value="2">Chương trình Tĩnh tâm Mùa Chay 2026</option>
-              <option value="3">Ngày hội Thể thao Giới trẻ Giáo hạt</option>
+            <select 
+              style={inputStyle} 
+              value={linkedArticleId}
+              onChange={e => {
+                setLinkedArticleId(e.target.value);
+                setHasArticle(e.target.value !== "");
+              }}
+            >
+              <option value="">-- Chọn bài viết --</option>
+              {articles.map(a => (
+                <option key={a.id} value={a.id}>{a.title}</option>
+              ))}
             </select>
-            <button style={{ padding: '0 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>
-              Tìm kiếm
-            </button>
           </div>
         </div>
       </div>
@@ -56,29 +132,29 @@ export default function EventEditor({ onSave, onPublish }: { onSave: () => void,
           <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
             <div>
               <label style={labelStyle}>Tên Sự Kiện hiển thị trên Form *</label>
-              <input style={inputStyle} type="text" placeholder="Ví dụ: Đại hội Giới trẻ Hạt Bà Rịa..." />
+              <input style={inputStyle} type="text" placeholder="Ví dụ: Đại hội Giới trẻ Hạt Bà Rịa..." value={eventName} onChange={e => setEventName(e.target.value)} />
             </div>
 
             <div style={{ display: 'flex', gap: '15px' }}>
               <div style={{ flex: 1 }}>
                 <label style={labelStyle}>Đơn vị Tổ chức (Giáo xứ / Ban ngành) *</label>
-                <input style={inputStyle} type="text" placeholder="Nhập tên giáo xứ..." />
+                <input style={inputStyle} type="text" placeholder="Nhập tên giáo xứ..." value={organizer} onChange={e => setOrganizer(e.target.value)} />
               </div>
             </div>
 
             <div>
               <label style={labelStyle}>Người phụ trách (Để học viên liên hệ) *</label>
-              <input style={inputStyle} type="text" placeholder="Họ và tên người phụ trách..." />
+              <input style={inputStyle} type="text" placeholder="Họ và tên người phụ trách..." value={contactName} onChange={e => setContactName(e.target.value)} />
             </div>
             
             <div style={{ display: 'flex', gap: '15px' }}>
               <div style={{ flex: 1 }}>
                 <label style={labelStyle}>Số điện thoại (Zalo) *</label>
-                <input style={inputStyle} type="text" placeholder="SĐT liên hệ..." />
+                <input style={inputStyle} type="text" placeholder="SĐT liên hệ..." value={phone} onChange={e => setPhone(e.target.value)} />
               </div>
               <div style={{ flex: 1 }}>
                 <label style={labelStyle}>Email (Tùy chọn)</label>
-                <input style={inputStyle} type="email" placeholder="Email hỗ trợ..." />
+                <input style={inputStyle} type="email" placeholder="Email hỗ trợ..." value={email} onChange={e => setEmail(e.target.value)} />
               </div>
             </div>
             

@@ -20,6 +20,7 @@ export interface Article {
   isPriority?: boolean;
   isHomeFeatured?: boolean;
   isHomePriority?: boolean;
+  metadata?: any; // Dùng cho Album, Khóa học, Sự kiện...
 };
 
 // Dữ liệu dummy mặc định nếu localStorage trống
@@ -130,7 +131,8 @@ export const getArticlesFromStore = async (): Promise<Article[]> => {
     isFeatured: item.is_featured,
     isPriority: item.is_priority,
     isHomeFeatured: item.is_home_featured,
-    isHomePriority: item.is_home_priority
+    isHomePriority: item.is_home_priority,
+    metadata: item.metadata
   }));
 };
 
@@ -175,7 +177,8 @@ export const addArticle = async (article: Omit<Article, 'id' | 'date'> & { date?
     is_featured: article.isFeatured,
     is_priority: article.isPriority,
     is_home_featured: article.isHomeFeatured,
-    is_home_priority: article.isHomePriority
+    is_home_priority: article.isHomePriority,
+    metadata: article.metadata || {}
   };
 
   if (article.date) payload.date = article.date;
@@ -205,6 +208,7 @@ export const updateArticle = async (id: string, updatedFields: Partial<Article>)
   if (updatedFields.isPriority !== undefined) payload.is_priority = updatedFields.isPriority;
   if (updatedFields.isHomeFeatured !== undefined) payload.is_home_featured = updatedFields.isHomeFeatured;
   if (updatedFields.isHomePriority !== undefined) payload.is_home_priority = updatedFields.isHomePriority;
+  if (updatedFields.metadata !== undefined) payload.metadata = updatedFields.metadata;
 
   const { error } = await supabase.from('articles').update(payload).eq('id', id);
   if (error) throw error;

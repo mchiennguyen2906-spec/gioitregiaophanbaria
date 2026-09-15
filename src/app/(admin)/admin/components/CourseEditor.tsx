@@ -1,30 +1,107 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
+import { addArticle, updateArticle, getArticlesFromStore, Article } from '../../../utils/store';
 
-export default function CourseEditor({ onSave, onPublish }: { onSave: () => void, onPublish: () => void }) {
+export default function CourseEditor({ onSave, onPublish, articleToEdit }: { onSave: () => void, onPublish: () => void, articleToEdit?: Article }) {
   const [hasArticle, setHasArticle] = useState(false);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [linkedArticleId, setLinkedArticleId] = useState('');
+  
+  const [courseName, setCourseName] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [location, setLocation] = useState('');
+  const [lessonCount, setLessonCount] = useState('');
+  const [certType, setCertType] = useState('Cấp Chứng Chỉ (Có phôi chuẩn)');
+  const [isSaving, setIsSaving] = useState(false);
+
   const [lessons, setLessons] = useState([{ id: 1, title: '', trainer: '', time: '' }]);
   const [customFields, setCustomFields] = useState([{ id: 1, label: 'Giáo xứ', type: 'text' }]);
 
+  useEffect(() => {
+    const fetchArticles = async () => {
+      const all = await getArticlesFromStore();
+      setArticles(all.filter(a => a.categoryId !== 'lich-hoc' && a.categoryId !== 'bieu-mau'));
+    };
+    fetchArticles();
+  }, []);
+
+  useEffect(() => {
+    if (articleToEdit) {
+      setCourseName(articleToEdit.title || '');
+      if (articleToEdit.metadata) {
+        setLinkedArticleId(articleToEdit.metadata.linkedArticleId || '');
+        setHasArticle(!!articleToEdit.metadata.linkedArticleId);
+        setStartDate(articleToEdit.metadata.startDate || '');
+        setEndDate(articleToEdit.metadata.endDate || '');
+        setLocation(articleToEdit.metadata.location || '');
+        setLessonCount(articleToEdit.metadata.lessonCount || '');
+        setCertType(articleToEdit.metadata.certType || 'Cấp Chứng Chỉ (Có phôi chuẩn)');
+        setLessons(articleToEdit.metadata.lessons || [{ id: 1, title: '', trainer: '', time: '' }]);
+        setCustomFields(articleToEdit.metadata.customFields || [{ id: 1, label: 'Giáo xứ', type: 'text' }]);
+      }
+    }
+  }, [articleToEdit]);
+
   const addLesson = () => setLessons([...lessons, { id: Date.now(), title: '', trainer: '', time: '' }]);
   const removeLesson = (id: number) => setLessons(lessons.filter(l => l.id !== id));
-
+  
   const addCustomField = () => setCustomFields([...customFields, { id: Date.now(), label: 'Trường thông tin mới', type: 'text' }]);
   const removeCustomField = (id: number) => setCustomFields(customFields.filter(f => f.id !== id));
+
+  const handlePublish = async () => {
+    if (!courseName || !startDate || !location || !lessonCount) {
+      toast.error('Vui lòng điền các trường bắt buộc (*)');
+      return;
+    }
+    setIsSaving(true);
+    try {
+      const payload = {
+        title: courseName,
+        categoryId: 'lich-hoc',
+        author: 'Ban Đào Tạo',
+        content: '',
+        status: 'published' as const,
+        metadata: {
+          linkedArticleId,
+          startDate,
+          endDate,
+          location,
+          lessonCount,
+          certType,
+          lessons,
+          customFields
+        }
+      };
+
+      if (articleToEdit) {
+        await updateArticle(articleToEdit.id, payload);
+        toast.success('Cập nhật Khóa Học thành công!');
+      } else {
+        await addArticle(payload);
+        toast.success('Đăng Khóa Học thành công!');
+      }
+      onPublish();
+    } catch (err: any) {
+      toast.error('Lỗi khi lưu: ' + err.message);
+    }
+    setIsSaving(false);
+  };
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2 style={{ color: 'var(--color-brand-red)', margin: 0 }}>Tạo Khóa Học Đào Tạo Mới</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={onSave} style={{
+          <button onClick={onSave} disabled={isSaving} style={{
             background: '#f1f5f9', color: '#334155', padding: '10px 15px', 
             borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
-          }}>Lưu Bản Nháp</button>
+          }}>Hủy bỏ / Quay lại</button>
           
-          <button onClick={onPublish} style={{
+          <button onClick={handlePublish} disabled={isSaving} style={{
             background: 'var(--color-brand-cyan)', color: 'white', padding: '10px 15px', 
             borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
-          }}>Đăng Khóa Học</button>
+          }}>{isSaving ? 'Đang lưu...' : 'Đăng Khóa Học'}</button>
         </div>
       </div>
 
@@ -42,10 +119,18 @@ export default function CourseEditor({ onSave, onPublish }: { onSave: () => void
         <p style={{ fontSize: '0.9rem', color: '#3b82f6' }}>Khóa học có thể liên kết với một bài viết chi tiết để học viên đọc trước khi đăng ký.</p>
         
         <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
-          <select style={inputStyle} onChange={e => setHasArticle(e.target.value !== "")}>
+          <select 
+            style={inputStyle} 
+            value={linkedArticleId}
+            onChange={e => {
+              setLinkedArticleId(e.target.value);
+              setHasArticle(e.target.value !== "");
+            }}
+          >
             <option value="">-- Có thể chọn bài viết liên kết --</option>
-            <option value="1">Thông báo mở Khóa Kỹ năng Quản trò</option>
-            <option value="2">Khóa Huynh Trưởng cấp 1</option>
+            {articles.map(a => (
+              <option key={a.id} value={a.id}>{a.title}</option>
+            ))}
           </select>
         </div>
       </div>
@@ -56,36 +141,36 @@ export default function CourseEditor({ onSave, onPublish }: { onSave: () => void
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
           <div>
             <label style={labelStyle}>Tên Khóa Học *</label>
-            <input style={inputStyle} type="text" placeholder="Ví dụ: Khóa Huynh trưởng cấp 1..." />
+            <input style={inputStyle} type="text" placeholder="Ví dụ: Khóa Huynh trưởng cấp 1..." value={courseName} onChange={e => setCourseName(e.target.value)} />
           </div>
 
           <div style={{ display: 'flex', gap: '15px' }}>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Thời gian khai giảng *</label>
-              <input style={inputStyle} type="date" />
+              <input style={inputStyle} type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
             </div>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Thời gian bế giảng</label>
-              <input style={inputStyle} type="date" />
+              <input style={inputStyle} type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
             </div>
           </div>
 
           <div>
             <label style={labelStyle}>Địa điểm đào tạo *</label>
-            <input style={inputStyle} type="text" placeholder="Ví dụ: Trung tâm hành hương Bãi Dâu..." />
+            <input style={inputStyle} type="text" placeholder="Ví dụ: Trung tâm hành hương Bãi Dâu..." value={location} onChange={e => setLocation(e.target.value)} />
           </div>
 
           <div style={{ display: 'flex', gap: '15px' }}>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Số buổi học *</label>
-              <input style={inputStyle} type="number" placeholder="Ví dụ: 8" />
+              <input style={inputStyle} type="number" placeholder="Ví dụ: 8" value={lessonCount} onChange={e => setLessonCount(e.target.value)} />
             </div>
             <div style={{ flex: 1 }}>
               <label style={labelStyle}>Loại chứng nhận sau khóa học *</label>
-              <select style={inputStyle}>
-                <option>Cấp Chứng Chỉ (Có phôi chuẩn)</option>
-                <option>Cấp Giấy Xác Nhận</option>
-                <option>Không Cấp</option>
+              <select style={inputStyle} value={certType} onChange={e => setCertType(e.target.value)}>
+                <option value="Cấp Chứng Chỉ (Có phôi chuẩn)">Cấp Chứng Chỉ (Có phôi chuẩn)</option>
+                <option value="Cấp Giấy Xác Nhận">Cấp Giấy Xác Nhận</option>
+                <option value="Không Cấp">Không Cấp</option>
               </select>
             </div>
           </div>
@@ -97,9 +182,21 @@ export default function CourseEditor({ onSave, onPublish }: { onSave: () => void
             {lessons.map((lesson, index) => (
               <div key={lesson.id} style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '10px', background: 'white', padding: '10px', borderRadius: '6px', border: '1px solid #e2e8f0' }}>
                 <span style={{ fontWeight: 'bold', color: '#64748b' }}>#{index + 1}</span>
-                <input style={{ ...inputStyle, flex: 2 }} type="text" placeholder="Tên bài học..." />
-                <input style={{ ...inputStyle, flex: 1.5 }} type="text" placeholder="Giảng viên / Người đào tạo..." />
-                <input style={{ ...inputStyle, flex: 1 }} type="datetime-local" title="Ngày giờ đào tạo" />
+                <input style={{ ...inputStyle, flex: 2 }} type="text" placeholder="Tên bài học..." value={lesson.title} onChange={e => {
+                  const newLessons = [...lessons];
+                  newLessons[index].title = e.target.value;
+                  setLessons(newLessons);
+                }} />
+                <input style={{ ...inputStyle, flex: 1.5 }} type="text" placeholder="Giảng viên / Người đào tạo..." value={lesson.trainer} onChange={e => {
+                  const newLessons = [...lessons];
+                  newLessons[index].trainer = e.target.value;
+                  setLessons(newLessons);
+                }} />
+                <input style={{ ...inputStyle, flex: 1 }} type="datetime-local" title="Ngày giờ đào tạo" value={lesson.time} onChange={e => {
+                  const newLessons = [...lessons];
+                  newLessons[index].time = e.target.value;
+                  setLessons(newLessons);
+                }} />
                 <button onClick={() => removeLesson(lesson.id)} style={{ padding: '8px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>Xóa</button>
               </div>
             ))}

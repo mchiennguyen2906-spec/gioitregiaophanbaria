@@ -105,3 +105,35 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    const { id, role, allowedCategories, status } = body;
+
+    if (!id) {
+      return NextResponse.json({ success: false, error: 'Thiếu user ID' }, { status: 400 });
+    }
+
+    const supabaseAdmin = getSupabaseAdmin();
+    
+    // Update user_roles
+    const updateData: any = {};
+    if (role) updateData.role = role;
+    if (allowedCategories !== undefined) updateData.allowed_categories = allowedCategories;
+    if (status) updateData.status = status;
+
+    const { error: roleError } = await supabaseAdmin
+      .from('user_roles')
+      .update(updateData)
+      .eq('user_id', id);
+
+    if (roleError) {
+      return NextResponse.json({ success: false, error: roleError.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true, message: 'Cập nhật tài khoản thành công!' });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}

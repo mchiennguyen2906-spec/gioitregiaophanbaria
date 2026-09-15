@@ -110,29 +110,45 @@ export default function AdminDashboard() {
       case 'NEW_EVENT':
         return (
           <EventEditor 
-            onSave={() => alert('Sẽ hiển thị UI Form Preview')}
-            onPublish={() => alert('Đã tạo Form Đăng ký thành công!')}
+            articleToEdit={articleToEdit || undefined}
+            onSave={() => setActiveMenu('MANAGE_CATEGORY')}
+            onPublish={() => {
+              setArticleToEdit(null);
+              setActiveMenu('MANAGE_CATEGORY');
+            }}
           />
         );
       case 'NEW_COURSE':
         return (
           <CourseEditor 
-            onSave={() => alert('Đã lưu nháp khóa học!')}
-            onPublish={() => alert('Đã đăng khóa học thành công!')}
+            articleToEdit={articleToEdit || undefined}
+            onSave={() => setActiveMenu('MANAGE_CATEGORY')}
+            onPublish={() => {
+              setArticleToEdit(null);
+              setActiveMenu('MANAGE_CATEGORY');
+            }}
           />
         );
       case 'NEW_ALBUM':
         return (
           <AlbumEditor 
-            onSave={() => alert('Đã lưu nháp album!')}
-            onPublish={() => alert('Đã đăng album thành công!')}
+            articleToEdit={articleToEdit || undefined}
+            onSave={() => setActiveMenu('MANAGE_CATEGORY')}
+            onPublish={() => {
+              setArticleToEdit(null);
+              setActiveMenu('MANAGE_CATEGORY');
+            }}
           />
         );
       case 'NEW_VIDEO':
         return (
           <VideoEditor 
-            onSave={() => alert('Đã lưu nháp video!')}
-            onPublish={() => alert('Đã đăng video thành công!')}
+            articleToEdit={articleToEdit || undefined}
+            onSave={() => setActiveMenu('MANAGE_CATEGORY')}
+            onPublish={() => {
+              setArticleToEdit(null);
+              setActiveMenu('MANAGE_CATEGORY');
+            }}
           />
         );
       case 'NEW_GUONGMAT':
@@ -154,6 +170,14 @@ export default function AdminDashboard() {
                      setActiveMenu('NEW_GUONGMAT');
                    } else if (article.categoryId === 'bieu-mau') {
                      setActiveMenu('NEW_BIEUMAU');
+                   } else if (article.categoryId === 'hinh-anh') {
+                     setActiveMenu('NEW_ALBUM');
+                   } else if (article.categoryId === 'lich-hoc') {
+                     setActiveMenu('NEW_COURSE');
+                   } else if (article.categoryId === 'su-kien') {
+                     setActiveMenu('NEW_EVENT');
+                   } else if (article.categoryId === 'thanh-ca') {
+                     setActiveMenu('NEW_VIDEO');
                    } else {
                      setActiveMenu('NEW_ARTICLE');
                    }
@@ -164,6 +188,14 @@ export default function AdminDashboard() {
                      setActiveMenu('NEW_GUONGMAT');
                    } else if (activeCategory === 'bieu-mau') {
                      setActiveMenu('NEW_BIEUMAU');
+                   } else if (activeCategory === 'hinh-anh') {
+                     setActiveMenu('NEW_ALBUM');
+                   } else if (activeCategory === 'lich-hoc') {
+                     setActiveMenu('NEW_COURSE');
+                   } else if (activeCategory === 'su-kien') {
+                     setActiveMenu('NEW_EVENT');
+                   } else if (activeCategory === 'thanh-ca') {
+                     setActiveMenu('NEW_VIDEO');
                    } else {
                      setActiveMenu('NEW_ARTICLE');
                    }

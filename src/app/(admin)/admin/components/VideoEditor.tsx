@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
-import { addArticle } from '../../../utils/store';
+import React, { useState, useEffect } from 'react';
+import { addArticle, updateArticle, Article } from '../../../utils/store';
 import toast from 'react-hot-toast';
 
-export default function VideoEditor({ onSave, onPublish }: { onSave: () => void, onPublish: () => void }) {
+export default function VideoEditor({ onSave, onPublish, articleToEdit }: { onSave: () => void, onPublish: () => void, articleToEdit?: Article }) {
   const [videoTitle, setVideoTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [description, setDescription] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [isHomeFeatured, setIsHomeFeatured] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (articleToEdit) {
+      setVideoTitle(articleToEdit.title || '');
+      setAuthor(articleToEdit.author || '');
+      setDescription(articleToEdit.excerpt || '');
+      setIsHomeFeatured(articleToEdit.isHomeFeatured || false);
+      if (articleToEdit.metadata?.videoUrl) {
+        setVideoUrl(articleToEdit.metadata.videoUrl);
+      }
+    }
+  }, [articleToEdit]);
 
   // Hàm helper để render preview youtube
   const getEmbedUrl = (url: string) => {
@@ -43,19 +55,29 @@ export default function VideoEditor({ onSave, onPublish }: { onSave: () => void,
 
     setIsSaving(true);
     try {
-      await addArticle({
+      const payload = {
         categoryId: 'thanh-ca',
         title: videoTitle,
         excerpt: description,
         content: fullContent,
         author: author || 'Admin',
-        status: 'published',
-        isHomeFeatured
-      });
-      toast.success('Đăng Video thành công!');
+        status: 'published' as const,
+        isHomeFeatured,
+        metadata: {
+          videoUrl
+        }
+      };
+
+      if (articleToEdit) {
+        await updateArticle(articleToEdit.id, payload);
+        toast.success('Cập nhật Video thành công!');
+      } else {
+        await addArticle(payload);
+        toast.success('Đăng Video thành công!');
+      }
       onPublish();
     } catch (err: any) {
-      toast.error('Lỗi khi đăng Video: ' + err.message);
+      toast.error('Lỗi khi lưu Video: ' + err.message);
     }
     setIsSaving(false);
   };
@@ -112,7 +134,7 @@ export default function VideoEditor({ onSave, onPublish }: { onSave: () => void,
           <h3 style={boxTitleStyle}>Đăng Tải</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button disabled={isSaving} onClick={handlePublish} style={primaryBtnStyle}>
-              {isSaving ? 'Đang đăng...' : 'Đăng Video'}
+              {isSaving ? 'Đang lưu...' : (articleToEdit ? 'Cập nhật Video' : 'Đăng Video')}
             </button>
             <button disabled={isSaving} onClick={onSave} style={secondaryBtnStyle}>
               Hủy bỏ / Quay lại

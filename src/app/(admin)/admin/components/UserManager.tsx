@@ -8,6 +8,7 @@ interface UserRole {
   email: string;
   role: string;
   allowed_categories: string[];
+  status?: string;
   created_at: string;
 }
 
@@ -23,6 +24,9 @@ export default function UserManager() {
   const [role, setRole] = useState('editor');
   const [allowedCategories, setAllowedCategories] = useState<string[]>([]);
   const [deleteConfirmUser, setDeleteConfirmUser] = useState<{id: string, email: string} | null>(null);
+  
+  // Edit states
+  const [editUserId, setEditUserId] = useState<string | null>(null);
 
   const categories = Object.keys(slugMap).map(key => ({
     id: key,
@@ -74,23 +78,34 @@ export default function UserManager() {
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password || !role) {
+    if (!editUserId && (!email || !password || !role)) {
       toast.error('Vui lòng điền đủ thông tin bắt buộc (Email, Password, Role).');
+      return;
+    }
+    if (editUserId && !role) {
+      toast.error('Vui lòng chọn Role.');
       return;
     }
     
     setIsSubmitting(true);
     try {
-      const res = await fetch('/api/admin/users', {
-        method: 'POST',
+      const url = '/api/admin/users';
+      const method = editUserId ? 'PUT' : 'POST';
+      const bodyPayload: any = editUserId 
+        ? { id: editUserId, role, allowedCategories }
+        : { email, password, role, allowedCategories };
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role, allowedCategories })
+        body: JSON.stringify(bodyPayload)
       });
       const result = await res.json();
       
       if (result.success) {
-        toast.success('Tạo tài khoản thành công!');
+        toast.success(editUserId ? 'Cập nhật tài khoản thành công!' : 'Tạo tài khoản thành công!');
         setShowForm(false);
+        setEditUserId(null);
         setEmail('');
         setPassword('');
         setRole('editor');
@@ -101,9 +116,42 @@ export default function UserManager() {
       }
     } catch (err) {
       console.error(err);
-      toast.error('Lỗi kết nối khi tạo tài khoản');
+      toast.error('Lỗi kết nối khi lưu tài khoản');
     }
     setIsSubmitting(false);
+  };
+
+  const handleEditClick = (user: UserRole) => {
+    setEditUserId(user.user_id);
+    setEmail(user.email);
+    setPassword(''); // Don't prefill password
+    setRole(user.role);
+    setAllowedCategories(user.allowed_categories || []);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleToggleStatus = async (user: UserRole) => {
+    const newStatus = user.status === 'locked' ? 'active' : 'locked';
+    if (!window.confirm(`Bạn có chắc muốn ${newStatus === 'locked' ? 'KHÓA' : 'MỞ KHÓA'} tài khoản ${user.email}?`)) return;
+
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: user.user_id, status: newStatus })
+      });
+      const result = await res.json();
+      if (result.success) {
+        toast.success(`${newStatus === 'locked' ? 'Khóa' : 'Mở khóa'} tài khoản thành công!`);
+        fetchUsers();
+      } else {
+        toast.error('Lỗi: ' + result.error);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Lỗi kết nối khi cập nhật trạng thái');
+    }
   };
 
   const executeDeleteUser = async () => {
@@ -129,7 +177,16 @@ export default function UserManager() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>Quản Lý Tài Khoản (Phân Quyền)</h2>
         <button 
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => {
+            setShowForm(!showForm);
+            if (!showForm) {
+              setEditUserId(null);
+              setEmail('');
+              setPassword('');
+              setRole('editor');
+              setAllowedCategories([]);
+            }
+          }}
           style={{
             background: showForm ? '#64748b' : 'var(--color-brand-red)', color: 'white', 
             padding: '10px 15px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
@@ -141,17 +198,19 @@ export default function UserManager() {
 
       {showForm && (
         <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0', marginBottom: '20px' }}>
-          <h3 style={{ marginTop: 0, color: '#334155' }}>Tạo Tài Khoản Mới</h3>
+          <h3 style={{ marginTop: 0, color: '#334155' }}>{editUserId ? 'Sửa Tài Khoản' : 'Tạo Tài Khoản Mới'}</h3>
           <form onSubmit={handleCreateUser} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <div style={{ display: 'flex', gap: '15px' }}>
               <div style={{ flex: 1 }}>
                 <label style={labelStyle}>Email *</label>
-                <input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+                <input style={inputStyle} type="email" value={email} onChange={e => setEmail(e.target.value)} disabled={!!editUserId} required={!editUserId} />
               </div>
-              <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Mật khẩu *</label>
-                <input style={inputStyle} type="text" placeholder="Nhập mật khẩu cho user..." value={password} onChange={e => setPassword(e.target.value)} required />
-              </div>
+              {!editUserId && (
+                <div style={{ flex: 1 }}>
+                  <label style={labelStyle}>Mật khẩu *</label>
+                  <input style={inputStyle} type="text" placeholder="Nhập mật khẩu cho user..." value={password} onChange={e => setPassword(e.target.value)} required />
+                </div>
+              )}
             </div>
             
             <div>
@@ -189,7 +248,7 @@ export default function UserManager() {
               background: isSubmitting ? '#cbd5e1' : 'var(--color-brand-cyan)', color: 'white', padding: '12px',
               borderRadius: '6px', border: 'none', fontWeight: 'bold', cursor: isSubmitting ? 'not-allowed' : 'pointer', marginTop: '10px'
             }}>
-              {isSubmitting ? 'Đang tạo...' : 'Xác nhận tạo tài khoản'}
+              {isSubmitting ? 'Đang lưu...' : (editUserId ? 'Lưu thay đổi' : 'Xác nhận tạo tài khoản')}
             </button>
           </form>
         </div>
@@ -204,6 +263,7 @@ export default function UserManager() {
               <th style={thStyle}>Email</th>
               <th style={thStyle}>Quyền hạn (Role)</th>
               <th style={thStyle}>Chuyên mục truy cập</th>
+              <th style={thStyle}>Trạng thái</th>
               <th style={thStyle}>Ngày tạo</th>
               <th style={thStyle}>Thao tác</th>
             </tr>
@@ -234,14 +294,37 @@ export default function UserManager() {
                     </div>
                   )}
                 </td>
+                <td style={tdStyle}>
+                  <span style={{ 
+                    padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold',
+                    background: user.status === 'locked' ? '#fee2e2' : '#dcfce7',
+                    color: user.status === 'locked' ? '#991b1b' : '#166534'
+                  }}>
+                    {user.status === 'locked' ? 'KHÓA' : 'HOẠT ĐỘNG'}
+                  </span>
+                </td>
                 <td style={tdStyle}>{new Date(user.created_at).toLocaleDateString('vi-VN')}</td>
                 <td style={tdStyle}>
-                  <button 
-                    onClick={() => setDeleteConfirmUser({id: user.user_id, email: user.email})}
-                    style={{ background: 'var(--color-brand-red)', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
-                  >
-                    Xóa
-                  </button>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    <button 
+                      onClick={() => handleEditClick(user)}
+                      style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                      Sửa
+                    </button>
+                    <button 
+                      onClick={() => handleToggleStatus(user)}
+                      style={{ background: user.status === 'locked' ? '#22c55e' : '#f59e0b', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                      {user.status === 'locked' ? 'Mở Khóa' : 'Khóa'}
+                    </button>
+                    <button 
+                      onClick={() => setDeleteConfirmUser({id: user.user_id, email: user.email})}
+                      style={{ background: 'var(--color-brand-red)', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
+                    >
+                      Xóa
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}

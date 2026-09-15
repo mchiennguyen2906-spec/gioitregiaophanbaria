@@ -1,17 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import imageCompression from 'browser-image-compression';
 import toast from 'react-hot-toast';
+import { addArticle, updateArticle, Article } from '../../../utils/store';
 
-export default function AlbumEditor({ onSave, onPublish }: { onSave: () => void, onPublish: () => void }) {
+export default function AlbumEditor({ onSave, onPublish, articleToEdit }: { onSave: () => void, onPublish: () => void, articleToEdit?: Article }) {
   const [albumTitle, setAlbumTitle] = useState('');
-  const [author, setAuthor] = useState('');
+  const [author, setAuthor] = useState('Ban Truyền Thông');
   const [isSaving, setIsSaving] = useState(false);
   
-  // Giả lập danh sách hình ảnh tải lên
-  const [images, setImages] = useState([
-    { id: 1, url: 'https://images.unsplash.com/photo-1543722530-d2c3201371e7?q=80&w=200&auto=format&fit=crop', caption: 'Lễ Khai mạc', isThumbnail: true },
-    { id: 2, url: 'https://images.unsplash.com/photo-1504450758481-7338eba7524a?q=80&w=200&auto=format&fit=crop', caption: 'Các bạn trẻ giao lưu', isThumbnail: false }
-  ]);
+  // Danh sách hình ảnh tải lên
+  const [images, setImages] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (articleToEdit) {
+      setAlbumTitle(articleToEdit.title || '');
+      setAuthor(articleToEdit.author || '');
+      if (articleToEdit.metadata?.images) {
+        setImages(articleToEdit.metadata.images);
+      }
+    }
+  }, [articleToEdit]);
 
   const setThumbnail = (id: number) => {
     setImages(images.map(img => ({ ...img, isThumbnail: img.id === id })));
@@ -37,9 +45,25 @@ export default function AlbumEditor({ onSave, onPublish }: { onSave: () => void,
     
     setIsSaving(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Đăng Album thành công!');
+      const thumbnailUrl = images.find(img => img.isThumbnail)?.url || images[0].url;
+      
+      const payload = {
+        title: albumTitle,
+        author: author,
+        categoryId: 'hinh-anh',
+        content: '',
+        status: 'published' as const,
+        thumbnailUrl: thumbnailUrl,
+        metadata: { images }
+      };
+
+      if (articleToEdit) {
+        await updateArticle(articleToEdit.id, payload);
+        toast.success('Cập nhật Album thành công!');
+      } else {
+        await addArticle(payload);
+        toast.success('Đăng Album thành công!');
+      }
       onPublish();
     } catch (err: any) {
       toast.error('Lỗi khi đăng: ' + err.message);
