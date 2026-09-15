@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getFooterConfigFromStore, saveFooterConfigToStore, FooterConfig } from "../../../utils/store";
+import toast from 'react-hot-toast';
 
 export default function FooterManager() {
   const [config, setConfig] = useState<FooterConfig | null>(null);
@@ -25,8 +26,12 @@ export default function FooterManager() {
 
   const handleSave = async () => {
     if (config) {
-      await saveFooterConfigToStore(config);
-      alert('Cập nhật cấu hình Footer thành công!');
+      try {
+        await saveFooterConfigToStore(config);
+        toast.success('Cập nhật cấu hình Footer thành công!');
+      } catch (err: any) {
+        toast.error('Lỗi khi lưu Footer: ' + err.message);
+      }
     }
   };
 

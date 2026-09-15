@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getWordOfGodsFromStore, saveWordOfGodsToStore, WordOfGod } from "../../../utils/store";
+import toast from 'react-hot-toast';
 
 export default function WordOfGodManager() {
   const [words, setWords] = useState<WordOfGod[]>([]);
@@ -15,11 +16,15 @@ export default function WordOfGodManager() {
 
   const handleSave = async () => {
     if (words.some(w => !w.quote || !w.source)) {
-      alert('Vui lòng điền đầy đủ Câu Lời Chúa và Nguồn cho tất cả các ngày!');
+      toast.error('Vui lòng điền đầy đủ Câu Lời Chúa và Nguồn cho tất cả các ngày!');
       return;
     }
-    await saveWordOfGodsToStore(words);
-    alert('Đã cập nhật Lời Chúa mỗi ngày!');
+    try {
+      await saveWordOfGodsToStore(words);
+      toast.success('Đã cập nhật Lời Chúa mỗi ngày!');
+    } catch (err: any) {
+      toast.error('Lỗi khi lưu: ' + err.message);
+    }
   };
 
   const dayNames = ['Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy', 'Chúa Nhật'];

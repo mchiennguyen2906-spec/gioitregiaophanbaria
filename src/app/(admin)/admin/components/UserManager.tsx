@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { slugMap } from '../../../utils/categoryMap';
+import toast from 'react-hot-toast';
 
 interface UserRole {
   id: string;
@@ -21,6 +22,7 @@ export default function UserManager() {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('editor');
   const [allowedCategories, setAllowedCategories] = useState<string[]>([]);
+  const [deleteConfirmUser, setDeleteConfirmUser] = useState<{id: string, email: string} | null>(null);
 
   const categories = Object.keys(slugMap).map(key => ({
     id: key,
@@ -49,10 +51,11 @@ export default function UserManager() {
       if (result.success) {
         setUsers(result.data);
       } else {
-        alert('Lỗi lấy danh sách user: ' + result.error);
+        toast.error('Lỗi lấy danh sách user: ' + result.error);
       }
     } catch (err) {
       console.error(err);
+      toast.error('Lỗi kết nối khi tải danh sách user');
     }
     setLoading(false);
   };
@@ -72,7 +75,7 @@ export default function UserManager() {
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password || !role) {
-      alert('Vui lòng điền đủ thông tin bắt buộc (Email, Password, Role).');
+      toast.error('Vui lòng điền đủ thông tin bắt buộc (Email, Password, Role).');
       return;
     }
     
@@ -86,7 +89,7 @@ export default function UserManager() {
       const result = await res.json();
       
       if (result.success) {
-        alert('Tạo tài khoản thành công!');
+        toast.success('Tạo tài khoản thành công!');
         setShowForm(false);
         setEmail('');
         setPassword('');
@@ -94,29 +97,30 @@ export default function UserManager() {
         setAllowedCategories([]);
         fetchUsers();
       } else {
-        alert('Lỗi: ' + result.error);
+        toast.error('Lỗi: ' + result.error);
       }
     } catch (err) {
       console.error(err);
-      alert('Lỗi kết nối khi tạo tài khoản');
+      toast.error('Lỗi kết nối khi tạo tài khoản');
     }
     setIsSubmitting(false);
   };
 
-  const handleDeleteUser = async (userId: string, userEmail: string) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa tài khoản ${userEmail}?\nHành động này không thể hoàn tác.`)) {
-      try {
-        const res = await fetch(`/api/admin/users?id=${userId}`, { method: 'DELETE' });
-        const result = await res.json();
-        if (result.success) {
-          alert('Xóa thành công');
-          fetchUsers();
-        } else {
-          alert('Lỗi: ' + result.error);
-        }
-      } catch (err) {
-        console.error(err);
+  const executeDeleteUser = async () => {
+    if (!deleteConfirmUser) return;
+    try {
+      const res = await fetch(`/api/admin/users?id=${deleteConfirmUser.id}`, { method: 'DELETE' });
+      const result = await res.json();
+      if (result.success) {
+        toast.success('Xóa tài khoản thành công');
+        setDeleteConfirmUser(null);
+        fetchUsers();
+      } else {
+        toast.error('Lỗi: ' + result.error);
       }
+    } catch (err) {
+      console.error(err);
+      toast.error('Lỗi kết nối khi xóa tài khoản');
     }
   };
 
@@ -233,7 +237,7 @@ export default function UserManager() {
                 <td style={tdStyle}>{new Date(user.created_at).toLocaleDateString('vi-VN')}</td>
                 <td style={tdStyle}>
                   <button 
-                    onClick={() => handleDeleteUser(user.user_id, user.email)}
+                    onClick={() => setDeleteConfirmUser({id: user.user_id, email: user.email})}
                     style={{ background: 'var(--color-brand-red)', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
                   >
                     Xóa
@@ -246,6 +250,24 @@ export default function UserManager() {
             )}
           </tbody>
         </table>
+      )}
+
+      {/* Custom Delete Modal */}
+      {deleteConfirmUser && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{ background: 'white', padding: '25px', borderRadius: '12px', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+            <h3 style={{ color: '#b91c1c', marginTop: 0 }}>⚠️ Xóa tài khoản?</h3>
+            <p style={{ color: '#475569', marginBottom: '10px' }}>Bạn có chắc chắn muốn xóa tài khoản <strong>{deleteConfirmUser.email}</strong>?</p>
+            <p style={{ color: '#ef4444', marginBottom: '25px', fontSize: '0.9rem' }}>Hành động này không thể hoàn tác.</p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button onClick={() => setDeleteConfirmUser(null)} style={{ padding: '10px 20px', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer', fontWeight: 'bold' }}>Hủy</button>
+              <button onClick={executeDeleteUser} style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', background: '#ef4444', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>Xác nhận Xóa</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

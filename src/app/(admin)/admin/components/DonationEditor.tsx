@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getArticlesFromStore, addDonation, updateDonation, DonationProgram, Article } from '../../../utils/store';
 import { slugMap } from '../../../utils/categoryMap';
+import toast from 'react-hot-toast';
 
 interface DonationEditorProps {
   donationToEdit?: DonationProgram | null;
@@ -19,6 +20,8 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
   const [isCompleted, setIsCompleted] = useState(false);
   const [articles, setArticles] = useState<Article[]>([]);
   const [searchArticle, setSearchArticle] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -50,7 +53,7 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
+    setIsUploading(true);
     // Client-side compression
     const reader = new FileReader();
     reader.onload = (event) => {
@@ -73,11 +76,17 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+        if (!ctx) {
+            setIsUploading(false);
+            return;
+        }
         
         ctx.drawImage(img, 0, 0, width, height);
         canvas.toBlob(async (blob) => {
-          if (!blob) return;
+          if (!blob) {
+            setIsUploading(false);
+            return;
+          }
           const formData = new FormData();
           formData.append('file', new File([blob], file.name, { type: 'image/jpeg' }));
           
@@ -91,13 +100,15 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
             const result = await res.json();
             if (result.success) {
               setQrCodeUrl(result.url);
+              toast.success('Đã tải ảnh QR Code lên!');
             } else {
-              alert('Lỗi khi tải ảnh lên!');
+              toast.error('Lỗi khi tải ảnh lên!');
             }
           } catch (err) {
             console.error(err);
-            alert('Lỗi kết nối khi tải ảnh lên!');
+            toast.error('Lỗi kết nối khi tải ảnh lên!');
           }
+          setIsUploading(false);
         }, 'image/jpeg', 0.8);
       };
       img.src = event.target?.result as string;
@@ -107,7 +118,7 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
 
   const handleSave = async () => {
     if (!name || !targetAmount) {
-      alert('Vui lòng nhập Tên chương trình và Số tiền mục tiêu!');
+      toast.error('Vui lòng nhập Tên chương trình và Số tiền mục tiêu!');
       return;
     }
 
@@ -122,14 +133,20 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
       isCompleted
     };
 
-    if (donationToEdit) {
-      await updateDonation(donationToEdit.id, data);
-      alert('Đã cập nhật chương trình!');
-    } else {
-      await addDonation(data);
-      alert('Đã tạo chương trình quyên góp mới!');
+    setIsSaving(true);
+    try {
+      if (donationToEdit) {
+        await updateDonation(donationToEdit.id, data);
+        toast.success('Đã cập nhật chương trình!');
+      } else {
+        await addDonation(data);
+        toast.success('Đã tạo chương trình quyên góp mới!');
+      }
+      onSave();
+    } catch (err: any) {
+      toast.error('Lỗi khi lưu: ' + err.message);
     }
-    onSave();
+    setIsSaving(false);
   };
 
   const filteredArticles = articles.filter(a => 
@@ -137,23 +154,14 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
   ).slice(0, 50);
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', background: '#fff', padding: '25px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>{donationToEdit ? 'Sửa Chương Trình Quyên Góp' : 'Tạo Chương Trình Quyên Góp'}</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={onCancel} style={{
-            background: '#f1f5f9', color: '#334155', padding: '10px 15px', 
-            borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
-          }}>Hủy</button>
-          
-          <button onClick={handleSave} style={{
-            background: 'var(--color-brand-red)', color: 'white', padding: '10px 15px', 
-            borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
-          }}>Lưu Chương Trình</button>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 350px', gap: '30px', alignItems: 'start' }}>
+      
+      {/* CỘT TRÁI - MAIN CONTENT */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ margin: 0, color: 'var(--color-brand-cyan)' }}>{donationToEdit ? 'Sửa Chương Trình Quyên Góp' : 'Tạo Chương Trình Quyên Góp'}</h2>
         </div>
-      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
         <div>
           <label style={labelStyle}>Tên chương trình quyên góp *</label>
           <input style={inputStyle} type="text" placeholder="VD: Quỹ học bổng mồ côi" value={name} onChange={e => setName(e.target.value)} />
@@ -161,7 +169,7 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
 
         <div>
           <label style={labelStyle}>Mô tả ngắn</label>
-          <textarea style={{...inputStyle, minHeight: '80px'}} placeholder="Thông tin tóm tắt về đợt quyên góp..." value={description} onChange={e => setDescription(e.target.value)} />
+          <textarea style={{...inputStyle, minHeight: '120px'}} placeholder="Thông tin tóm tắt về đợt quyên góp..." value={description} onChange={e => setDescription(e.target.value)} />
         </div>
 
         <div style={{ display: 'flex', gap: '15px' }}>
@@ -175,42 +183,67 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Thông tin chuyển khoản (Bank)</label>
-            <textarea style={{...inputStyle, minHeight: '80px'}} placeholder="Vietcombank - 123456789 - Ban Caritas" value={bankInfo} onChange={e => setBankInfo(e.target.value)} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Ảnh QR Code (Upload file hoặc dán Link)</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <input 
-                type="file" 
-                accept="image/*" 
-                onChange={handleImageUpload}
-                style={{ fontSize: '0.9rem' }}
-              />
-              <div style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>
-                Ảnh tải lên sẽ được tự động nén nhỏ gọn.
-              </div>
-              <input 
-                style={inputStyle} 
-                type="text" 
-                placeholder="Hoặc dán link ảnh https://..." 
-                value={qrCodeUrl} 
-                onChange={e => setQrCodeUrl(e.target.value)} 
-              />
-            </div>
-            {qrCodeUrl && <img src={qrCodeUrl} alt="QR Code" style={{ width: '80px', height: '80px', marginTop: '10px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #ccc' }} />}
+        <div>
+          <label style={labelStyle}>Thông tin chuyển khoản (Bank)</label>
+          <textarea style={{...inputStyle, minHeight: '100px'}} placeholder="Ngân hàng - Số tài khoản - Chủ tài khoản" value={bankInfo} onChange={e => setBankInfo(e.target.value)} />
+        </div>
+      </div>
+
+      {/* CỘT PHẢI - SETTINGS */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        
+        {/* Nút hành động */}
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Đăng Tải</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button disabled={isSaving} onClick={handleSave} style={primaryBtnStyle}>
+              {isSaving ? 'Đang lưu...' : (donationToEdit ? 'Cập nhật' : 'Đăng chương trình')}
+            </button>
+            <button disabled={isSaving} onClick={onCancel} style={secondaryBtnStyle}>
+              Hủy bỏ
+            </button>
           </div>
         </div>
 
-        <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <label style={{...labelStyle, color: 'var(--color-brand-cyan)'}}>🔗 Gắn Link Bài Viết Thiện Nguyện (Tùy chọn)</label>
-          <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '10px' }}>Tìm kiếm và chọn bài viết liên quan. Khi bấm "Xem chi tiết", hệ thống sẽ chuyển đến bài viết này. Khi quyên góp hoàn thành, bài viết này cũng sẽ được gắn nhãn "Đã hoàn thành".</p>
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Trạng Thái</h3>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-red)' }}>
+            <input type="checkbox" checked={isCompleted} onChange={e => setIsCompleted(e.target.checked)} style={{ width: '18px', height: '18px' }} />
+            Đã Hoàn Thành (Sẽ ẩn khỏi Trang chủ)
+          </label>
+        </div>
+
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Ảnh QR Code</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {qrCodeUrl && (
+              <img src={qrCodeUrl} alt="QR" style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0', objectFit: 'cover' }} />
+            )}
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleImageUpload}
+              style={{ fontSize: '0.9rem' }}
+              disabled={isUploading}
+            />
+            {isUploading && <span style={{ fontSize: '0.85rem', color: '#64748b' }}>Đang tải lên...</span>}
+            <input 
+              style={inputStyle} 
+              type="text" 
+              placeholder="Hoặc dán link ảnh https://..." 
+              value={qrCodeUrl} 
+              onChange={e => setQrCodeUrl(e.target.value)} 
+            />
+          </div>
+        </div>
+
+        <div style={boxStyle}>
+          <h3 style={{...boxTitleStyle, color: 'var(--color-brand-cyan)'}}>🔗 Gắn Link Bài Viết</h3>
+          <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '10px' }}>Khi xem chi tiết, hệ thống sẽ chuyển đến bài viết này.</p>
           <input 
             style={{...inputStyle, marginBottom: '10px'}} 
             type="text" 
-            placeholder="🔍 Nhập tên bài viết để tìm..." 
+            placeholder="🔍 Tìm kiếm bài viết..." 
             value={searchArticle} 
             onChange={e => setSearchArticle(e.target.value)} 
           />
@@ -228,17 +261,14 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
           </select>
         </div>
 
-        <div style={{ marginTop: '10px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-red)' }}>
-            <input type="checkbox" checked={isCompleted} onChange={e => setIsCompleted(e.target.checked)} style={{ width: '18px', height: '18px' }} />
-            Đánh dấu Đã Hoàn Thành (Sẽ ẩn khỏi Trang chủ, chuyển vào lịch sử)
-          </label>
-        </div>
-
       </div>
     </div>
   );
 }
 
 const labelStyle = { display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155', fontSize: '0.9rem' };
-const inputStyle = { width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem', outlineColor: 'var(--color-brand-cyan)' };
+const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.95rem', outlineColor: 'var(--color-brand-cyan)' };
+const boxStyle = { background: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' };
+const boxTitleStyle = { marginTop: 0, marginBottom: '15px', color: '#1e293b', fontSize: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' };
+const primaryBtnStyle = { background: 'var(--color-brand-cyan)', color: 'white', padding: '12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };
+const secondaryBtnStyle = { background: '#f1f5f9', color: '#475569', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };

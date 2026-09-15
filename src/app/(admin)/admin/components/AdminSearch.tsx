@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../../utils/supabaseClient';
+import toast from 'react-hot-toast';
 
 export default function AdminSearch() {
   const [activeTab, setActiveTab] = useState<'LOGS' | 'SEARCH'>('LOGS');
@@ -73,9 +74,10 @@ export default function AdminSearch() {
     
     if (data && !error) {
       setSearchResults(data);
+      toast.success(`Tìm thấy ${data.length} kết quả`);
     } else {
       console.error(error);
-      alert('Có lỗi xảy ra khi tìm kiếm');
+      toast.error('Có lỗi xảy ra khi tìm kiếm');
     }
     setLoadingSearch(false);
   };

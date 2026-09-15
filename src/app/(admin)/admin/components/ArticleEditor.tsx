@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { slugMap } from "../../../utils/categoryMap";
 import { addArticle, updateArticle, Article } from "../../../utils/store";
+import toast from 'react-hot-toast';
 
 // Import CSS của React-Quill (cần thiết để hiển thị toolbar)
 import 'react-quill-new/dist/quill.snow.css';
@@ -32,6 +33,12 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
   const [isHomePriority, setIsHomePriority] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  
+  // File đính kèm
+  const [attachmentUrl, setAttachmentUrl] = useState('');
+  const [attachmentName, setAttachmentName] = useState('');
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const getLocalDatetime = (dateVal?: string) => {
@@ -59,6 +66,8 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       setIsHomeFeatured(articleToEdit.isHomeFeatured || false);
       setIsHomePriority(articleToEdit.isHomePriority || false);
       setThumbnailUrl(articleToEdit.thumbnailUrl || '');
+      setAttachmentUrl(articleToEdit.attachmentUrl || '');
+      setAttachmentName(articleToEdit.attachmentName || '');
     } else {
       setTitle('');
       setExcerpt('');
@@ -73,12 +82,14 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       setIsHomeFeatured(false);
       setIsHomePriority(false);
       setThumbnailUrl('');
+      setAttachmentUrl('');
+      setAttachmentName('');
     }
   }, [articleToEdit]);
   
   const handlePublish = async () => {
     if (!title || !category || !content) {
-      alert('Vui lòng điền đầy đủ Tiêu đề, Hạng mục và Nội dung!');
+      toast.error('Vui lòng điền đầy đủ Tiêu đề, Hạng mục và Nội dung!');
       return;
     }
     
@@ -90,6 +101,8 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       parish,
       content,
       audioUrl,
+      attachmentUrl,
+      attachmentName,
       date: publishDate ? new Date(publishDate).toISOString() : new Date().toISOString(),
       thumbnailUrl,
       status: 'published' as const,
@@ -101,10 +114,10 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
 
     if (articleToEdit && articleToEdit.id) {
       await updateArticle(articleToEdit.id, articleData);
-      alert('Đã cập nhật bài viết thành công!');
+      toast.success('Đã cập nhật bài viết thành công!');
     } else {
       await addArticle(articleData);
-      alert('Đã đăng bài viết mới thành công!');
+      toast.success('Đã đăng bài viết mới thành công!');
     }
     
     onPublish();
@@ -158,12 +171,13 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
             const result = await res.json();
             if (result.success) {
               setThumbnailUrl(result.url);
+              toast.success('Đã tải ảnh lên!');
             } else {
-              alert('Lỗi khi tải ảnh lên!');
+              toast.error('Lỗi khi tải ảnh lên!');
             }
           } catch (err) {
             console.error(err);
-            alert('Lỗi kết nối khi tải ảnh lên!');
+            toast.error('Lỗi kết nối khi tải ảnh lên!');
           }
           setIsUploading(false);
         }, 'image/jpeg', 0.8);
@@ -171,6 +185,66 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       img.src = event.target?.result as string;
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+    const allowedExts = ['.pdf', '.doc', '.docx', '.xls', '.xlsx'];
+    const ext = '.' + file.name.split('.').pop()?.toLowerCase();
+    
+    if (!allowedTypes.includes(file.type) && !allowedExts.includes(ext)) {
+      toast.error('Chỉ chấp nhận file PDF, Word hoặc Excel');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File tối đa 10MB!');
+      return;
+    }
+
+    setIsUploadingFile(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      if (attachmentUrl) {
+        formData.append('oldFileUrl', attachmentUrl);
+      }
+
+      const res = await fetch('/api/upload', { method: 'POST', body: formData });
+      const data = await res.json();
+      
+      if (data.success) {
+        setAttachmentUrl(data.url);
+        setAttachmentName(file.name);
+        toast.success('Đã tải file lên!');
+      } else {
+        toast.error('Lỗi upload file: ' + (data.error || 'Không xác định'));
+      }
+    } catch (err) {
+      toast.error('Lỗi kết nối khi upload file đính kèm!');
+    }
+    setIsUploadingFile(false);
+  };
+
+  const getFileIcon = (name: string) => {
+    const ext = name.split('.').pop()?.toLowerCase();
+    switch (ext) {
+      case 'pdf': return '📕';
+      case 'doc': case 'docx': return '📘';
+      case 'xls': case 'xlsx': return '📗';
+      default: return '📄';
+    }
   };
 
   const categories = allowedCategories || Object.keys(slugMap).map(key => ({ id: key, name: slugMap[key] }));
@@ -196,7 +270,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
   ];
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '50px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>Soạn Thảo Bài Viết Mới</h2>
         <div style={{ display: 'flex', gap: '10px' }}>
@@ -206,9 +280,10 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
           }}>Lưu & Xem Trước</button>
           
           <button onClick={handlePublish} style={{
-            background: 'var(--color-brand-red)', color: 'white', padding: '10px 15px', 
-            borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
-          }}>Xác Nhận Đăng</button>
+            background: 'var(--color-brand-cyan)', color: 'white', padding: '10px 20px', 
+            borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold',
+            boxShadow: '0 4px 6px -1px rgba(6, 182, 212, 0.4)'
+          }}>🚀 XÁC NHẬN ĐĂNG</button>
         </div>
       </div>
 
@@ -221,120 +296,192 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
         </ul>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        {/* Form Meta */}
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Hạng mục / Chuyên mục *</label>
-            <select style={inputStyle} value={category} onChange={e => setCategory(e.target.value)}>
-              <option value="">-- Chọn Hạng Mục --</option>
-              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Thời gian đăng (Hẹn giờ) *</label>
-            <input 
-              style={inputStyle} 
-              type="datetime-local" 
-              value={publishDate} 
-              onChange={e => setPublishDate(e.target.value)} 
-            />
-          </div>
-        </div>
+      <style dangerouslySetInnerHTML={{__html: `
+        .editor-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .editor-grid { grid-template-columns: 1fr; } }
+      `}} />
+      <div className="editor-grid">
+        {/* CỘT TRÁI - NỘI DUNG CHÍNH */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <div style={{ marginBottom: '15px' }}>
+              <label style={labelStyle}>Tiêu đề bài viết *</label>
+              <input style={{...inputStyle, fontSize: '1.2rem', padding: '15px', fontWeight: 'bold'}} type="text" placeholder="Nhập tiêu đề..." value={title} onChange={e => setTitle(e.target.value)} />
+            </div>
 
-        {category === 'podcast' && (
-          <div>
-            <label style={{ display: 'block', fontSize: '0.9rem', marginBottom: '5px', color: '#64748b' }}>Link Audio/Podcast (MP3)</label>
-            <input 
-              type="text" 
-              value={audioUrl}
-              onChange={(e) => setAudioUrl(e.target.value)}
-              placeholder="https://..."
-              style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-            />
-          </div>
-        )}
+            <div style={{ marginBottom: '15px' }}>
+              <label style={labelStyle}>Lời dẫn (Sapo / Câu hút) *</label>
+              <textarea style={{ ...inputStyle, minHeight: '80px' }} placeholder="Đoạn văn ngắn dẫn dắt vào bài..." value={excerpt} onChange={e => setExcerpt(e.target.value)} />
+            </div>
 
-        <div style={{ display: 'flex', gap: '20px', padding: '10px 0', borderBottom: '1px dashed #e2e8f0', marginBottom: '10px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
-            <div style={{ fontWeight: 'bold', color: '#475569', fontSize: '0.9rem', marginBottom: '5px' }}>Tùy chọn TRANG CON (Chuyên mục)</div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-red)' }}>
-              <input type="checkbox" checked={isFeatured} onChange={e => setIsFeatured(e.target.checked)} style={{ width: '18px', height: '18px' }} />
-              Nổi Bật Trang Con (Slider)
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-cyan)' }}>
-              <input type="checkbox" checked={isPriority} onChange={e => setIsPriority(e.target.checked)} style={{ width: '18px', height: '18px' }} />
-              Ưu Tiên Trang Con (Danh sách bên phải)
-            </label>
+            <div>
+              <label style={labelStyle}>Nội dung bài viết *</label>
+              <div style={{ background: '#fff', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
+                <ReactQuill 
+                  theme="snow"
+                  value={content}
+                  onChange={setContent}
+                  modules={modules}
+                  formats={formats}
+                  placeholder="Bắt đầu viết nội dung tại đây..."
+                  style={{ height: '500px', marginBottom: '40px', border: 'none' }}
+                />
+              </div>
+            </div>
           </div>
           
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, borderLeft: '1px solid #e2e8f0', paddingLeft: '20px' }}>
-            <div style={{ fontWeight: 'bold', color: '#475569', fontSize: '0.9rem', marginBottom: '5px' }}>Tùy chọn TRANG CHỦ</div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-red)' }}>
-              <input type="checkbox" checked={isHomeFeatured} onChange={e => setIsHomeFeatured(e.target.checked)} style={{ width: '18px', height: '18px' }} />
-              Nổi Bật Trang Chủ (Slider lớn - Tối đa 10)
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-cyan)' }}>
-              <input type="checkbox" checked={isHomePriority} onChange={e => setIsHomePriority(e.target.checked)} style={{ width: '18px', height: '18px' }} />
-              Ưu Tiên Trang Chủ (Danh sách Bản tin - Tối đa 10)
-            </label>
-          </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Người viết *</label>
-            <input style={inputStyle} type="text" placeholder="Tên tác giả..." value={author} onChange={e => setAuthor(e.target.value)} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Giáo xứ</label>
-            <input style={inputStyle} type="text" placeholder="Thuộc giáo xứ nào..." value={parish} onChange={e => setParish(e.target.value)} />
-          </div>
-        </div>
-
-        <div>
-          <label style={labelStyle}>Tiêu đề bài viết *</label>
-          <input style={inputStyle} type="text" placeholder="Nhập tiêu đề..." value={title} onChange={e => setTitle(e.target.value)} />
-        </div>
-
-
-        <div>
-          <label style={labelStyle}>Lời dẫn (Sapo / Câu hút) *</label>
-          <textarea style={{ ...inputStyle, minHeight: '80px' }} placeholder="Đoạn văn ngắn dẫn dắt vào bài..." value={excerpt} onChange={e => setExcerpt(e.target.value)} />
-        </div>
-
-        {/* Thumbnail upload section */}
-        <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-          <label style={labelStyle}>Ảnh đại diện (Thumbnail) *</label>
-          {thumbnailUrl && (
-            <div style={{ marginBottom: '10px' }}>
-              <img src={thumbnailUrl} alt="Thumbnail" style={{ maxWidth: '200px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+        {/* CỘT PHẢI - CÀI ĐẶT PHỤ */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* Box Đăng bài */}
+          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#1e293b', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>⚙️ Cài đặt Đăng bài</h3>
+            
+            <div style={{ marginBottom: '15px' }}>
+              <label style={labelStyle}>Hạng mục / Chuyên mục *</label>
+              <select style={inputStyle} value={category} onChange={e => setCategory(e.target.value)}>
+                <option value="">-- Chọn Hạng Mục --</option>
+                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+              </select>
             </div>
-          )}
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={handleImageUpload} 
-            disabled={isUploading}
-            style={{ width: '100%', padding: '10px', border: '1px dashed #94a3b8', borderRadius: '6px', background: 'white', cursor: 'pointer' }}
-          />
-          {isUploading && <span style={{ color: 'var(--color-brand-red)', fontSize: '0.9rem', marginTop: '5px', display: 'block' }}>Đang nén và tải ảnh lên...</span>}
-        </div>
 
-        {/* Real WYSIWYG Editor */}
-        <div style={{ marginTop: '10px' }}>
-          <label style={labelStyle}>Nội dung bài viết *</label>
-          <div style={{ background: '#fff', borderRadius: '8px', overflow: 'hidden' }}>
-            <ReactQuill 
-              theme="snow"
-              value={content}
-              onChange={setContent}
-              modules={modules}
-              formats={formats}
-              placeholder="Bắt đầu viết nội dung tại đây... Đặt con trỏ ở đâu, bấm nút chèn ảnh thì ảnh sẽ nằm ở đó..."
-              style={{ height: '400px', marginBottom: '40px' }} // Tăng marginBottom vì height của ReactQuill không bao gồm toolbar
-            />
+            <div style={{ marginBottom: '15px' }}>
+              <label style={labelStyle}>Thời gian đăng (Hẹn giờ) *</label>
+              <input 
+                style={inputStyle} 
+                type="datetime-local" 
+                value={publishDate} 
+                onChange={e => setPublishDate(e.target.value)} 
+              />
+            </div>
+
+            {category === 'podcast' && (
+              <div style={{ marginBottom: '15px' }}>
+                <label style={labelStyle}>Link Audio/Podcast (MP3)</label>
+                <input 
+                  type="text" 
+                  value={audioUrl}
+                  onChange={(e) => setAudioUrl(e.target.value)}
+                  placeholder="https://..."
+                  style={inputStyle}
+                />
+              </div>
+            )}
+            
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={labelStyle}>Người viết *</label>
+                <input style={inputStyle} type="text" placeholder="Tên..." value={author} onChange={e => setAuthor(e.target.value)} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={labelStyle}>Giáo xứ</label>
+                <input style={inputStyle} type="text" placeholder="Giáo xứ..." value={parish} onChange={e => setParish(e.target.value)} />
+              </div>
+            </div>
           </div>
+
+          {/* Box Nổi bật */}
+          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#1e293b', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>⭐ Tùy chọn Hiển thị</h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+              <div>
+                <div style={{ fontWeight: 'bold', color: '#475569', fontSize: '0.85rem', marginBottom: '8px', textTransform: 'uppercase' }}>Trang Con (Chuyên mục)</div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#334155', fontSize: '0.9rem', marginBottom: '5px' }}>
+                  <input type="checkbox" checked={isFeatured} onChange={e => setIsFeatured(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--color-brand-cyan)' }} />
+                  Đưa lên Slider nổi bật
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#334155', fontSize: '0.9rem' }}>
+                  <input type="checkbox" checked={isPriority} onChange={e => setIsPriority(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--color-brand-cyan)' }} />
+                  Ghim vào danh sách Ưu tiên
+                </label>
+              </div>
+              
+              <div style={{ borderTop: '1px dashed #e2e8f0', paddingTop: '15px' }}>
+                <div style={{ fontWeight: 'bold', color: '#475569', fontSize: '0.85rem', marginBottom: '8px', textTransform: 'uppercase' }}>Trang Chủ Hệ Thống</div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#b91c1c', fontSize: '0.9rem', marginBottom: '5px' }}>
+                  <input type="checkbox" checked={isHomeFeatured} onChange={e => setIsHomeFeatured(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: '#b91c1c' }} />
+                  Đưa ra Slider Trang Chủ (VIP)
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#b91c1c', fontSize: '0.9rem' }}>
+                  <input type="checkbox" checked={isHomePriority} onChange={e => setIsHomePriority(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: '#b91c1c' }} />
+                  Đưa ra Bản tin Trang Chủ
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Box Media */}
+          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#1e293b', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>🖼️ Đa phương tiện</h3>
+            
+            {/* Thumbnail */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={labelStyle}>Ảnh đại diện (Thumbnail) *</label>
+              {thumbnailUrl && (
+                <div style={{ marginBottom: '10px', position: 'relative' }}>
+                  <img src={thumbnailUrl} alt="Thumbnail" style={{ width: '100%', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                </div>
+              )}
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleImageUpload} 
+                disabled={isUploading}
+                style={{ width: '100%', padding: '10px', border: '1px dashed #cbd5e1', borderRadius: '6px', background: '#f8fafc', cursor: 'pointer', fontSize: '0.85rem' }}
+              />
+              {isUploading && <span style={{ color: '#ea580c', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>⏳ Đang tải ảnh...</span>}
+            </div>
+
+            {/* File đính kèm */}
+            <div>
+              <label style={labelStyle}>File đính kèm (PDF, Word, Excel)</label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.doc,.docx,.xls,.xlsx"
+                onChange={handleFileUpload}
+                style={{ display: 'none' }}
+              />
+
+              {attachmentUrl ? (
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '10px',
+                  padding: '10px', border: '1px solid #22c55e', borderRadius: '8px',
+                  background: '#f0fdf4'
+                }}>
+                  <span style={{ fontSize: '1.2rem' }}>{getFileIcon(attachmentName)}</span>
+                  <div style={{ flex: 1, overflow: 'hidden' }}>
+                    <div style={{ fontWeight: 'bold', color: '#166534', fontSize: '0.85rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{attachmentName}</div>
+                  </div>
+                  <button 
+                    onClick={() => { setAttachmentUrl(''); setAttachmentName(''); }}
+                    style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#ef4444', fontSize: '1rem' }}
+                    title="Xóa file"
+                  >
+                    ✖
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingFile}
+                  style={{
+                    width: '100%', padding: '10px', border: '1px dashed #cbd5e1', borderRadius: '6px',
+                    background: '#f8fafc', cursor: isUploadingFile ? 'wait' : 'pointer', color: '#475569',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem'
+                  }}
+                >
+                  {isUploadingFile ? '⏳ Đang tải...' : '📎 Chọn file...'}
+                </button>
+              )}
+            </div>
+
+          </div>
+
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getDonationsFromStore, deleteDonation, DonationProgram } from '../../../utils/store';
+import toast from 'react-hot-toast';
 
 interface DonationManagerProps {
   onEdit: (donation: DonationProgram) => void;
@@ -8,6 +9,8 @@ interface DonationManagerProps {
 
 export default function DonationManager({ onEdit, onCreateNew }: DonationManagerProps) {
   const [donations, setDonations] = useState<DonationProgram[]>([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadDonations = async () => {
@@ -23,10 +26,21 @@ export default function DonationManager({ onEdit, onCreateNew }: DonationManager
     };
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa chương trình này?')) {
-      await deleteDonation(id);
+  const requestDelete = (id: string) => {
+    setDeletingId(id);
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingId) return;
+    try {
+      await deleteDonation(deletingId);
+      toast.success('Đã xóa chương trình quyên góp!');
+    } catch (err: any) {
+      toast.error('Lỗi khi xóa: ' + err.message);
     }
+    setShowConfirmModal(false);
+    setDeletingId(null);
   };
 
   return (
@@ -85,7 +99,7 @@ export default function DonationManager({ onEdit, onCreateNew }: DonationManager
                 </td>
                 <td style={{ padding: '15px', textAlign: 'right' }}>
                   <button onClick={() => onEdit(donation)} style={{ padding: '6px 12px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '4px', cursor: 'pointer', marginRight: '8px' }}>Sửa</button>
-                  <button onClick={() => handleDelete(donation.id)} style={{ padding: '6px 12px', background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: '4px', cursor: 'pointer' }}>Xóa</button>
+                  <button onClick={() => requestDelete(donation.id)} style={{ padding: '6px 12px', background: '#fef2f2', border: '1px solid #fca5a5', color: '#dc2626', borderRadius: '4px', cursor: 'pointer' }}>Xóa</button>
                 </td>
               </tr>
             )) : (
@@ -96,6 +110,35 @@ export default function DonationManager({ onEdit, onCreateNew }: DonationManager
           </tbody>
         </table>
       </div>
+
+      {showConfirmModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '400px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ margin: '0 0 15px 0', color: '#0f172a' }}>Xác nhận xóa</h3>
+            <p style={{ color: '#475569', marginBottom: '25px', lineHeight: 1.5 }}>
+              Bạn có chắc chắn muốn xóa vĩnh viễn chương trình quyên góp này không? Thao tác này không thể hoàn tác.
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button 
+                onClick={() => setShowConfirmModal(false)}
+                style={{ padding: '10px 15px', border: '1px solid #cbd5e1', background: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={handleConfirmDelete}
+                style={{ background: '#ef4444', color: 'white', padding: '10px 15px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                Xóa vĩnh viễn
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

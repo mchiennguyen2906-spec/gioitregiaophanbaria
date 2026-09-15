@@ -66,10 +66,12 @@ export default function AdminDashboard() {
       }
       setIsLoadingAuth(false);
       
-      // Chỉ log nếu session chưa được đánh dấu đã log trong bộ nhớ tạm thời của browser
-      if (!sessionStorage.getItem('has_logged_in_session')) {
+      // Chỉ log nếu session chưa được đánh dấu đã log cho email hiện tại
+      const currentLoggedEmail = sessionStorage.getItem('logged_in_email');
+      const userEmail = session.user.email || '';
+      if (currentLoggedEmail !== userEmail) {
         logActivity('Đăng nhập', 'user', 'Người dùng truy cập vào hệ thống Admin');
-        sessionStorage.setItem('has_logged_in_session', 'true');
+        sessionStorage.setItem('logged_in_email', userEmail);
       }
     };
     checkAuth();
@@ -416,9 +418,41 @@ export default function AdminDashboard() {
       </div>
 
       {/* CỘT PHẢI - MAIN CONTENT */}
-      <div style={{ flex: 1, padding: '30px', overflowY: 'auto' }}>
-        <div style={{ background: 'white', padding: '30px', borderRadius: '12px', minHeight: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-          {renderContent()}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        
+        {/* TOPBAR */}
+        <div style={{ 
+          background: 'white', padding: '15px 30px', borderBottom: '1px solid #e2e8f0', 
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' 
+        }}>
+          <div style={{ color: '#64748b', fontSize: '0.95rem' }}>
+            <span style={{ fontWeight: 'bold', color: '#334155' }}>Admin Workspace</span> / {activeCategoryName || activeMenu}
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f1f5f9', padding: '6px 12px', borderRadius: '20px' }}>
+              <div style={{ width: '24px', height: '24px', background: 'var(--color-brand-cyan)', borderRadius: '50%', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.8rem' }}>
+                👤
+              </div>
+              <span style={{ fontSize: '0.85rem', color: '#334155', fontWeight: 'bold' }}>{userRole?.role.toUpperCase()}</span>
+            </div>
+            <button 
+              onClick={async () => {
+                await supabase.auth.signOut();
+                router.push('/admin/login');
+              }}
+              style={{ background: 'transparent', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.85rem', color: '#475569', transition: 'all 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#f1f5f9'}
+              onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+            >
+              Đăng xuất
+            </button>
+          </div>
+        </div>
+
+        <div style={{ flex: 1, padding: '30px', overflowY: 'auto' }}>
+          <div style={{ background: 'white', padding: '30px', borderRadius: '12px', minHeight: '100%', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+            {renderContent()}
+          </div>
         </div>
       </div>
     </div>
@@ -426,16 +460,18 @@ export default function AdminDashboard() {
 }
 
 const menuBtnStyle = (isActive: boolean): React.CSSProperties => ({
-  background: isActive ? 'var(--color-brand-cyan)' : 'transparent',
-  color: isActive ? 'white' : '#cbd5e1',
+  background: isActive ? 'linear-gradient(90deg, rgba(6,182,212,0.15) 0%, transparent 100%)' : 'transparent',
+  color: isActive ? 'var(--color-brand-cyan)' : '#cbd5e1',
   border: 'none',
-  padding: '12px 20px',
+  borderLeft: isActive ? '4px solid var(--color-brand-cyan)' : '4px solid transparent',
+  padding: '12px 20px 12px 16px',
   textAlign: 'left',
   cursor: 'pointer',
   fontSize: '0.95rem',
-  transition: 'background 0.2s',
+  transition: 'all 0.2s ease',
   display: 'block',
-  width: '100%'
+  width: '100%',
+  fontWeight: isActive ? 'bold' : 'normal',
 });
 
 const menuSectionStyle: React.CSSProperties = {
@@ -451,14 +487,16 @@ const menuSectionTitleStyle: React.CSSProperties = {
 };
 
 const menuItemStyle = (isActive: boolean): React.CSSProperties => ({
-  background: isActive ? '#334155' : 'transparent',
-  color: isActive ? 'white' : '#cbd5e1',
+  background: isActive ? 'linear-gradient(90deg, rgba(6,182,212,0.15) 0%, transparent 100%)' : 'transparent',
+  color: isActive ? 'var(--color-brand-cyan)' : '#cbd5e1',
   border: 'none',
-  padding: '10px 20px 10px 30px',
+  borderLeft: isActive ? '4px solid var(--color-brand-cyan)' : '4px solid transparent',
+  padding: '10px 20px 10px 26px',
   textAlign: 'left',
   cursor: 'pointer',
   fontSize: '0.9rem',
-  transition: 'background 0.2s',
+  transition: 'all 0.2s',
   display: 'block',
-  width: '100%'
+  width: '100%',
+  fontWeight: isActive ? 'bold' : 'normal',
 });

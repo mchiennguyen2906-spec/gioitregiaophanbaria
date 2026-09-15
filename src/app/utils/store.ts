@@ -177,10 +177,9 @@ export const addArticle = async (article: Omit<Article, 'id' | 'date'>) => {
     is_home_featured: article.isHomeFeatured,
     is_home_priority: article.isHomePriority
   }]);
-  if (!error) {
-    notifyUpdate();
-    logActivity('Thêm bài viết', 'article', `Tiêu đề: ${article.title}`);
-  }
+  if (error) throw error;
+  notifyUpdate();
+  logActivity('Thêm bài viết', 'article', `Tiêu đề: ${article.title}`);
 };
 
 // Cập nhật bài viết đã có
@@ -203,26 +202,25 @@ export const updateArticle = async (id: string, updatedFields: Partial<Article>)
   if (updatedFields.isHomePriority !== undefined) payload.is_home_priority = updatedFields.isHomePriority;
 
   const { error } = await supabase.from('articles').update(payload).eq('id', id);
-  if (!error) {
-    notifyUpdate();
-    logActivity('Cập nhật bài viết', 'article', `ID: ${id} | Tiêu đề: ${updatedFields.title || 'Không đổi'}`);
-  }
+  if (error) throw error;
+  notifyUpdate();
+  logActivity('Cập nhật bài viết', 'article', `ID: ${id} | Tiêu đề: ${updatedFields.title || 'Không đổi'}`);
 };
 
 // Xóa bài viết
 export const deleteArticle = async (id: string) => {
   const { error } = await supabase.from('articles').delete().eq('id', id);
-  if (!error) {
-    notifyUpdate();
-    logActivity('Xóa bài viết', 'article', `ID bài viết bị xóa: ${id}`);
-  }
+  if (error) throw error;
+  notifyUpdate();
+  logActivity('Xóa bài viết', 'article', `ID bài viết bị xóa: ${id}`);
 };
 
 // Đổi trạng thái Ẩn/Hiện
 export const toggleArticleStatus = async (id: string, currentStatus: string) => {
   const newStatus = currentStatus === 'published' ? 'hidden' : 'published';
   const { error } = await supabase.from('articles').update({ status: newStatus }).eq('id', id);
-  if (!error) notifyUpdate();
+  if (error) throw error;
+  notifyUpdate();
 };
 
 // ================= DONATION PROGRAMS =================
@@ -270,7 +268,8 @@ export const addDonation = async (donation: Omit<DonationProgram, 'id' | 'create
     name: donation.name, description: donation.description, target_amount: donation.targetAmount, raised_amount: donation.raisedAmount,
     bank_info: donation.bankInfo, qr_code_url: donation.qrCodeUrl, linked_article_id: donation.linkedArticleId, is_completed: donation.isCompleted
   }]);
-  if (!error) notifyUpdate();
+  if (error) throw error;
+  notifyUpdate();
 };
 
 export const updateDonation = async (id: string, updatedFields: Partial<DonationProgram>) => {
@@ -284,12 +283,14 @@ export const updateDonation = async (id: string, updatedFields: Partial<Donation
   if (updatedFields.linkedArticleId !== undefined) payload.linked_article_id = updatedFields.linkedArticleId;
   if (updatedFields.isCompleted !== undefined) payload.is_completed = updatedFields.isCompleted;
   const { error } = await supabase.from('donation_programs').update(payload).eq('id', id);
-  if (!error) notifyUpdate();
+  if (error) throw error;
+  notifyUpdate();
 };
 
 export const deleteDonation = async (id: string) => {
   const { error } = await supabase.from('donation_programs').delete().eq('id', id);
-  if (!error) notifyUpdate();
+  if (error) throw error;
+  notifyUpdate();
 };
 
 // ================= Q&A PROGRAMS =================
@@ -324,17 +325,20 @@ export const addQuestion = async (question: Omit<Question, 'id' | 'createdAt' | 
     sender_email: question.senderContact || '',
     content: `Gửi tới: ${question.recipient}\n\nNội dung: ${question.questionText}`
   }]);
-  if (!error) notifyUpdate();
+  if (error) throw error;
+  notifyUpdate();
 };
 
 export const deleteQuestion = async (id: string) => {
   const { error } = await supabase.from('questions').delete().eq('id', id);
-  if (!error) notifyUpdate();
+  if (error) throw error;
+  notifyUpdate();
 };
 
 export const markQuestionAnswered = async (id: string) => {
   const { error } = await supabase.from('questions').update({ status: 'answered' }).eq('id', id);
-  if (!error) notifyUpdate();
+  if (error) throw error;
+  notifyUpdate();
 };
 
 // ================= LỜI CHÚA (WORD OF GOD) =================
@@ -376,7 +380,8 @@ export const saveWordOfGodsToStore = async (words: WordOfGod[]) => {
     verse_text: w.quote,
     reference: w.source
   }));
-  await supabase.from('word_of_gods').insert(payload);
+  const { error: insertError } = await supabase.from('word_of_gods').insert(payload);
+  if (insertError) throw insertError;
   notifyUpdate();
 };
 
@@ -412,7 +417,8 @@ export const saveMassSchedulesToStore = async (schedules: MassSchedule[]) => {
     parish_name: s.parishName,
     times: s.times
   }));
-  await supabase.from('mass_schedules').insert(payload);
+  const { error: insertError } = await supabase.from('mass_schedules').insert(payload);
+  if (insertError) throw insertError;
   notifyUpdate();
 };
 
@@ -426,7 +432,8 @@ export const getRadioLinkFromStore = async (): Promise<string> => {
 
 export const saveRadioLinkToStore = async (link: string) => {
   const { error } = await supabase.from('settings').upsert({ id: 'radio_link', value: link });
-  if (!error) notifyUpdate();
+  if (error) throw error;
+  notifyUpdate();
 };
 
 // ================= FOOTER CONFIG =================
@@ -495,6 +502,7 @@ export const saveFooterConfigToStore = async (config: FooterConfig) => {
     youtube_url: (config as any).youtubeLink || '#'
   };
   const { error } = await supabase.from('footer_config').update(payload).eq('id', 'main');
-  if (!error) notifyUpdate();
+  if (error) throw error;
+  notifyUpdate();
 };
 

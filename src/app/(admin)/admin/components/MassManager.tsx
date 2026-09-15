@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getMassSchedulesFromStore, saveMassSchedulesToStore, MassSchedule } from "../../../utils/store";
+import toast from 'react-hot-toast';
 
 export default function MassManager() {
   const [schedules, setSchedules] = useState<MassSchedule[]>([]);
@@ -29,11 +30,15 @@ export default function MassManager() {
   const handleSave = async () => {
     // Validate
     if (schedules.some(s => !s.parishName || s.times.length === 0)) {
-      alert('Vui lòng điền đầy đủ Tên Giáo xứ và Giờ lễ cho tất cả các dòng!');
+      toast.error('Vui lòng điền đầy đủ Tên Giáo xứ và Giờ lễ cho tất cả các dòng!');
       return;
     }
-    await saveMassSchedulesToStore(schedules);
-    alert('Đã cập nhật Giờ Lễ!');
+    try {
+      await saveMassSchedulesToStore(schedules);
+      toast.success('Đã cập nhật Giờ Lễ!');
+    } catch (err: any) {
+      toast.error('Lỗi khi lưu Giờ Lễ: ' + err.message);
+    }
   };
 
   return (

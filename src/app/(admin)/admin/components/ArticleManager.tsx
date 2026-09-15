@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { getArticlesFromStore, toggleArticleStatus, deleteArticle, Article, getQuestionsFromStore } from "../../../utils/store";
+import toast from 'react-hot-toast';
 
 export default function ArticleManager({ categoryId, categoryName, onEdit, onCreateNew, onViewQuestions }: { categoryId: string, categoryName: string, onEdit: (article: Article) => void, onCreateNew: () => void, onViewQuestions?: () => void }) {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     // Load from Supabase and filter by categoryId
@@ -21,6 +26,11 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
     return () => window.removeEventListener('storage_update', loadArticles);
   }, [categoryId]);
 
+  // Reset page when search or category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, categoryId]);
+
   const [questionsCount, setQuestionsCount] = useState(0);
 
   useEffect(() => {
@@ -33,32 +43,54 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
 
   const toggleStatus = async (article: Article) => {
     await toggleArticleStatus(article.id, article.status);
+    toast.success(`Đã ${article.status === 'published' ? 'ẩn' : 'hiển thị'} bài viết!`);
     // Reload will be triggered by storage_update event inside toggleArticleStatus
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa bài viết này vĩnh viễn?')) {
-      await deleteArticle(id);
+  const executeDelete = async () => {
+    if (deleteConfirmId) {
+      await deleteArticle(deleteConfirmId);
+      toast.success('Đã xóa bài viết thành công!');
+      setDeleteConfirmId(null);
       // Reload will be triggered by storage_update
     }
   };
 
+  // Filter and Paginate
+  const filteredArticles = articles.filter(a => 
+    a.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (a.author && a.author.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+  
+  const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
+  const currentArticles = filteredArticles.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
         <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>Quản lý: {categoryName || 'Tất cả'}</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
+        
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <input 
+            type="text" 
+            placeholder="🔍 Tìm kiếm bài viết, tác giả..." 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '250px' }}
+          />
+
           {categoryId === 'tam-ly' && onViewQuestions && (
             <button onClick={onViewQuestions} style={{
               background: '#f8fafc', color: '#0f172a', padding: '8px 15px', 
               borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
             }}>
-              📋 Tổng hợp câu hỏi ({questionsCount})
+              📋 Câu hỏi ({questionsCount})
             </button>
           )}
           <button onClick={onCreateNew} style={{
-            background: 'var(--color-brand-red)', color: 'white', padding: '8px 15px', 
-            borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
+            background: 'var(--color-brand-cyan)', color: 'white', padding: '8px 15px', 
+            borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold',
+            boxShadow: '0 2px 4px rgba(6,182,212,0.3)'
           }}>
             + TẠO BÀI MỚI
           </button>
@@ -77,15 +109,17 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
           </tr>
         </thead>
         <tbody>
-          {articles.length === 0 ? (
+          {currentArticles.length === 0 ? (
             <tr>
-              <td colSpan={5} style={{ padding: '30px', textAlign: 'center', color: '#64748b' }}>
-                Chưa có bài viết nào trong chuyên mục này.
+              <td colSpan={6} style={{ padding: '30px', textAlign: 'center', color: '#64748b' }}>
+                {searchTerm ? 'Không tìm thấy bài viết nào phù hợp.' : 'Chưa có bài viết nào trong chuyên mục này.'}
               </td>
             </tr>
           ) : (
-            articles.map(article => (
-              <tr key={article.id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background 0.2s', cursor: 'default' }}>
+            currentArticles.map(article => (
+              <tr key={article.id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background 0.2s', cursor: 'default' }} 
+                  onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                  onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
                 <td style={{ padding: '15px 12px', fontWeight: '500', color: '#1e293b' }}>{article.title}</td>
                 <td style={{ padding: '15px 12px', color: '#64748b' }}>{article.author} {article.parish ? `(${article.parish})` : ''}</td>
                 <td style={{ padding: '15px 12px', color: '#64748b' }}>{new Date(article.date).toLocaleDateString('vi-VN')}</td>
@@ -109,13 +143,51 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
                   <button onClick={() => toggleStatus(article)} style={actionBtnStyle('#64748b')} title="Ẩn / Hiện">
                     {article.status === 'published' ? '👁️' : '🙈'}
                   </button>
-                  <button onClick={() => handleDelete(article.id)} style={actionBtnStyle('#ef4444')} title="Xóa">🗑️</button>
+                  <button onClick={() => setDeleteConfirmId(article.id)} style={actionBtnStyle('#ef4444')} title="Xóa">🗑️</button>
                 </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', marginTop: '20px' }}>
+          <button 
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(p => p - 1)}
+            style={{ padding: '8px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', background: currentPage === 1 ? '#f1f5f9' : 'white', cursor: currentPage === 1 ? 'not-allowed' : 'pointer' }}
+          >
+            &laquo; Trước
+          </button>
+          <span style={{ color: '#475569', fontWeight: 'bold' }}>Trang {currentPage} / {totalPages}</span>
+          <button 
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(p => p + 1)}
+            style={{ padding: '8px 15px', borderRadius: '6px', border: '1px solid #cbd5e1', background: currentPage === totalPages ? '#f1f5f9' : 'white', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer' }}
+          >
+            Sau &raquo;
+          </button>
+        </div>
+      )}
+
+      {/* Custom Delete Modal */}
+      {deleteConfirmId && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000
+        }}>
+          <div style={{ background: 'white', padding: '25px', borderRadius: '12px', maxWidth: '400px', width: '90%', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)' }}>
+            <h3 style={{ color: '#b91c1c', marginTop: 0 }}>⚠️ Xóa bài viết?</h3>
+            <p style={{ color: '#475569', marginBottom: '25px' }}>Hành động này không thể hoàn tác. Bạn có chắc chắn muốn xóa bài viết này khỏi hệ thống?</p>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button onClick={() => setDeleteConfirmId(null)} style={{ padding: '10px 20px', borderRadius: '6px', border: '1px solid #cbd5e1', background: 'white', cursor: 'pointer', fontWeight: 'bold' }}>Hủy</button>
+              <button onClick={executeDelete} style={{ padding: '10px 20px', borderRadius: '6px', border: 'none', background: '#ef4444', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>Xác nhận Xóa</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

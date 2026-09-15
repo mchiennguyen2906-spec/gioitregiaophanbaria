@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useRef } from 'react';
 import { addArticle, updateArticle, Article } from '../../../utils/store';
+import toast from 'react-hot-toast';
 
 interface BieuMauEditorProps {
   articleToEdit?: Article | null;
@@ -33,13 +34,13 @@ export default function BieuMauEditor({ articleToEdit, onSave, onCancel }: BieuM
     const ext = '.' + file.name.split('.').pop()?.toLowerCase();
     
     if (!allowedTypes.includes(file.type) && !allowedExts.includes(ext)) {
-      alert('Chỉ chấp nhận file PDF, Word (.doc, .docx) hoặc Excel (.xls, .xlsx)');
+      toast.error('Chỉ chấp nhận file PDF, Word (.doc, .docx) hoặc Excel (.xls, .xlsx)');
       return;
     }
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
-      alert('File tối đa 10MB!');
+      toast.error('File tối đa 10MB!');
       return;
     }
 
@@ -57,11 +58,12 @@ export default function BieuMauEditor({ articleToEdit, onSave, onCancel }: BieuM
       if (data.success) {
         setAttachmentUrl(data.url);
         setAttachmentName(file.name);
+        toast.success('Đã tải file lên thành công!');
       } else {
-        alert('Lỗi upload: ' + (data.error || 'Không xác định'));
+        toast.error('Lỗi upload: ' + (data.error || 'Không xác định'));
       }
     } catch (err) {
-      alert('Lỗi kết nối khi upload file!');
+      toast.error('Lỗi kết nối khi upload file!');
     }
     setUploading(false);
   };
@@ -76,19 +78,13 @@ export default function BieuMauEditor({ articleToEdit, onSave, onCancel }: BieuM
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
-
   const handleSave = async () => {
     if (!title.trim()) {
-      alert('Vui lòng nhập tên văn bản/biểu mẫu!');
+      toast.error('Vui lòng nhập tên văn bản/biểu mẫu!');
       return;
     }
     if (!attachmentUrl) {
-      alert('Vui lòng đính kèm file!');
+      toast.error('Vui lòng đính kèm file!');
       return;
     }
 
@@ -116,130 +112,137 @@ export default function BieuMauEditor({ articleToEdit, onSave, onCancel }: BieuM
           status: 'published',
         });
       }
-      alert(articleToEdit ? 'Đã cập nhật biểu mẫu!' : 'Đã đăng biểu mẫu thành công!');
+      toast.success(articleToEdit ? 'Đã cập nhật biểu mẫu!' : 'Đã đăng biểu mẫu thành công!');
       onSave();
-    } catch (err) {
-      alert('Lỗi khi lưu biểu mẫu!');
+    } catch (err: any) {
+      toast.error('Lỗi khi lưu biểu mẫu: ' + err.message);
     }
     setSaving(false);
   };
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px' }}>
-        <h2 style={{ margin: 0, color: 'var(--color-brand-cyan)' }}>
-          {articleToEdit ? '✏️ Sửa Biểu mẫu' : '📋 Thêm Biểu mẫu & Văn bản mới'}
-        </h2>
-        <button onClick={onCancel} style={{
-          padding: '8px 20px', border: '1px solid #cbd5e1', borderRadius: '6px',
-          background: 'white', cursor: 'pointer', color: '#64748b'
-        }}>
-          ← Quay lại
-        </button>
-      </div>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '30px', alignItems: 'start' }}>
+      
+      {/* CỘT TRÁI - MAIN CONTENT */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ margin: 0, color: 'var(--color-brand-cyan)' }}>
+            {articleToEdit ? 'Sửa Biểu mẫu' : 'Thêm Biểu mẫu & Văn bản mới'}
+          </h2>
+        </div>
 
-      {/* Tên văn bản */}
-      <div style={{ marginBottom: '20px' }}>
-        <label style={labelStyle}>Tên văn bản / Biểu mẫu *</label>
-        <input
-          type="text"
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          placeholder="VD: Đơn xin Hôn phối, Đơn xin Rửa tội..."
-          style={inputStyle}
-        />
-      </div>
+        {/* Tên văn bản */}
+        <div>
+          <label style={labelStyle}>Tên văn bản / Biểu mẫu *</label>
+          <input
+            type="text"
+            value={title}
+            onChange={e => setTitle(e.target.value)}
+            placeholder="VD: Đơn xin Hôn phối, Đơn xin Rửa tội..."
+            style={inputStyle}
+          />
+        </div>
 
-      {/* Mô tả */}
-      <div style={{ marginBottom: '20px' }}>
-        <label style={labelStyle}>Mô tả ngắn</label>
-        <textarea
-          value={excerpt}
-          onChange={e => setExcerpt(e.target.value)}
-          placeholder="Mô tả ngắn về văn bản này (không bắt buộc)"
-          rows={3}
-          style={{ ...inputStyle, resize: 'vertical' }}
-        />
-      </div>
+        {/* Mô tả */}
+        <div>
+          <label style={labelStyle}>Mô tả ngắn</label>
+          <textarea
+            value={excerpt}
+            onChange={e => setExcerpt(e.target.value)}
+            placeholder="Mô tả ngắn về văn bản này (không bắt buộc)"
+            rows={4}
+            style={{ ...inputStyle, resize: 'vertical' }}
+          />
+        </div>
 
-      {/* Upload file */}
-      <div style={{ marginBottom: '25px' }}>
-        <label style={labelStyle}>File đính kèm * (PDF, Word, Excel — tối đa 10MB)</label>
-        
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf,.doc,.docx,.xls,.xlsx"
-          onChange={handleFileUpload}
-          style={{ display: 'none' }}
-        />
+        {/* Upload file */}
+        <div>
+          <label style={labelStyle}>File đính kèm * (PDF, Word, Excel — tối đa 10MB)</label>
+          
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.doc,.docx,.xls,.xlsx"
+            onChange={handleFileUpload}
+            style={{ display: 'none' }}
+          />
 
-        {attachmentUrl ? (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: '15px',
-            padding: '15px 20px', border: '2px solid #22c55e', borderRadius: '10px',
-            background: '#f0fdf4'
-          }}>
-            <span style={{ fontSize: '2rem' }}>{getFileIcon(attachmentName)}</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 'bold', color: '#166534' }}>{attachmentName}</div>
-              <a href={attachmentUrl} target="_blank" rel="noopener noreferrer" 
-                 style={{ fontSize: '0.85rem', color: '#3b82f6', textDecoration: 'underline' }}>
-                Xem file ↗
-              </a>
+          {attachmentUrl ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '15px',
+              padding: '15px 20px', border: '2px solid #22c55e', borderRadius: '10px',
+              background: '#f0fdf4'
+            }}>
+              <span style={{ fontSize: '2rem' }}>{getFileIcon(attachmentName)}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 'bold', color: '#166534' }}>{attachmentName}</div>
+                <a href={attachmentUrl} target="_blank" rel="noopener noreferrer" 
+                   style={{ fontSize: '0.85rem', color: '#3b82f6', textDecoration: 'underline' }}>
+                  Xem file ↗
+                </a>
+              </div>
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                style={{
+                  padding: '8px 15px', border: '1px solid #f97316', borderRadius: '6px',
+                  background: '#fff7ed', cursor: 'pointer', color: '#ea580c', fontSize: '0.85rem'
+                }}
+              >
+                🔄 Đổi file
+              </button>
             </div>
+          ) : (
             <button 
               onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
               style={{
-                padding: '8px 15px', border: '1px solid #f97316', borderRadius: '6px',
-                background: '#fff7ed', cursor: 'pointer', color: '#ea580c', fontSize: '0.85rem'
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
+                width: '100%', padding: '40px', border: '2px dashed #94a3b8', borderRadius: '12px',
+                background: uploading ? '#f1f5f9' : '#f8fafc', cursor: uploading ? 'wait' : 'pointer',
+                color: '#64748b', fontSize: '1rem', transition: 'all 0.2s'
               }}
             >
-              🔄 Đổi file
+              {uploading ? (
+                <>
+                  <span style={{ fontSize: '2rem' }}>⏳</span>
+                  <span>Đang tải file lên...</span>
+                </>
+              ) : (
+                <>
+                  <span style={{ fontSize: '2.5rem' }}>📎</span>
+                  <span style={{ fontWeight: 'bold' }}>Nhấn để chọn file đính kèm</span>
+                  <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>PDF, Word (.doc, .docx), Excel (.xls, .xlsx)</span>
+                </>
+              )}
             </button>
-          </div>
-        ) : (
-          <button 
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-            style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px',
-              width: '100%', padding: '40px', border: '2px dashed #94a3b8', borderRadius: '12px',
-              background: uploading ? '#f1f5f9' : '#f8fafc', cursor: uploading ? 'wait' : 'pointer',
-              color: '#64748b', fontSize: '1rem', transition: 'all 0.2s'
-            }}
-          >
-            {uploading ? (
-              <>
-                <span style={{ fontSize: '2rem' }}>⏳</span>
-                <span>Đang tải file lên...</span>
-              </>
-            ) : (
-              <>
-                <span style={{ fontSize: '2.5rem' }}>📎</span>
-                <span style={{ fontWeight: 'bold' }}>Nhấn để chọn file đính kèm</span>
-                <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>PDF, Word (.doc, .docx), Excel (.xls, .xlsx)</span>
-              </>
-            )}
-          </button>
-        )}
+          )}
+        </div>
       </div>
 
-      {/* Nút lưu */}
-      <div style={{ display: 'flex', gap: '15px', justifyContent: 'flex-end' }}>
-        <button onClick={onCancel} style={{
-          padding: '12px 25px', border: '1px solid #cbd5e1', borderRadius: '8px',
-          background: 'white', cursor: 'pointer', fontSize: '1rem', color: '#64748b'
-        }}>
-          Hủy
-        </button>
-        <button onClick={handleSave} disabled={saving} style={{
-          padding: '12px 30px', border: 'none', borderRadius: '8px',
-          background: saving ? '#94a3b8' : 'var(--color-brand-cyan)', color: 'white',
-          cursor: saving ? 'wait' : 'pointer', fontSize: '1rem', fontWeight: 'bold'
-        }}>
-          {saving ? 'Đang lưu...' : (articleToEdit ? '💾 Cập nhật' : '📤 Đăng biểu mẫu')}
-        </button>
+      {/* CỘT PHẢI - SETTINGS */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Đăng Tải</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button onClick={handleSave} disabled={saving} style={primaryBtnStyle}>
+              {saving ? 'Đang lưu...' : (articleToEdit ? 'Cập nhật' : 'Đăng biểu mẫu')}
+            </button>
+            <button onClick={onCancel} disabled={saving} style={secondaryBtnStyle}>
+              Hủy bỏ
+            </button>
+          </div>
+        </div>
+
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Thông Tin Hỗ Trợ</h3>
+          <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: 1.5 }}>
+            - Biểu mẫu sẽ được tự động hiển thị trong trang **Văn Bản & Biểu Mẫu**.<br/><br/>
+            - Bạn có thể tải lên các file **PDF, Word hoặc Excel**.<br/><br/>
+            - Dung lượng tối đa là **10MB**.
+          </p>
+        </div>
+
       </div>
     </div>
   );
@@ -253,3 +256,8 @@ const inputStyle: React.CSSProperties = {
   width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1',
   fontSize: '1rem', boxSizing: 'border-box'
 };
+
+const boxStyle = { background: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' };
+const boxTitleStyle = { marginTop: 0, marginBottom: '15px', color: '#1e293b', fontSize: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' };
+const primaryBtnStyle = { background: 'var(--color-brand-cyan)', color: 'white', padding: '12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };
+const secondaryBtnStyle = { background: '#f1f5f9', color: '#475569', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };

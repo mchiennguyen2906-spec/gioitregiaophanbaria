@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { addArticle, updateArticle, Article } from "../../../utils/store";
+import toast from 'react-hot-toast';
 
 // Import CSS của React-Quill (cần thiết để hiển thị toolbar)
 import 'react-quill-new/dist/quill.snow.css';
@@ -28,6 +29,7 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
   const [isHomeFeatured, setIsHomeFeatured] = useState(false);
   const [isHomePriority, setIsHomePriority] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     const getLocalDatetime = (dateVal?: string) => {
@@ -72,7 +74,7 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
   
   const handlePublish = async () => {
     if (!title || !thumbnailUrl || !content) {
-      alert('Vui lòng điền đầy đủ Tên, Link Avatar và Bài viết!');
+      toast.error('Vui lòng điền đầy đủ Tên, Link Avatar và Bài viết!');
       return;
     }
     
@@ -93,15 +95,20 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
       isHomePriority
     };
 
-    if (articleToEdit && articleToEdit.id) {
-      await updateArticle(articleToEdit.id, articleData);
-      alert('Cập nhật Gương mặt thành công!');
-    } else {
-      await addArticle(articleData);
-      alert('Đăng Gương mặt thành công!');
+    setIsSaving(true);
+    try {
+      if (articleToEdit && articleToEdit.id) {
+        await updateArticle(articleToEdit.id, articleData);
+        toast.success('Cập nhật Gương mặt thành công!');
+      } else {
+        await addArticle(articleData);
+        toast.success('Đăng Gương mặt thành công!');
+      }
+      onPublish();
+    } catch (err: any) {
+      toast.error('Lỗi khi đăng bài: ' + err.message);
     }
-    
-    onPublish();
+    setIsSaving(false);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,11 +139,17 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+        if (!ctx) {
+            setIsUploading(false);
+            return;
+        }
         
         ctx.drawImage(img, 0, 0, width, height);
         canvas.toBlob(async (blob) => {
-          if (!blob) return;
+          if (!blob) {
+            setIsUploading(false);
+            return;
+          }
           const formData = new FormData();
           formData.append('file', new File([blob], file.name, { type: 'image/jpeg' }));
           
@@ -152,12 +165,13 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
             const result = await res.json();
             if (result.success) {
               setThumbnailUrl(result.url);
+              toast.success('Đã tải ảnh lên thành công!');
             } else {
-              alert('Lỗi khi tải ảnh lên!');
+              toast.error('Lỗi khi tải ảnh lên!');
             }
           } catch (err) {
             console.error(err);
-            alert('Lỗi kết nối khi tải ảnh lên!');
+            toast.error('Lỗi kết nối khi tải ảnh lên!');
           }
           setIsUploading(false);
         }, 'image/jpeg', 0.8);
@@ -188,47 +202,12 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
   ];
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>Soạn Thảo: Gương Mặt Truyền Cảm Hứng</h2>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={onSave} style={{
-            background: '#f1f5f9', color: '#334155', padding: '10px 15px', 
-            borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
-          }}>Hủy</button>
-          
-          <button onClick={handlePublish} style={{
-            background: 'var(--color-brand-red)', color: 'white', padding: '10px 15px', 
-            borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
-          }}>Lưu & Đăng</button>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-        <div style={{ display: 'flex', gap: '20px', padding: '10px 0', borderBottom: '1px dashed #e2e8f0', marginBottom: '10px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1 }}>
-            <div style={{ fontWeight: 'bold', color: '#475569', fontSize: '0.9rem', marginBottom: '5px' }}>Tùy chọn TRANG CON (Chuyên mục)</div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-red)' }}>
-              <input type="checkbox" checked={isFeatured} onChange={e => setIsFeatured(e.target.checked)} style={{ width: '18px', height: '18px' }} />
-              Nổi Bật Trang Con (Slider)
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-cyan)' }}>
-              <input type="checkbox" checked={isPriority} onChange={e => setIsPriority(e.target.checked)} style={{ width: '18px', height: '18px' }} />
-              Ưu Tiên Trang Con (Danh sách bên phải)
-            </label>
-          </div>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', flex: 1, borderLeft: '1px solid #e2e8f0', paddingLeft: '20px' }}>
-            <div style={{ fontWeight: 'bold', color: '#475569', fontSize: '0.9rem', marginBottom: '5px' }}>Tùy chọn TRANG CHỦ</div>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-red)' }}>
-              <input type="checkbox" checked={isHomeFeatured} onChange={e => setIsHomeFeatured(e.target.checked)} style={{ width: '18px', height: '18px' }} />
-              Nổi Bật Trang Chủ (Slider lớn)
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, color: 'var(--color-brand-cyan)' }}>
-              <input type="checkbox" checked={isHomePriority} onChange={e => setIsHomePriority(e.target.checked)} style={{ width: '18px', height: '18px' }} />
-              Ưu Tiên Trang Chủ (Danh sách Bản tin)
-            </label>
-          </div>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '30px', alignItems: 'start' }}>
+      
+      {/* CỘT TRÁI - MAIN CONTENT */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ margin: 0, color: 'var(--color-brand-cyan)' }}>{articleToEdit ? 'Chỉnh Sửa Gương Mặt' : 'Thêm Gương Mặt Mới'}</h2>
         </div>
 
         <div>
@@ -236,42 +215,9 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
           <input style={inputStyle} type="text" placeholder="VD: Maria Nguyễn Thị A" value={title} onChange={e => setTitle(e.target.value)} />
         </div>
 
-        <div style={{ display: 'flex', gap: '15px' }}>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Chức vụ / Vị trí</label>
-            <input style={inputStyle} type="text" placeholder="VD: Trưởng ban Giới trẻ..." value={author} onChange={e => setAuthor(e.target.value)} />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Giáo xứ</label>
-            <input style={inputStyle} type="text" placeholder="VD: Long Điền..." value={parish} onChange={e => setParish(e.target.value)} />
-          </div>
-        </div>
-
-        <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
-          <label style={labelStyle}>Ảnh đại diện (Avatar) *</label>
-          {thumbnailUrl && (
-            <div style={{ marginBottom: '10px' }}>
-              <img src={thumbnailUrl} alt="Thumbnail" style={{ maxWidth: '200px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
-            </div>
-          )}
-          <input 
-            type="file" 
-            accept="image/*" 
-            onChange={handleImageUpload} 
-            disabled={isUploading}
-            style={{ width: '100%', padding: '10px', border: '1px dashed #94a3b8', borderRadius: '6px', background: 'white', cursor: 'pointer' }}
-          />
-          {isUploading && <span style={{ color: 'var(--color-brand-red)', fontSize: '0.9rem', marginTop: '5px', display: 'block' }}>Đang nén và tải ảnh lên...</span>}
-        </div>
-
         <div>
           <label style={labelStyle}>Câu hút (Sapo/Trích dẫn) *</label>
           <textarea style={{ ...inputStyle, minHeight: '80px' }} placeholder="Đoạn văn ngắn hoặc một câu nói ấn tượng..." value={excerpt} onChange={e => setExcerpt(e.target.value)} />
-        </div>
-
-        <div>
-          <label style={labelStyle}>Link File Âm Thanh (MP3)</label>
-          <input style={inputStyle} type="text" placeholder="Dán link Google Drive hoặc file MP3..." value={audioUrl} onChange={e => setAudioUrl(e.target.value)} />
         </div>
 
         {/* Real WYSIWYG Editor */}
@@ -290,9 +236,100 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
           </div>
         </div>
       </div>
+
+      {/* CỘT PHẢI - SETTINGS */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Đăng Tải</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            <button disabled={isSaving} onClick={handlePublish} style={primaryBtnStyle}>
+              {isSaving ? 'Đang lưu...' : (articleToEdit ? 'Cập nhật Gương mặt' : 'Đăng bài viết')}
+            </button>
+            <button disabled={isSaving} onClick={onSave} style={secondaryBtnStyle}>Hủy bỏ</button>
+          </div>
+        </div>
+
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Thông Tin Bổ Sung</h3>
+          <div style={{ marginBottom: '15px' }}>
+            <label style={labelStyle}>Chức vụ / Vị trí</label>
+            <input style={inputStyle} type="text" placeholder="VD: Trưởng ban..." value={author} onChange={e => setAuthor(e.target.value)} />
+          </div>
+          <div style={{ marginBottom: '15px' }}>
+            <label style={labelStyle}>Giáo xứ</label>
+            <input style={inputStyle} type="text" placeholder="VD: Long Điền..." value={parish} onChange={e => setParish(e.target.value)} />
+          </div>
+          <div>
+            <label style={labelStyle}>Ngày Đăng</label>
+            <input style={inputStyle} type="datetime-local" value={publishDate} onChange={e => setPublishDate(e.target.value)} />
+          </div>
+        </div>
+
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Ảnh đại diện (Avatar) *</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {thumbnailUrl && (
+              <img src={thumbnailUrl} alt="Thumbnail" style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0', objectFit: 'cover' }} />
+            )}
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleImageUpload} 
+              disabled={isUploading}
+              style={{ fontSize: '0.9rem' }}
+            />
+            {isUploading && <span style={{ color: 'var(--color-brand-cyan)', fontSize: '0.85rem' }}>Đang nén và tải ảnh lên...</span>}
+          </div>
+        </div>
+
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Tùy Chọn Hiển Thị</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            
+            <div>
+              <div style={{ fontWeight: 'bold', color: '#475569', fontSize: '0.85rem', marginBottom: '8px' }}>TRANG CHUYÊN MỤC</div>
+              <label style={checkboxLabelStyle}>
+                <input type="checkbox" checked={isFeatured} onChange={e => setIsFeatured(e.target.checked)} style={checkboxStyle} />
+                <span style={{ color: 'var(--color-brand-red)' }}>Nổi Bật (Slider chính)</span>
+              </label>
+              <label style={checkboxLabelStyle}>
+                <input type="checkbox" checked={isPriority} onChange={e => setIsPriority(e.target.checked)} style={checkboxStyle} />
+                <span style={{ color: 'var(--color-brand-cyan)' }}>Ưu Tiên (Danh sách phải)</span>
+              </label>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 'bold', color: '#475569', fontSize: '0.85rem', marginBottom: '8px' }}>TRANG CHỦ</div>
+              <label style={checkboxLabelStyle}>
+                <input type="checkbox" checked={isHomeFeatured} onChange={e => setIsHomeFeatured(e.target.checked)} style={checkboxStyle} />
+                <span style={{ color: 'var(--color-brand-red)' }}>Nổi Bật (Slider Lớn)</span>
+              </label>
+              <label style={checkboxLabelStyle}>
+                <input type="checkbox" checked={isHomePriority} onChange={e => setIsHomePriority(e.target.checked)} style={checkboxStyle} />
+                <span style={{ color: 'var(--color-brand-cyan)' }}>Ưu Tiên (Bản tin)</span>
+              </label>
+            </div>
+
+          </div>
+        </div>
+
+        <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Audio / Podcast</h3>
+          <label style={labelStyle}>Link File Âm Thanh (MP3)</label>
+          <input style={inputStyle} type="text" placeholder="Dán link audio..." value={audioUrl} onChange={e => setAudioUrl(e.target.value)} />
+        </div>
+
+      </div>
     </div>
   );
 }
 
 const labelStyle = { display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155', fontSize: '0.9rem' };
-const inputStyle = { width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem', outlineColor: 'var(--color-brand-cyan)' };
+const inputStyle = { width: '100%', padding: '10px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.95rem', outlineColor: 'var(--color-brand-cyan)' };
+const boxStyle = { background: '#f8fafc', padding: '20px', borderRadius: '8px', border: '1px solid #e2e8f0' };
+const boxTitleStyle = { marginTop: 0, marginBottom: '15px', color: '#1e293b', fontSize: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' };
+const primaryBtnStyle = { background: 'var(--color-brand-cyan)', color: 'white', padding: '12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };
+const secondaryBtnStyle = { background: '#f1f5f9', color: '#475569', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };
+const checkboxStyle = { width: '16px', height: '16px', cursor: 'pointer' };
+const checkboxLabelStyle = { display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', marginBottom: '8px' };

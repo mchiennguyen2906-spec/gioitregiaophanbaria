@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getRadioLinkFromStore, saveRadioLinkToStore } from "../../../utils/store";
+import toast from 'react-hot-toast';
 
 export default function RadioManager() {
   const [link, setLink] = useState('');
@@ -28,22 +29,26 @@ export default function RadioManager() {
       const result = await res.json();
       if (result.success) {
         setLink(result.url);
-        await saveRadioLinkToStore(result.url); // Tự động lưu sau khi upload
-        alert('Tải file MP3 thành công và đã tự động lưu!');
+        await saveRadioLinkToStore(result.url);
+        toast.success('Tải file MP3 thành công và đã tự động lưu!');
       } else {
-        alert('Lỗi khi tải file lên: ' + result.message);
+        toast.error('Lỗi khi tải file lên: ' + result.message);
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert('Lỗi kết nối khi tải file lên!');
+      toast.error('Lỗi kết nối khi tải file lên!');
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleSave = async () => {
-    await saveRadioLinkToStore(link);
-    alert('Đã cập nhật link Radio Lời Chúa thành công!');
+    try {
+      await saveRadioLinkToStore(link);
+      toast.success('Đã cập nhật link Radio Lời Chúa thành công!');
+    } catch (err: any) {
+      toast.error('Lỗi khi cập nhật link: ' + err.message);
+    }
   };
 
   return (

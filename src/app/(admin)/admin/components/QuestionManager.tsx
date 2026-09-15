@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { getQuestionsFromStore, markQuestionAnswered, deleteQuestion, Question } from "../../../utils/store";
+import toast from 'react-hot-toast';
 
 export default function QuestionManager() {
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<{ id: string, type: 'delete' | 'mark' } | null>(null);
 
   useEffect(() => {
     const loadQuestions = async () => setQuestions(await getQuestionsFromStore());
@@ -11,17 +14,36 @@ export default function QuestionManager() {
     return () => window.removeEventListener('storage_update', loadQuestions);
   }, []);
 
-  const handleMarkAnswered = async (id: string) => {
-    if (confirm('Đánh dấu câu hỏi này đã trả lời?')) {
-      await markQuestionAnswered(id);
-      // setQuestions(await getQuestionsFromStore()); // storage_update will handle it
-    }
+  const requestMarkAnswered = (id: string) => {
+    setConfirmAction({ id, type: 'mark' });
+    setShowConfirmModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Xóa vĩnh viễn câu hỏi này?')) {
-      await deleteQuestion(id);
+  const requestDelete = (id: string) => {
+    setConfirmAction({ id, type: 'delete' });
+    setShowConfirmModal(true);
+  };
+
+  const handleConfirmAction = async () => {
+    if (!confirmAction) return;
+    try {
+      if (confirmAction.type === 'mark') {
+        await markQuestionAnswered(confirmAction.id);
+        toast.success('Đã đánh dấu câu hỏi đã giải đáp!');
+      } else if (confirmAction.type === 'delete') {
+        await deleteQuestion(confirmAction.id);
+        toast.success('Đã xóa câu hỏi thành công!');
+      }
+    } catch (err: any) {
+      toast.error('Có lỗi xảy ra: ' + err.message);
     }
+    setShowConfirmModal(false);
+    setConfirmAction(null);
+  };
+
+  const cancelAction = () => {
+    setShowConfirmModal(false);
+    setConfirmAction(null);
   };
 
   return (
@@ -75,11 +97,11 @@ export default function QuestionManager() {
                 </td>
                 <td style={{ padding: '15px 12px', textAlign: 'center' }}>
                   {q.status === 'new' && (
-                    <button onClick={() => handleMarkAnswered(q.id)} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', marginBottom: '5px', width: '100%' }}>
+                    <button onClick={() => requestMarkAnswered(q.id)} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', marginBottom: '5px', width: '100%' }}>
                       Đánh dấu Xong
                     </button>
                   )}
-                  <button onClick={() => handleDelete(q.id)} style={{ background: '#f1f5f9', color: '#ef4444', border: '1px solid #ef4444', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', width: '100%' }}>
+                  <button onClick={() => requestDelete(q.id)} style={{ background: '#f1f5f9', color: '#ef4444', border: '1px solid #ef4444', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', width: '100%' }}>
                     Xóa
                   </button>
                 </td>
@@ -88,6 +110,40 @@ export default function QuestionManager() {
           )}
         </tbody>
       </table>
+
+      {showConfirmModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '400px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ margin: '0 0 15px 0', color: '#0f172a' }}>Xác nhận thao tác</h3>
+            <p style={{ color: '#475569', marginBottom: '25px', lineHeight: 1.5 }}>
+              {confirmAction?.type === 'mark' 
+                ? 'Bạn có chắc chắn muốn đánh dấu câu hỏi này là đã giải đáp không? (Thao tác này sẽ cập nhật trên giao diện web)' 
+                : 'Bạn có chắc chắn muốn xóa vĩnh viễn câu hỏi này không? Thao tác này không thể hoàn tác.'}
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button 
+                onClick={cancelAction}
+                style={{ padding: '10px 15px', border: '1px solid #cbd5e1', background: 'white', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={handleConfirmAction}
+                style={{ 
+                  padding: '10px 15px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', color: 'white',
+                  background: confirmAction?.type === 'mark' ? 'var(--color-brand-cyan)' : '#ef4444' 
+                }}
+              >
+                {confirmAction?.type === 'mark' ? 'Đánh dấu Xong' : 'Xóa vĩnh viễn'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
