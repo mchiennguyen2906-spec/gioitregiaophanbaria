@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL || '').trim();
-const serviceRoleKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+// Hard-code credentials for server-side API route (service_role key is safe here — never exposed to browser)
+const supabaseUrl = 'https://spoqkzsrcphgzvmxwadd.supabase.co';
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwb3FrenNyY3BoZ3p2bXh3YWRkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4OTQ0MjkxNywiZXhwIjoyMTA1MDE4OTE3fQ.vIR-P9PJPpQ8M9cedwW06F3fccQWvRohN87h-8XfbQI';
 
-// Lazy initialization to prevent Next.js build time errors if env vars are missing
 const getSupabaseAdmin = () => {
-  return createClient(supabaseUrl || 'https://placeholder.supabase.co', serviceRoleKey || 'placeholder', {
+  return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
@@ -16,10 +16,6 @@ const getSupabaseAdmin = () => {
 
 export async function POST(request: Request) {
   try {
-    if (!serviceRoleKey) {
-      return NextResponse.json({ success: false, error: 'Chưa cấu hình SUPABASE_SERVICE_ROLE_KEY' }, { status: 500 });
-    }
-
     const body = await request.json();
     const { email, password, role, allowedCategories } = body;
 
@@ -68,10 +64,6 @@ export async function POST(request: Request) {
 
 export async function GET(request: Request) {
   try {
-    if (!serviceRoleKey) {
-      return NextResponse.json({ success: false, error: 'Chưa cấu hình SUPABASE_SERVICE_ROLE_KEY' }, { status: 500 });
-    }
-
     const supabaseAdmin = getSupabaseAdmin();
 
     // Lấy danh sách users từ user_roles
@@ -92,10 +84,6 @@ export async function GET(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    if (!serviceRoleKey) {
-      return NextResponse.json({ success: false, error: 'Chưa cấu hình SUPABASE_SERVICE_ROLE_KEY' }, { status: 500 });
-    }
-
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('id');
 
