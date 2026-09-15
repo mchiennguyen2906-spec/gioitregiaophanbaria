@@ -113,15 +113,20 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       isHomePriority
     };
 
-    if (articleToEdit && articleToEdit.id) {
-      await updateArticle(articleToEdit.id, articleData);
-      toast.success('Đã cập nhật bài viết thành công!');
-    } else {
-      await addArticle(articleData);
-      toast.success('Đã đăng bài viết mới thành công!');
+    try {
+      if (articleToEdit && articleToEdit.id) {
+        await updateArticle(articleToEdit.id, articleData);
+        toast.success('Đã cập nhật bài viết thành công!');
+      } else {
+        await addArticle(articleData);
+        toast.success('Đã đăng bài viết mới thành công!');
+      }
+      
+      onPublish();
+    } catch (err: any) {
+      console.error(err);
+      toast.error('Lỗi khi đăng bài: ' + (err.message || 'Lỗi không xác định'));
     }
-    
-    onPublish();
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
