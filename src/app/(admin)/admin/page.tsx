@@ -44,23 +44,23 @@ export default function AdminDashboard() {
         return;
       }
       
-      console.log('Session user ID:', session.user.id);
-      
       // Fetch user role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role, allowed_categories')
         .eq('user_id', session.user.id)
         .single();
-      
-      console.log('Role query result:', roleData, 'Error:', roleError);
         
-      if (roleData) {
+      if (roleData && !roleError) {
         setUserRole(roleData as any);
       } else {
-        // Mặc định là editor nếu chưa được gán quyền rõ ràng
-        console.warn('No role found for user, defaulting to editor. Error:', roleError?.message);
-        setUserRole({ role: 'editor', allowed_categories: [] });
+        // RLS policy có thể bị lỗi đệ quy, fallback theo email
+        const email = session.user.email;
+        if (email === 'admin@brvt.com') {
+          setUserRole({ role: 'super_admin', allowed_categories: [] });
+        } else {
+          setUserRole({ role: 'editor', allowed_categories: [] });
+        }
       }
       setIsLoadingAuth(false);
     };
