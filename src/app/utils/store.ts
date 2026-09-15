@@ -1,4 +1,5 @@
 "use client";
+import { supabase } from './supabaseClient';
 
 // Định nghĩa cấu trúc Article chuẩn
 export interface Article {
@@ -117,59 +118,93 @@ if (typeof window !== 'undefined') {
   }
 }
 
-// Khởi tạo và đọc dữ liệu từ LocalStorage
-export const getArticlesFromStore = (): Article[] => {
+// Khởi tạo và đọc dữ liệu từ Supabase
+export const getArticlesFromStore = async (): Promise<Article[]> => {
   if (typeof window === 'undefined') return []; // SSR an toàn
-  const data = localStorage.getItem('brvt_articles');
-  if (data) {
-    try {
-      return JSON.parse(data);
-    } catch(e) {
-      return defaultArticles;
-    }
+  const { data, error } = await supabase.from('articles').select('*').order('date', { ascending: false });
+  if (error) {
+    console.error('Lỗi khi tải bài viết từ Supabase:', error);
+    return defaultArticles;
   }
-  return defaultArticles;
+  // Convert snake_case from DB to camelCase for UI
+  return data.map(item => ({
+    id: item.id,
+    categoryId: item.category_id,
+    title: item.title,
+    excerpt: item.excerpt,
+    content: item.content,
+    author: item.author,
+    parish: item.parish,
+    date: item.date,
+    thumbnailUrl: item.thumbnail_url,
+    audioUrl: item.audio_url,
+    status: item.status,
+    isFeatured: item.is_featured,
+    isPriority: item.is_priority,
+    isHomeFeatured: item.is_home_featured,
+    isHomePriority: item.is_home_priority
+  }));
 };
 
-// Lưu dữ liệu vào LocalStorage
-export const saveArticlesToStore = (articles: Article[]) => {
+// Trigger UI re-render
+export const notifyUpdate = () => {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('brvt_articles', JSON.stringify(articles));
-    // Trigger custom event để báo cho các component khác (trang chủ) re-render nếu cần
     window.dispatchEvent(new Event('storage_update'));
   }
 };
 
 // Thêm bài viết mới
-export const addArticle = (article: Omit<Article, 'id' | 'date'>) => {
-  const newArticle: Article = {
-    ...article,
-    id: `article-${Date.now()}`,
-    date: new Date().toISOString()
-  };
-  const current = getArticlesFromStore();
-  saveArticlesToStore([newArticle, ...current]);
+export const addArticle = async (article: Omit<Article, 'id' | 'date'>) => {
+  const { error } = await supabase.from('articles').insert([{
+    category_id: article.categoryId,
+    title: article.title,
+    excerpt: article.excerpt,
+    content: article.content,
+    author: article.author,
+    parish: article.parish,
+    thumbnail_url: article.thumbnailUrl,
+    audio_url: article.audioUrl,
+    status: article.status,
+    is_featured: article.isFeatured,
+    is_priority: article.isPriority,
+    is_home_featured: article.isHomeFeatured,
+    is_home_priority: article.isHomePriority
+  }]);
+  if (!error) notifyUpdate();
 };
 
 // Cập nhật bài viết đã có
-export const updateArticle = (id: string, updatedFields: Partial<Article>) => {
-  const current = getArticlesFromStore();
-  const updated = current.map(a => a.id === id ? { ...a, ...updatedFields } : a);
-  saveArticlesToStore(updated);
+export const updateArticle = async (id: string, updatedFields: Partial<Article>) => {
+  const payload: any = {};
+  if (updatedFields.categoryId !== undefined) payload.category_id = updatedFields.categoryId;
+  if (updatedFields.title !== undefined) payload.title = updatedFields.title;
+  if (updatedFields.excerpt !== undefined) payload.excerpt = updatedFields.excerpt;
+  if (updatedFields.content !== undefined) payload.content = updatedFields.content;
+  if (updatedFields.author !== undefined) payload.author = updatedFields.author;
+  if (updatedFields.parish !== undefined) payload.parish = updatedFields.parish;
+  if (updatedFields.thumbnailUrl !== undefined) payload.thumbnail_url = updatedFields.thumbnailUrl;
+  if (updatedFields.audioUrl !== undefined) payload.audio_url = updatedFields.audioUrl;
+  if (updatedFields.status !== undefined) payload.status = updatedFields.status;
+  if (updatedFields.isFeatured !== undefined) payload.is_featured = updatedFields.isFeatured;
+  if (updatedFields.isPriority !== undefined) payload.is_priority = updatedFields.isPriority;
+  if (updatedFields.isHomeFeatured !== undefined) payload.is_home_featured = updatedFields.isHomeFeatured;
+  if (updatedFields.isHomePriority !== undefined) payload.is_home_priority = updatedFields.isHomePriority;
+
+  const { error } = await supabase.from('articles').update(payload).eq('id', id);
+  if (!error) notifyUpdate();
 };
 
 // Xóa bài viết
-export const deleteArticle = (id: string) => {
-  const current = getArticlesFromStore();
-  saveArticlesToStore(current.filter(a => a.id !== id));
+export const deleteArticle = async (id: string) => {
+  const { error } = await supabase.from('articles').delete().eq('id', id);
+  if (!error) notifyUpdate();
 };
 
 // Đổi trạng thái Ẩn/Hiện
-export const toggleArticleStatus = (id: string) => {
-  const current = getArticlesFromStore();
-  saveArticlesToStore(current.map(a => 
-    a.id === id ? { ...a, status: a.status === 'published' ? 'hidden' : 'published' } : a
-  ));
+export const toggleArticleStatus = async (id: string, currentStatus: string) => {
+  const newStatus = currentStatus === 'published' ? 'hidden' : 'published';
+  const { error } = await supabase.from('articles').update({ status: newStatus }).eq('id', id);
+  if (!error) notifyUpdate();
 };
 
 // ================= DONATION PROGRAMS =================

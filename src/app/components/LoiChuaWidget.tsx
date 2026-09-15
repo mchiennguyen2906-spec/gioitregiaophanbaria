@@ -7,8 +7,8 @@ export default function LoiChuaWidget() {
   const [wordOfGod, setWordOfGod] = useState<WordOfGod | null>(null);
 
   useEffect(() => {
-    const loadArticles = () => {
-      const allArticles = getArticlesFromStore();
+    const loadArticles = async () => {
+      const allArticles = await getArticlesFromStore();
       const validArticles = allArticles.filter(a => a.categoryId === 'loi-chua');
       setArticles(validArticles);
       

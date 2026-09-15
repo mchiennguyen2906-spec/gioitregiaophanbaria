@@ -71,7 +71,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, onSave, 
     }
   }, [articleToEdit]);
   
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!title || !category || !content) {
       alert('Vui lòng điền đầy đủ Tiêu đề, Hạng mục và Nội dung!');
       return;
@@ -95,11 +95,11 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, onSave, 
     };
 
     if (articleToEdit && articleToEdit.id) {
-      updateArticle(articleToEdit.id, articleData);
-      alert('Cập nhật bài viết thành công!');
+      await updateArticle(articleToEdit.id, articleData);
+      alert('Đã cập nhật bài viết thành công!');
     } else {
-      addArticle(articleData);
-      alert('Đăng bài thành công!');
+      await addArticle(articleData);
+      alert('Đã đăng bài viết mới thành công!');
     }
     
     onPublish();

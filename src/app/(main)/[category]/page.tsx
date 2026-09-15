@@ -27,8 +27,17 @@ export default function CategoryPage({ params }: { params: any }) {
   const [donations, setDonations] = useState<DonationProgram[]>([]);
 
   useEffect(() => {
-    setArticles(getArticlesFromStore().filter(a => a.categoryId === category && a.status === 'published'));
-    setDonations(getDonationsFromStore());
+    const fetchData = async () => {
+      const allArticles = await getArticlesFromStore();
+      setArticles(allArticles.filter(a => a.categoryId === category && a.status === 'published'));
+      
+      const allDonations = getDonationsFromStore();
+      setDonations(allDonations.filter(d => !d.isCompleted));
+    };
+
+    fetchData();
+    window.addEventListener('storage_update', fetchData);
+    return () => window.removeEventListener('storage_update', fetchData);
   }, [category]);
 
   const isArticleCompleted = (articleId: string) => {

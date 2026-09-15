@@ -15,9 +15,10 @@ export default function Home() {
   const [articles, setArticles] = useState<Article[]>([]);
 
   useEffect(() => {
-    const loadArticles = () => {
+    const loadArticles = async () => {
       const now = new Date();
-      const validArticles = getArticlesFromStore()
+      const allArticles = await getArticlesFromStore();
+      const validArticles = allArticles
         .filter(a => a.status === 'published' && (!a.date || new Date(a.date) <= now))
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setArticles(validArticles);

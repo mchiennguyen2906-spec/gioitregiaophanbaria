@@ -21,7 +21,11 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
   const [searchArticle, setSearchArticle] = useState('');
 
   useEffect(() => {
-    setArticles(getArticlesFromStore());
+    const fetchArticles = async () => {
+      const arts = await getArticlesFromStore();
+      setArticles(arts);
+    };
+    fetchArticles();
     
     if (donationToEdit) {
       setName(donationToEdit.name || '');

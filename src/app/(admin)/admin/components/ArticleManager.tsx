@@ -5,28 +5,33 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
   const [articles, setArticles] = useState<Article[]>([]);
 
   useEffect(() => {
-    // Load from LocalStorage and filter by categoryId
-    const all = getArticlesFromStore();
-    if (categoryId) {
-      setArticles(all.filter(a => a.categoryId === categoryId));
-    } else {
-      setArticles(all); // Show all if no category (e.g. for a global view)
-    }
+    // Load from Supabase and filter by categoryId
+    const loadArticles = async () => {
+      const all = await getArticlesFromStore();
+      if (categoryId) {
+        setArticles(all.filter(a => a.categoryId === categoryId));
+      } else {
+        setArticles(all);
+      }
+    };
+    loadArticles();
+    
+    // Auto refresh on updates
+    window.addEventListener('storage_update', loadArticles);
+    return () => window.removeEventListener('storage_update', loadArticles);
   }, [categoryId]);
 
   const questionsCount = getQuestionsFromStore().length;
 
-  const toggleStatus = (id: string) => {
-    toggleArticleStatus(id);
-    // Reload
-    setArticles(getArticlesFromStore().filter(a => a.categoryId === categoryId));
+  const toggleStatus = async (article: Article) => {
+    await toggleArticleStatus(article.id, article.status);
+    // Reload will be triggered by storage_update event inside toggleArticleStatus
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Bạn có chắc chắn muốn xóa bài viết này vĩnh viễn?')) {
-      deleteArticle(id);
-      // Reload
-      setArticles(getArticlesFromStore().filter(a => a.categoryId === categoryId));
+      await deleteArticle(id);
+      // Reload will be triggered by storage_update
     }
   };
 
@@ -93,7 +98,7 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
                 </td>
                 <td style={{ padding: '15px 12px', textAlign: 'center' }}>
                   <button onClick={() => onEdit(article)} style={actionBtnStyle('#3b82f6')} title="Chỉnh sửa">✏️</button>
-                  <button onClick={() => toggleStatus(article.id)} style={actionBtnStyle('#64748b')} title="Ẩn / Hiện">
+                  <button onClick={() => toggleStatus(article)} style={actionBtnStyle('#64748b')} title="Ẩn / Hiện">
                     {article.status === 'published' ? '👁️' : '🙈'}
                   </button>
                   <button onClick={() => handleDelete(article.id)} style={actionBtnStyle('#ef4444')} title="Xóa">🗑️</button>

@@ -30,7 +30,7 @@ export default function VideoEditor({ onSave, onPublish }: { onSave: () => void,
 
   const embedUrl = getEmbedUrl(videoUrl);
 
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!videoTitle || !embedUrl) {
       alert("Vui lòng nhập Tiêu đề và Đường dẫn Video hợp lệ!");
       return;
@@ -39,7 +39,7 @@ export default function VideoEditor({ onSave, onPublish }: { onSave: () => void,
     const iframeContent = `<div style="text-align: center;"><iframe src="${embedUrl}" width="100%" height="500" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe></div>`;
     const fullContent = `<p>${description}</p>${iframeContent}`;
 
-    addArticle({
+    await addArticle({
       categoryId: 'thanh-ca',
       title: videoTitle,
       excerpt: description,

@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server';
-import { writeFile, unlink, mkdir } from 'fs/promises';
-import path from 'path';
-import fs from 'fs';
+import { supabase } from '../../utils/supabaseClient';
 
 export async function POST(request: Request) {
   try {
@@ -16,32 +14,37 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Save to public/uploads
+    // Save to Supabase Storage
     const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    
-    // Ensure dir exists
-    if (!fs.existsSync(uploadDir)) {
-      await mkdir(uploadDir, { recursive: true });
+    const { data: uploadData, error } = await supabase.storage
+      .from('public-files')
+      .upload(filename, buffer, {
+        contentType: file.type,
+        upsert: true
+      });
+
+    if (error) {
+      console.error('Supabase upload error:', error);
+      return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 });
     }
-    
-    const filePath = path.join(uploadDir, filename);
-    await writeFile(filePath, buffer);
-    
+
+    const { data: publicUrlData } = supabase.storage
+      .from('public-files')
+      .getPublicUrl(filename);
+
     // Delete old file if provided
-    if (oldFileUrl && oldFileUrl.startsWith('/uploads/')) {
+    if (oldFileUrl && oldFileUrl.includes('/public-files/')) {
       try {
-        const oldFilename = oldFileUrl.replace('/uploads/', '');
-        const oldFilePath = path.join(uploadDir, oldFilename);
-        if (fs.existsSync(oldFilePath)) {
-          await unlink(oldFilePath);
+        const oldFilename = oldFileUrl.split('/public-files/').pop();
+        if (oldFilename) {
+          await supabase.storage.from('public-files').remove([oldFilename]);
         }
       } catch (e) {
         console.error('Failed to delete old file:', e);
       }
     }
 
-    return NextResponse.json({ success: true, url: `/uploads/${filename}` });
+    return NextResponse.json({ success: true, url: publicUrlData.publicUrl });
   } catch (error) {
     console.error(error);
     return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 });

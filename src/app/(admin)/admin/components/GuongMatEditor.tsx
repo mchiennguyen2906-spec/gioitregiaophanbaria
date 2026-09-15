@@ -69,7 +69,7 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
     }
   }, [articleToEdit]);
   
-  const handlePublish = () => {
+  const handlePublish = async () => {
     if (!title || !thumbnailUrl || !content) {
       alert('Vui lòng điền đầy đủ Tên, Link Avatar và Bài viết!');
       return;

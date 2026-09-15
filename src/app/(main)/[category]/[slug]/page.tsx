@@ -21,17 +21,21 @@ export default function SubPage({ params }: { params: any }) {
   const isEventRegistration = category === 'dao-tao' && slug === 'su-kien';
 
   useEffect(() => {
-    // Tìm bài viết theo ID (nếu slug là ID)
-    const all = getArticlesFromStore();
-    const foundArticle = all.find(a => a.id === slug);
-    if (foundArticle) {
-      setArticleDetail(foundArticle);
-    } else {
-      // Nếu không phải ID bài viết, giả định đây là trang danh sách subcategory
-      setSubcategoryArticles(all.filter(a => a.categoryId === slug && a.status === 'published'));
-    }
-    
-    setDonations(getDonationsFromStore());
+    const fetchData = async () => {
+      const all = await getArticlesFromStore();
+      const foundArticle = all.find(a => a.id === slug || (a.title && a.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug));
+      if (foundArticle) {
+        setArticleDetail(foundArticle);
+      } else {
+        setSubcategoryArticles(all.filter(a => a.categoryId === slug && a.status === 'published'));
+      }
+      
+      setDonations(getDonationsFromStore());
+    };
+
+    fetchData();
+    window.addEventListener('storage_update', fetchData);
+    return () => window.removeEventListener('storage_update', fetchData);
   }, [slug]);
 
   const isArticleCompleted = (articleId: string) => {
