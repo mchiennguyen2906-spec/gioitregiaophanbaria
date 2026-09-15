@@ -10,17 +10,22 @@ export default function DonationManager({ onEdit, onCreateNew }: DonationManager
   const [donations, setDonations] = useState<DonationProgram[]>([]);
 
   useEffect(() => {
-    const loadData = () => {
-      setDonations(getDonationsFromStore().sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+    const loadDonations = async () => {
+      const data = await getDonationsFromStore();
+      setDonations(data.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
     };
-    loadData();
-    window.addEventListener('donation_update', loadData);
-    return () => window.removeEventListener('donation_update', loadData);
+    loadDonations();
+    window.addEventListener('donation_update', loadDonations);
+    window.addEventListener('storage_update', loadDonations);
+    return () => {
+      window.removeEventListener('donation_update', loadDonations);
+      window.removeEventListener('storage_update', loadDonations);
+    };
   }, []);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Bạn có chắc chắn muốn xóa chương trình này?')) {
-      deleteDonation(id);
+      await deleteDonation(id);
     }
   };
 

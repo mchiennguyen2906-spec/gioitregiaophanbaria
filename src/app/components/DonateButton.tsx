@@ -11,8 +11,8 @@ export default function DonateButton() {
 
   useEffect(() => {
     if (isOpen) {
-      const loadDonations = () => {
-        const allDonations = getDonationsFromStore();
+      const loadDonations = async () => {
+        const allDonations = await getDonationsFromStore();
         const activeDonations = allDonations
           .filter(d => !d.isCompleted)
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());

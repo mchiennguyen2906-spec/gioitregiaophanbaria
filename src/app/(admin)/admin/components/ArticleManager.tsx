@@ -21,7 +21,15 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
     return () => window.removeEventListener('storage_update', loadArticles);
   }, [categoryId]);
 
-  const questionsCount = getQuestionsFromStore().length;
+  const [questionsCount, setQuestionsCount] = useState(0);
+
+  useEffect(() => {
+    const loadQuestionsCount = async () => {
+      const q = await getQuestionsFromStore();
+      setQuestionsCount(q.length);
+    };
+    loadQuestionsCount();
+  }, []);
 
   const toggleStatus = async (article: Article) => {
     await toggleArticleStatus(article.id, article.status);

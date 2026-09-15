@@ -237,45 +237,41 @@ export const defaultDonations: DonationProgram[] = [
   }
 ];
 
-export const getDonationsFromStore = (): DonationProgram[] => {
+export const getDonationsFromStore = async (): Promise<DonationProgram[]> => {
   if (typeof window === 'undefined') return [];
-  const data = localStorage.getItem('brvt_donations');
-  if (data) {
-    try {
-      return JSON.parse(data);
-    } catch(e) {
-      return defaultDonations;
-    }
-  }
-  return defaultDonations;
+  const { data, error } = await supabase.from('donation_programs').select('*').order('created_at', { ascending: false });
+  if (error || !data) return defaultDonations;
+  return data.map((d: any) => ({
+    id: d.id, name: d.name, description: d.description, targetAmount: d.target_amount, raisedAmount: d.raised_amount,
+    bankInfo: d.bank_info, qrCodeUrl: d.qr_code_url, linkedArticleId: d.linked_article_id, createdAt: d.created_at, isCompleted: d.is_completed
+  }));
 };
 
-export const saveDonationsToStore = (donations: DonationProgram[]) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('brvt_donations', JSON.stringify(donations));
-    window.dispatchEvent(new Event('donation_update'));
-  }
+export const addDonation = async (donation: Omit<DonationProgram, 'id' | 'createdAt'>) => {
+  const { error } = await supabase.from('donation_programs').insert([{
+    name: donation.name, description: donation.description, target_amount: donation.targetAmount, raised_amount: donation.raisedAmount,
+    bank_info: donation.bankInfo, qr_code_url: donation.qrCodeUrl, linked_article_id: donation.linkedArticleId, is_completed: donation.isCompleted
+  }]);
+  if (!error) notifyUpdate();
 };
 
-export const addDonation = (donation: Omit<DonationProgram, 'id' | 'createdAt'>) => {
-  const newDonation: DonationProgram = {
-    ...donation,
-    id: `donation-${Date.now()}`,
-    createdAt: new Date().toISOString(),
-  };
-  const current = getDonationsFromStore();
-  saveDonationsToStore([newDonation, ...current]);
+export const updateDonation = async (id: string, updatedFields: Partial<DonationProgram>) => {
+  const payload: any = {};
+  if (updatedFields.name !== undefined) payload.name = updatedFields.name;
+  if (updatedFields.description !== undefined) payload.description = updatedFields.description;
+  if (updatedFields.targetAmount !== undefined) payload.target_amount = updatedFields.targetAmount;
+  if (updatedFields.raisedAmount !== undefined) payload.raised_amount = updatedFields.raisedAmount;
+  if (updatedFields.bankInfo !== undefined) payload.bank_info = updatedFields.bankInfo;
+  if (updatedFields.qrCodeUrl !== undefined) payload.qr_code_url = updatedFields.qrCodeUrl;
+  if (updatedFields.linkedArticleId !== undefined) payload.linked_article_id = updatedFields.linkedArticleId;
+  if (updatedFields.isCompleted !== undefined) payload.is_completed = updatedFields.isCompleted;
+  const { error } = await supabase.from('donation_programs').update(payload).eq('id', id);
+  if (!error) notifyUpdate();
 };
 
-export const updateDonation = (id: string, updatedFields: Partial<DonationProgram>) => {
-  const current = getDonationsFromStore();
-  const updated = current.map(d => d.id === id ? { ...d, ...updatedFields } : d);
-  saveDonationsToStore(updated);
-};
-
-export const deleteDonation = (id: string) => {
-  const current = getDonationsFromStore();
-  saveDonationsToStore(current.filter(d => d.id !== id));
+export const deleteDonation = async (id: string) => {
+  const { error } = await supabase.from('donation_programs').delete().eq('id', id);
+  if (!error) notifyUpdate();
 };
 
 // ================= Q&A PROGRAMS =================
@@ -289,37 +285,38 @@ export interface Question {
   status: 'new' | 'answered';
 }
 
-export const getQuestionsFromStore = (): Question[] => {
+export const getQuestionsFromStore = async (): Promise<Question[]> => {
   if (typeof window === 'undefined') return [];
-  const data = localStorage.getItem('brvt_questions');
-  return data ? JSON.parse(data) : [];
+  const { data, error } = await supabase.from('questions').select('*').order('created_at', { ascending: false });
+  if (error || !data) return [];
+  return data.map((q: any) => ({
+    id: q.id,
+    senderName: q.sender_name,
+    senderContact: q.sender_email,
+    questionText: q.content,
+    recipient: 'Ban Tư Vấn', // Fallback recipient since it's missing in DB schema
+    status: q.status,
+    createdAt: q.created_at
+  }));
 };
 
-export const saveQuestionsToStore = (questions: Question[]) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('brvt_questions', JSON.stringify(questions));
-  }
+export const addQuestion = async (question: Omit<Question, 'id' | 'createdAt' | 'status'>) => {
+  const { error } = await supabase.from('questions').insert([{
+    sender_name: question.senderName,
+    sender_email: question.senderContact || '',
+    content: `Gửi tới: ${question.recipient}\n\nNội dung: ${question.questionText}`
+  }]);
+  if (!error) notifyUpdate();
 };
 
-export const addQuestion = (question: Omit<Question, 'id' | 'createdAt' | 'status'>) => {
-  const newQuestion: Question = {
-    ...question,
-    id: `q-${Date.now()}`,
-    createdAt: new Date().toISOString(),
-    status: 'new'
-  };
-  const current = getQuestionsFromStore();
-  saveQuestionsToStore([newQuestion, ...current]);
+export const deleteQuestion = async (id: string) => {
+  const { error } = await supabase.from('questions').delete().eq('id', id);
+  if (!error) notifyUpdate();
 };
 
-export const deleteQuestion = (id: string) => {
-  const current = getQuestionsFromStore();
-  saveQuestionsToStore(current.filter(q => q.id !== id));
-};
-
-export const markQuestionAnswered = (id: string) => {
-  const current = getQuestionsFromStore();
-  saveQuestionsToStore(current.map(q => q.id === id ? { ...q, status: 'answered' } : q));
+export const markQuestionAnswered = async (id: string) => {
+  const { error } = await supabase.from('questions').update({ status: 'answered' }).eq('id', id);
+  if (!error) notifyUpdate();
 };
 
 // ================= LỜI CHÚA (WORD OF GOD) =================
@@ -339,16 +336,30 @@ const defaultWordOfGods: WordOfGod[] = [
   { dayOfWeek: 7, quote: "Ai muốn theo Thầy, phải từ bỏ chính mình, vác thập giá mình mà theo.", source: "Mt 16, 24" }
 ];
 
-export const getWordOfGodsFromStore = (): WordOfGod[] => {
+export const getWordOfGodsFromStore = async (): Promise<WordOfGod[]> => {
   if (typeof window === 'undefined') return defaultWordOfGods;
-  const data = localStorage.getItem('brvt_wordofgods');
-  return data ? JSON.parse(data) : defaultWordOfGods;
+  const { data, error } = await supabase.from('word_of_gods').select('*');
+  if (error || !data || data.length === 0) return defaultWordOfGods;
+  return data.map((w: any) => ({
+    dayOfWeek: w.day_of_week,
+    quote: w.verse_text,
+    source: w.reference
+  }));
 };
 
-export const saveWordOfGodsToStore = (words: WordOfGod[]) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('brvt_wordofgods', JSON.stringify(words));
-  }
+export const saveWordOfGodsToStore = async (words: WordOfGod[]) => {
+  // Clear old data and insert new (or use upsert if day_of_week is primary key)
+  // Our schema has id as primary key, day_of_week is not. Wait, the schema has:
+  // id UUID PRIMARY KEY, day_of_week INTEGER, verse_text TEXT, reference TEXT
+  // So let's delete all and insert new ones
+  await supabase.from('word_of_gods').delete().neq('id', '00000000-0000-0000-0000-000000000000'); // delete all
+  const payload = words.map(w => ({
+    day_of_week: w.dayOfWeek,
+    verse_text: w.quote,
+    reference: w.source
+  }));
+  await supabase.from('word_of_gods').insert(payload);
+  notifyUpdate();
 };
 
 // ================= MASS SCHEDULE (GIỜ LỄ) =================
@@ -427,16 +438,35 @@ const defaultFooterConfig: FooterConfig = {
   newsletterText: 'Đăng ký email để không bỏ lỡ hội trại hay khóa tĩnh tâm nào.'
 };
 
-export const getFooterConfigFromStore = (): FooterConfig => {
+export const getFooterConfigFromStore = async (): Promise<FooterConfig> => {
   if (typeof window === 'undefined') return defaultFooterConfig;
-  const data = localStorage.getItem('brvt_footer_config');
-  return data ? JSON.parse(data) : defaultFooterConfig;
+  const { data, error } = await supabase.from('footer_config').select('*').eq('id', 'main').single();
+  if (error || !data) return defaultFooterConfig;
+  return {
+    aboutText: data.about_text || defaultFooterConfig.aboutText,
+    address: data.address || defaultFooterConfig.address,
+    hotline: data.phone || defaultFooterConfig.hotline,
+    email: data.email || defaultFooterConfig.email,
+    facebookLink: data.facebook_url || defaultFooterConfig.facebookLink,
+    youtubeLink: data.youtube_url || '#',
+    tiktokLink: defaultFooterConfig.tiktokLink,
+    instagramLink: defaultFooterConfig.instagramLink,
+    onlineSupport: defaultFooterConfig.onlineSupport,
+    quickLinks: defaultFooterConfig.quickLinks,
+    newsletterText: defaultFooterConfig.newsletterText
+  } as any;
 };
 
-export const saveFooterConfigToStore = (config: FooterConfig) => {
-  if (typeof window !== 'undefined') {
-    localStorage.setItem('brvt_footer_config', JSON.stringify(config));
-    window.dispatchEvent(new Event('storage_update'));
-  }
+export const saveFooterConfigToStore = async (config: FooterConfig) => {
+  const payload = {
+    about_text: config.aboutText,
+    address: config.address,
+    phone: config.hotline,
+    email: config.email,
+    facebook_url: config.facebookLink,
+    youtube_url: (config as any).youtubeLink || '#'
+  };
+  const { error } = await supabase.from('footer_config').update(payload).eq('id', 'main');
+  if (!error) notifyUpdate();
 };
 

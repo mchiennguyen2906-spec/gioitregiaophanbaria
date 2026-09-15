@@ -5,19 +5,20 @@ export default function WordOfGodManager() {
   const [words, setWords] = useState<WordOfGod[]>([]);
 
   useEffect(() => {
-    setWords(getWordOfGodsFromStore());
+    const loadWords = async () => setWords(await getWordOfGodsFromStore());
+    loadWords();
   }, []);
 
   const handleChange = (dayOfWeek: number, field: keyof WordOfGod, value: string) => {
     setWords(words.map(w => w.dayOfWeek === dayOfWeek ? { ...w, [field]: value } : w));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (words.some(w => !w.quote || !w.source)) {
       alert('Vui lòng điền đầy đủ Câu Lời Chúa và Nguồn cho tất cả các ngày!');
       return;
     }
-    saveWordOfGodsToStore(words);
+    await saveWordOfGodsToStore(words);
     alert('Đã cập nhật Lời Chúa mỗi ngày!');
   };
 

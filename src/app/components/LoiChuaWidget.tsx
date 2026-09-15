@@ -12,7 +12,7 @@ export default function LoiChuaWidget() {
       const validArticles = allArticles.filter(a => a.categoryId === 'loi-chua');
       setArticles(validArticles);
       
-      const words = getWordOfGodsFromStore();
+      const words = await getWordOfGodsFromStore();
       const nowDay = new Date().getDay();
       const dayOfWeek = nowDay === 0 ? 7 : nowDay; // 1-7
       const todayWord = words.find(w => w.dayOfWeek === dayOfWeek);

@@ -5,18 +5,22 @@ export default function QuestionManager() {
   const [questions, setQuestions] = useState<Question[]>([]);
 
   useEffect(() => {
-    setQuestions(getQuestionsFromStore());
+    const loadQuestions = async () => setQuestions(await getQuestionsFromStore());
+    loadQuestions();
+    window.addEventListener('storage_update', loadQuestions);
+    return () => window.removeEventListener('storage_update', loadQuestions);
   }, []);
 
-  const handleMarkAnswered = (id: string) => {
-    markQuestionAnswered(id);
-    setQuestions(getQuestionsFromStore());
+  const handleMarkAnswered = async (id: string) => {
+    if (confirm('Đánh dấu câu hỏi này đã trả lời?')) {
+      await markQuestionAnswered(id);
+      // setQuestions(await getQuestionsFromStore()); // storage_update will handle it
+    }
   };
 
-  const handleDelete = (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn xóa câu hỏi này?')) {
-      deleteQuestion(id);
-      setQuestions(getQuestionsFromStore());
+  const handleDelete = async (id: string) => {
+    if (confirm('Xóa vĩnh viễn câu hỏi này?')) {
+      await deleteQuestion(id);
     }
   };
 

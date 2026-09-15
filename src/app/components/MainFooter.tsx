@@ -6,7 +6,7 @@ export default function MainFooter() {
   const [config, setConfig] = useState<FooterConfig | null>(null);
 
   useEffect(() => {
-    const loadConfig = () => setConfig(getFooterConfigFromStore());
+    const loadConfig = async () => setConfig(await getFooterConfigFromStore());
     loadConfig();
     window.addEventListener('storage_update', loadConfig);
     return () => window.removeEventListener('storage_update', loadConfig);

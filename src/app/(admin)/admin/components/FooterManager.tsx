@@ -5,7 +5,8 @@ export default function FooterManager() {
   const [config, setConfig] = useState<FooterConfig | null>(null);
 
   useEffect(() => {
-    setConfig(getFooterConfigFromStore());
+    const load = async () => setConfig(await getFooterConfigFromStore());
+    load();
   }, []);
 
   const handleChange = (field: keyof FooterConfig, value: any) => {
@@ -22,10 +23,10 @@ export default function FooterManager() {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (config) {
-      saveFooterConfigToStore(config);
-      alert('Đã lưu cấu hình Chân Trang (Footer) thành công!');
+      await saveFooterConfigToStore(config);
+      alert('Cập nhật cấu hình Footer thành công!');
     }
   };
 

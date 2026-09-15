@@ -9,10 +9,10 @@ export default function RadioPlayer() {
   const [todayWord, setTodayWord] = useState<WordOfGod | null>(null);
 
   useEffect(() => {
-    const loadData = () => {
+    const loadData = async () => {
       setRadioLink(getRadioLinkFromStore());
       
-      const words = getWordOfGodsFromStore();
+      const words = await getWordOfGodsFromStore();
       const nowDay = new Date().getDay();
       const dayOfWeek = nowDay === 0 ? 7 : nowDay; // 1-7
       const word = words.find(w => w.dayOfWeek === dayOfWeek);

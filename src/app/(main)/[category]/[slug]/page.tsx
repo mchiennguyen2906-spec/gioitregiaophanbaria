@@ -30,7 +30,7 @@ export default function SubPage({ params }: { params: any }) {
         setSubcategoryArticles(all.filter(a => a.categoryId === slug && a.status === 'published'));
       }
       
-      setDonations(getDonationsFromStore());
+      setDonations(await getDonationsFromStore());
     };
 
     fetchData();

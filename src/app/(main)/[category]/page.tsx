@@ -31,7 +31,7 @@ export default function CategoryPage({ params }: { params: any }) {
       const allArticles = await getArticlesFromStore();
       setArticles(allArticles.filter(a => a.categoryId === category && a.status === 'published'));
       
-      const allDonations = getDonationsFromStore();
+      const allDonations = await getDonationsFromStore();
       setDonations(allDonations.filter(d => !d.isCompleted));
     };
 

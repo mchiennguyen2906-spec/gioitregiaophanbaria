@@ -7,13 +7,13 @@ export default function QuestionFormPopup({ onClose }: { onClose: () => void }) 
   const [recipient, setRecipient] = useState('');
   const [questionText, setQuestionText] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!senderName || !questionText || !recipient) {
       alert('Vui lòng điền đủ Tên, Nơi gửi và Nội dung câu hỏi!');
       return;
     }
-    addQuestion({
+    await addQuestion({
       senderName,
       senderContact,
       recipient,
