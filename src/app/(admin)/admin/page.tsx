@@ -18,11 +18,12 @@ import WordOfGodManager from "./components/WordOfGodManager";
 import MassManager from "./components/MassManager";
 import RadioManager from "./components/RadioManager";
 import FooterManager from "./components/FooterManager";
-import { DonationProgram } from "../../utils/store";
 import UserManager from "./components/UserManager";
 import BieuMauEditor from "./components/BieuMauEditor";
+import AdminSearch from "./components/AdminSearch";
+import { logActivity, DonationProgram } from "../../utils/store";
 
-type MenuType = 'DASHBOARD' | 'NEW_ARTICLE' | 'NEW_EVENT' | 'NEW_COURSE' | 'NEW_ALBUM' | 'NEW_VIDEO' | 'NEW_GUONGMAT' | 'NEW_BIEUMAU' | 'MANAGE_DONATION' | 'EDIT_DONATION' | 'MANAGE_CATEGORY' | 'MANAGE_WORD' | 'MANAGE_MASS' | 'MANAGE_RADIO' | 'MANAGE_FOOTER' | 'MANAGE_QUESTIONS' | 'PREVIEW' | 'MANAGE_USERS';
+type MenuType = 'DASHBOARD' | 'NEW_ARTICLE' | 'NEW_EVENT' | 'NEW_COURSE' | 'NEW_ALBUM' | 'NEW_VIDEO' | 'NEW_GUONGMAT' | 'NEW_BIEUMAU' | 'MANAGE_DONATION' | 'EDIT_DONATION' | 'MANAGE_CATEGORY' | 'MANAGE_WORD' | 'MANAGE_MASS' | 'MANAGE_RADIO' | 'MANAGE_FOOTER' | 'MANAGE_QUESTIONS' | 'PREVIEW' | 'MANAGE_USERS' | 'SEARCH_LOGS';
 
 export default function AdminDashboard() {
   const [activeMenu, setActiveMenu] = useState<MenuType>('DASHBOARD');
@@ -64,6 +65,12 @@ export default function AdminDashboard() {
         }
       }
       setIsLoadingAuth(false);
+      
+      // Chỉ log nếu session chưa được đánh dấu đã log trong bộ nhớ tạm thời của browser
+      if (!sessionStorage.getItem('has_logged_in_session')) {
+        logActivity('Đăng nhập', 'user', 'Người dùng truy cập vào hệ thống Admin');
+        sessionStorage.setItem('has_logged_in_session', 'true');
+      }
     };
     checkAuth();
   }, [router]);
@@ -205,6 +212,8 @@ export default function AdminDashboard() {
         return <FooterManager />;
       case 'MANAGE_USERS':
         return <UserManager />;
+      case 'SEARCH_LOGS':
+        return <AdminSearch />;
       case 'MANAGE_DONATION':
         return <DonationManager 
                  onEdit={(donation) => {
@@ -324,12 +333,20 @@ export default function AdminDashboard() {
               <div style={menuSectionTitleStyle}>HỆ THỐNG</div>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {userRole?.role === 'super_admin' && (
-                  <li 
-                    onClick={() => setActiveMenu('MANAGE_USERS')}
-                    style={menuItemStyle(activeMenu === 'MANAGE_USERS')}
-                  >
-                    👥 Quản lý Tài khoản (RBAC)
-                  </li>
+                  <>
+                    <li 
+                      onClick={() => setActiveMenu('MANAGE_USERS')}
+                      style={menuItemStyle(activeMenu === 'MANAGE_USERS')}
+                    >
+                      👥 Quản lý Tài khoản (RBAC)
+                    </li>
+                    <li 
+                      onClick={() => setActiveMenu('SEARCH_LOGS')}
+                      style={menuItemStyle(activeMenu === 'SEARCH_LOGS')}
+                    >
+                      🔍 Lịch sử & Tìm kiếm nâng cao
+                    </li>
+                  </>
                 )}
                 <li 
                   onClick={() => setActiveMenu('MANAGE_FOOTER')}

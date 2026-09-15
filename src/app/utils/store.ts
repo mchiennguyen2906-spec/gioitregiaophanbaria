@@ -141,6 +141,23 @@ export const notifyUpdate = () => {
   }
 };
 
+// Ghi log hoạt động (Activity Logs)
+export const logActivity = async (action: string, targetType: string, details: string) => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return;
+    
+    await supabase.from('activity_logs').insert([{
+      user_email: session.user.email,
+      action,
+      target_type: targetType,
+      details
+    }]);
+  } catch (err) {
+    console.error('Failed to log activity', err);
+  }
+};
+
 // Thêm bài viết mới
 export const addArticle = async (article: Omit<Article, 'id' | 'date'>) => {
   const { error } = await supabase.from('articles').insert([{
@@ -160,7 +177,10 @@ export const addArticle = async (article: Omit<Article, 'id' | 'date'>) => {
     is_home_featured: article.isHomeFeatured,
     is_home_priority: article.isHomePriority
   }]);
-  if (!error) notifyUpdate();
+  if (!error) {
+    notifyUpdate();
+    logActivity('Thêm bài viết', 'article', `Tiêu đề: ${article.title}`);
+  }
 };
 
 // Cập nhật bài viết đã có
@@ -183,13 +203,19 @@ export const updateArticle = async (id: string, updatedFields: Partial<Article>)
   if (updatedFields.isHomePriority !== undefined) payload.is_home_priority = updatedFields.isHomePriority;
 
   const { error } = await supabase.from('articles').update(payload).eq('id', id);
-  if (!error) notifyUpdate();
+  if (!error) {
+    notifyUpdate();
+    logActivity('Cập nhật bài viết', 'article', `ID: ${id} | Tiêu đề: ${updatedFields.title || 'Không đổi'}`);
+  }
 };
 
 // Xóa bài viết
 export const deleteArticle = async (id: string) => {
   const { error } = await supabase.from('articles').delete().eq('id', id);
-  if (!error) notifyUpdate();
+  if (!error) {
+    notifyUpdate();
+    logActivity('Xóa bài viết', 'article', `ID bài viết bị xóa: ${id}`);
+  }
 };
 
 // Đổi trạng thái Ẩn/Hiện
