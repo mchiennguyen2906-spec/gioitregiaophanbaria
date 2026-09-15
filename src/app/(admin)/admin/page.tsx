@@ -1,5 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '../../utils/supabaseClient';
 import { slugMap, categoryHierarchy, categoryMap } from "../../utils/categoryMap";
 import { Article } from "../../utils/store";
 import ArticleManager from "./components/ArticleManager";
@@ -17,8 +19,9 @@ import MassManager from "./components/MassManager";
 import RadioManager from "./components/RadioManager";
 import FooterManager from "./components/FooterManager";
 import { DonationProgram } from "../../utils/store";
+import UserManager from "./components/UserManager";
 
-type MenuType = 'DASHBOARD' | 'NEW_ARTICLE' | 'NEW_EVENT' | 'NEW_COURSE' | 'NEW_ALBUM' | 'NEW_VIDEO' | 'NEW_GUONGMAT' | 'MANAGE_DONATION' | 'EDIT_DONATION' | 'MANAGE_CATEGORY' | 'MANAGE_WORD' | 'MANAGE_MASS' | 'MANAGE_RADIO' | 'MANAGE_FOOTER' | 'MANAGE_QUESTIONS' | 'PREVIEW';
+type MenuType = 'DASHBOARD' | 'NEW_ARTICLE' | 'NEW_EVENT' | 'NEW_COURSE' | 'NEW_ALBUM' | 'NEW_VIDEO' | 'NEW_GUONGMAT' | 'MANAGE_DONATION' | 'EDIT_DONATION' | 'MANAGE_CATEGORY' | 'MANAGE_WORD' | 'MANAGE_MASS' | 'MANAGE_RADIO' | 'MANAGE_FOOTER' | 'MANAGE_QUESTIONS' | 'PREVIEW' | 'MANAGE_USERS';
 
 export default function AdminDashboard() {
   const [activeMenu, setActiveMenu] = useState<MenuType>('DASHBOARD');
@@ -28,16 +31,55 @@ export default function AdminDashboard() {
   const [donationToEdit, setDonationToEdit] = useState<DonationProgram | null>(null);
   const [expandedFolder, setExpandedFolder] = useState<string | null>(null);
   
+  // Auth state
+  const router = useRouter();
+  const [userRole, setUserRole] = useState<{ role: string, allowed_categories: string[] } | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        router.push('/admin/login');
+        return;
+      }
+      
+      // Fetch user role
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role, allowed_categories')
+        .eq('user_id', session.user.id)
+        .single();
+        
+      if (roleData) {
+        setUserRole(roleData as any);
+      } else {
+        // Mặc định là editor nếu chưa được gán quyền rõ ràng
+        setUserRole({ role: 'editor', allowed_categories: [] });
+      }
+      setIsLoadingAuth(false);
+    };
+    checkAuth();
+  }, [router]);
+  
   // Lấy danh sách 26 trang con từ slugMap
-  const categories = Object.keys(slugMap).map(key => ({
-    id: key,
-    name: slugMap[key]
-  }));
+  // Lấy danh sách 26 trang con từ slugMap, LỌC THEO PHÂN QUYỀN
+  const categories = Object.keys(slugMap)
+    .filter(key => userRole?.role === 'super_admin' || userRole?.allowed_categories?.includes(key))
+    .map(key => ({
+      id: key,
+      name: slugMap[key]
+    }));
 
   const renderContent = () => {
     switch (activeMenu) {
       case 'DASHBOARD':
-        return <h2>Chào mừng đến với hệ thống Quản trị</h2>;
+        return (
+          <div>
+            <h2>Chào mừng đến với hệ thống Quản trị</h2>
+            <p>Quyền hạn của bạn: <strong>{userRole?.role?.toUpperCase()}</strong></p>
+          </div>
+        );
       case 'NEW_ARTICLE':
         return (
           <ArticleEditor 
@@ -138,6 +180,8 @@ export default function AdminDashboard() {
         return <RadioManager />;
       case 'MANAGE_FOOTER':
         return <FooterManager />;
+      case 'MANAGE_USERS':
+        return <UserManager />;
       case 'MANAGE_DONATION':
         return <DonationManager 
                  onEdit={(donation) => {
@@ -159,6 +203,14 @@ export default function AdminDashboard() {
         return <h2>Đang phát triển...</h2>;
     }
   };
+
+  if (isLoadingAuth) {
+    return (
+      <div style={{ display: 'flex', height: '100vh', width: '100vw', justifyContent: 'center', alignItems: 'center', background: '#f8fafc' }}>
+        <h2 style={{ color: 'var(--color-brand-cyan)' }}>Đang xác thực...</h2>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: '#f8fafc' }}>
@@ -240,24 +292,74 @@ export default function AdminDashboard() {
             })}
           </div>
 
-          <div style={{ padding: '15px 20px 10px 20px', fontSize: '0.8rem', color: '#94a3b8', fontWeight: 'bold', marginTop: '10px' }}>
-            QUẢN LÝ TIỆN ÍCH
-          </div>
-          <button onClick={() => setActiveMenu('MANAGE_DONATION')} style={menuBtnStyle(activeMenu === 'MANAGE_DONATION' || activeMenu === 'EDIT_DONATION')}>
-            ❤️ Quyên góp / Thiện nguyện
-          </button>
-          <button onClick={() => setActiveMenu('MANAGE_WORD')} style={menuBtnStyle(activeMenu === 'MANAGE_WORD')}>
-            📖 Lời Chúa trong tuần
-          </button>
-          <button onClick={() => setActiveMenu('MANAGE_MASS')} style={menuBtnStyle(activeMenu === 'MANAGE_MASS')}>
-            ⛪ Giờ Lễ hôm nay
-          </button>
-          <button onClick={() => setActiveMenu('MANAGE_RADIO')} style={menuBtnStyle(activeMenu === 'MANAGE_RADIO')}>
-            📻 Radio Lời Chúa
-          </button>
-          <button onClick={() => setActiveMenu('MANAGE_FOOTER')} style={menuBtnStyle(activeMenu === 'MANAGE_FOOTER')}>
-            🔧 Chân trang (Footer)
-          </button>
+          {/* Menu Admin (Chỉ Super Admin mới thấy) */}
+          {userRole?.role === 'super_admin' && (
+            <div style={menuSectionStyle}>
+              <div style={menuSectionTitleStyle}>HỆ THỐNG</div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <li 
+                  onClick={() => setActiveMenu('MANAGE_USERS')}
+                  style={menuItemStyle(activeMenu === 'MANAGE_USERS')}
+                >
+                  👥 Quản lý Tài khoản (RBAC)
+                </li>
+                <li 
+                  onClick={() => setActiveMenu('MANAGE_FOOTER')}
+                  style={menuItemStyle(activeMenu === 'MANAGE_FOOTER')}
+                >
+                  ⚙️ Cấu hình Chân trang
+                </li>
+              </ul>
+            </div>
+          )}
+
+          {/* Menu Tương Tác & Lời Chúa (Super Admin hoặc người được cấp quyền) */}
+          {(userRole?.role === 'super_admin' || userRole?.allowed_categories?.includes('tuong-tac')) && (
+            <div style={menuSectionStyle}>
+              <div style={menuSectionTitleStyle}>TƯƠNG TÁC & LỜI CHÚA</div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <li 
+                  onClick={() => setActiveMenu('MANAGE_WORD')}
+                  style={menuItemStyle(activeMenu === 'MANAGE_WORD')}
+                >
+                  📖 Lời Chúa & Châm ngôn
+                </li>
+                <li 
+                  onClick={() => setActiveMenu('MANAGE_QUESTIONS')}
+                  style={menuItemStyle(activeMenu === 'MANAGE_QUESTIONS')}
+                >
+                  ❓ Hỏi đáp tâm lý
+                </li>
+              </ul>
+            </div>
+          )}
+
+          {/* Mục Vụ & Truyền Thông */}
+          {(userRole?.role === 'super_admin' || userRole?.allowed_categories?.includes('muc-vu')) && (
+            <div style={menuSectionStyle}>
+              <div style={menuSectionTitleStyle}>MỤC VỤ & TRUYỀN THÔNG</div>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                <li 
+                  onClick={() => setActiveMenu('MANAGE_MASS')}
+                  style={menuItemStyle(activeMenu === 'MANAGE_MASS')}
+                >
+                  ⛪ Lịch Giờ Lễ
+                </li>
+                <li 
+                  onClick={() => setActiveMenu('MANAGE_RADIO')}
+                  style={menuItemStyle(activeMenu === 'MANAGE_RADIO')}
+                >
+                  📻 Radio & Podcast
+                </li>
+                <li 
+                  onClick={() => setActiveMenu('MANAGE_DONATION')}
+                  style={menuItemStyle(activeMenu === 'MANAGE_DONATION' || activeMenu === 'EDIT_DONATION')}
+                >
+                  💖 Từ Thiện & Quyên Góp
+                </li>
+              </ul>
+            </div>
+          )}
           
           <a href="/" style={{
              padding: '12px 20px', marginTop: '30px', background: 'var(--color-brand-red)', color: 'white', 
@@ -286,6 +388,31 @@ const menuBtnStyle = (isActive: boolean): React.CSSProperties => ({
   textAlign: 'left',
   cursor: 'pointer',
   fontSize: '0.95rem',
+  transition: 'background 0.2s',
+  display: 'block',
+  width: '100%'
+});
+
+const menuSectionStyle: React.CSSProperties = {
+  marginBottom: '15px'
+};
+
+const menuSectionTitleStyle: React.CSSProperties = {
+  padding: '10px 20px', 
+  fontSize: '0.8rem', 
+  color: '#94a3b8', 
+  fontWeight: 'bold', 
+  marginTop: '10px'
+};
+
+const menuItemStyle = (isActive: boolean): React.CSSProperties => ({
+  background: isActive ? '#334155' : 'transparent',
+  color: isActive ? 'white' : '#cbd5e1',
+  border: 'none',
+  padding: '10px 20px 10px 30px',
+  textAlign: 'left',
+  cursor: 'pointer',
+  fontSize: '0.9rem',
   transition: 'background 0.2s',
   display: 'block',
   width: '100%'

@@ -27,6 +27,7 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
   const [isPriority, setIsPriority] = useState(false);
   const [isHomeFeatured, setIsHomeFeatured] = useState(false);
   const [isHomePriority, setIsHomePriority] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     const getLocalDatetime = (dateVal?: string) => {
@@ -101,6 +102,69 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
     }
     
     onPublish();
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+
+    // Client-side compression
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+        
+        // Max 800x800
+        const MAX_SIZE = 800;
+        if (width > height && width > MAX_SIZE) {
+          height *= MAX_SIZE / width;
+          width = MAX_SIZE;
+        } else if (height > MAX_SIZE) {
+          width *= MAX_SIZE / height;
+          height = MAX_SIZE;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          const formData = new FormData();
+          formData.append('file', new File([blob], file.name, { type: 'image/jpeg' }));
+          
+          if (thumbnailUrl && thumbnailUrl.includes('supabase.co')) {
+             formData.append('oldFileUrl', thumbnailUrl);
+          }
+
+          try {
+            const res = await fetch('/api/upload', {
+              method: 'POST',
+              body: formData
+            });
+            const result = await res.json();
+            if (result.success) {
+              setThumbnailUrl(result.url);
+            } else {
+              alert('Lỗi khi tải ảnh lên!');
+            }
+          } catch (err) {
+            console.error(err);
+            alert('Lỗi kết nối khi tải ảnh lên!');
+          }
+          setIsUploading(false);
+        }, 'image/jpeg', 0.8);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   // Cấu hình Toolbar cho Quill
@@ -183,9 +247,21 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
           </div>
         </div>
 
-        <div>
-          <label style={labelStyle}>Link Hình ảnh (Avatar) *</label>
-          <input style={inputStyle} type="text" placeholder="https://..." value={thumbnailUrl} onChange={e => setThumbnailUrl(e.target.value)} />
+        <div style={{ background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+          <label style={labelStyle}>Ảnh đại diện (Avatar) *</label>
+          {thumbnailUrl && (
+            <div style={{ marginBottom: '10px' }}>
+              <img src={thumbnailUrl} alt="Thumbnail" style={{ maxWidth: '200px', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+            </div>
+          )}
+          <input 
+            type="file" 
+            accept="image/*" 
+            onChange={handleImageUpload} 
+            disabled={isUploading}
+            style={{ width: '100%', padding: '10px', border: '1px dashed #94a3b8', borderRadius: '6px', background: 'white', cursor: 'pointer' }}
+          />
+          {isUploading && <span style={{ color: 'var(--color-brand-red)', fontSize: '0.9rem', marginTop: '5px', display: 'block' }}>Đang nén và tải ảnh lên...</span>}
         </div>
 
         <div>

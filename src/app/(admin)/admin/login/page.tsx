@@ -1,18 +1,30 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { supabase } from '../../../utils/supabaseClient';
 
 export default function AdminLoginPage() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'admin' && password === 'admin') {
-      router.push('/admin');
+    setLoading(true);
+    
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      alert('Đăng nhập thất bại: ' + error.message);
+      setLoading(false);
     } else {
-      alert('Sai thông tin đăng nhập! (Dùng admin/admin để test)');
+      // Đăng nhập thành công
+      // Redirect to admin
+      router.push('/admin');
     }
   };
 
@@ -30,10 +42,10 @@ export default function AdminLoginPage() {
         </h2>
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <input 
-            type="text" 
-            placeholder="Tên đăng nhập" 
-            value={username} 
-            onChange={(e) => setUsername(e.target.value)}
+            type="email" 
+            placeholder="Email đăng nhập" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)}
             style={{ padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem' }}
             required
           />
@@ -49,7 +61,7 @@ export default function AdminLoginPage() {
             background: 'var(--color-brand-red)', color: 'white', padding: '12px', borderRadius: '6px',
             border: 'none', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', marginTop: '10px'
           }}>
-            Đăng Nhập
+            {loading ? 'Đang xác thực...' : 'Đăng Nhập'}
           </button>
         </form>
         <div style={{ marginTop: '20px', fontSize: '0.85rem' }}>

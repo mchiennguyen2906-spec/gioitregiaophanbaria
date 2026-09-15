@@ -102,3 +102,22 @@ CREATE POLICY "Cho phép admin full quyền" ON public.footer_config FOR ALL USI
 CREATE POLICY "Cho phép admin full quyền" ON public.word_of_gods FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Cho phép admin full quyền" ON public.settings FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Cho phép admin full quyền" ON public.mass_schedules FOR ALL USING (true) WITH CHECK (true);
+
+-- Bảng phân quyền (RBAC)
+CREATE TABLE public.user_roles (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('super_admin', 'category_admin', 'editor')),
+    allowed_categories JSONB DEFAULT '[]'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(user_id)
+);
+
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Cho phép xem roles" ON public.user_roles FOR SELECT USING (true);
+CREATE POLICY "SuperAdmin full quyền user_roles" ON public.user_roles FOR ALL USING (
+    auth.uid() IN (SELECT user_id FROM public.user_roles WHERE role = 'super_admin')
+) WITH CHECK (
+    auth.uid() IN (SELECT user_id FROM public.user_roles WHERE role = 'super_admin')
+);
