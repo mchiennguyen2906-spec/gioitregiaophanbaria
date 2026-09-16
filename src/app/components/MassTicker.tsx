@@ -1,10 +1,11 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { getTodayMassesFromStore, TodayMass } from '../utils/store';
+import { getTodayMassesFromStore, TodayMass, getSettingFromStore } from '../utils/store';
 
 export default function MassTicker() {
   const [upcoming, setUpcoming] = useState<React.ReactNode[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [speed, setSpeed] = useState(60); // Mặc định 60s
 
   useEffect(() => {
     setMounted(true);
@@ -44,10 +45,23 @@ export default function MassTicker() {
       }
     };
 
+    const loadSpeed = async () => {
+      const spd = await getSettingFromStore('mass_ticker_speed', '60');
+      setSpeed(Number(spd));
+    };
+
     updateMasses();
+    loadSpeed();
+    
     const interval = setInterval(updateMasses, 60000);
     window.addEventListener('storage_update', updateMasses);
-    return () => { clearInterval(interval); window.removeEventListener('storage_update', updateMasses); };
+    window.addEventListener('storage_update', loadSpeed);
+    
+    return () => { 
+      clearInterval(interval); 
+      window.removeEventListener('storage_update', updateMasses); 
+      window.removeEventListener('storage_update', loadSpeed);
+    };
   }, []);
 
   if (!mounted) return null;
@@ -59,7 +73,7 @@ export default function MassTicker() {
       </div>
       
       <div className="ticker-content-container">
-        <div className="ticker-track">
+        <div className="ticker-track" style={{ animationDuration: `${speed}s` }}>
           {[...upcoming, ...upcoming].map((item, index) => (
             <span key={index} className="ticker-item">
               <span style={{color: 'var(--color-brand-gold)', marginRight: '8px'}}>✦</span>

@@ -1,12 +1,13 @@
 "use client";
 import { useState, useEffect } from 'react';
-import { getWordOfGodsFromStore, WordOfGod } from '../utils/store';
+import { getWordOfGodsFromStore, WordOfGod, getSettingFromStore } from '../utils/store';
 
 const dayNames = ["", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chúa Nhật"];
 
 export default function BibleTicker() {
   const [bibleVerses, setBibleVerses] = useState<{day: string, verse: string}[]>([]);
   const [mounted, setMounted] = useState(false);
+  const [speed, setSpeed] = useState(300); // Mặc định 300s
 
   useEffect(() => {
     setMounted(true);
@@ -18,9 +19,19 @@ export default function BibleTicker() {
         verse: `"${w.quote}" (${w.source})`
       })));
     };
+    const loadSpeed = async () => {
+      const spd = await getSettingFromStore('bible_ticker_speed', '300');
+      setSpeed(Number(spd));
+    };
+    
     loadWords();
+    loadSpeed();
     window.addEventListener('storage_update', loadWords);
-    return () => window.removeEventListener('storage_update', loadWords);
+    window.addEventListener('storage_update', loadSpeed);
+    return () => {
+      window.removeEventListener('storage_update', loadWords);
+      window.removeEventListener('storage_update', loadSpeed);
+    };
   }, []);
 
   if (!mounted || bibleVerses.length === 0) return null;
@@ -34,8 +45,8 @@ export default function BibleTicker() {
       
       {/* Vùng nội dung chữ chạy */}
       <div className="ticker-content-container">
-        {/* Do nội dung Lời Chúa dài gấp ~2.5 lần Giờ Lễ, ta phải tăng thời gian vòng lặp lên 300s để vận tốc thật sự (pixel/s) bằng nhau */}
-        <div className="ticker-track" style={{ animationDuration: '300s' }}>
+        {/* Do nội dung Lời Chúa dài, có thể thiết lập thời gian dài hơn để chạy mượt */}
+        <div className="ticker-track" style={{ animationDuration: `${speed}s` }}>
           {/* Lặp lại mảng để tạo hiệu ứng chạy vô tận */}
           {[...bibleVerses, ...bibleVerses].map((item, index) => (
             <span key={index} className="ticker-item" style={{padding: '0 60px'}}>

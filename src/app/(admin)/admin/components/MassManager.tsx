@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
   getParishesFromStore, saveParishToStore, updateParishInStore, deleteParishFromStore, Parish,
-  getTodayMassesFromStore, saveTodayMassToStore, updateTodayMassInStore, deleteTodayMassFromStore, syncTodayMasses, TodayMass
+  getTodayMassesFromStore, saveTodayMassToStore, updateTodayMassInStore, deleteTodayMassFromStore, syncTodayMasses, TodayMass,
+  getSettingFromStore, saveSettingToStore
 } from "../../../utils/store";
 import toast from 'react-hot-toast';
 
@@ -18,11 +19,29 @@ export default function MassManager() {
   const [todayMasses, setTodayMasses] = useState<TodayMass[]>([]);
   const [loadingToday, setLoadingToday] = useState(false);
   const [targetDate, setTargetDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [tickerSpeed, setTickerSpeed] = useState<number>(60);
 
   useEffect(() => {
     if (activeTab === 'MASTER') loadParishes();
-    if (activeTab === 'TODAY') loadTodayMasses();
+    if (activeTab === 'TODAY') {
+      loadTodayMasses();
+      loadTickerSpeed();
+    }
   }, [activeTab, targetDate]);
+
+  const loadTickerSpeed = async () => {
+    const spd = await getSettingFromStore('mass_ticker_speed', '60');
+    setTickerSpeed(Number(spd));
+  };
+
+  const handleSpeedChange = async (newSpeed: number) => {
+    setTickerSpeed(newSpeed);
+    try {
+      await saveSettingToStore('mass_ticker_speed', newSpeed.toString(), 'Tốc độ Giờ Lễ');
+    } catch (e: any) {
+      toast.error('Lỗi lưu tốc độ: ' + e.message);
+    }
+  };
 
   const loadParishes = async () => {
     setLoadingParishes(true);
@@ -136,7 +155,7 @@ export default function MassManager() {
 
       {activeTab === 'TODAY' && (
         <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', background: '#f8fafc', padding: '15px', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', background: '#f8fafc', padding: '15px', borderRadius: '8px', flexWrap: 'wrap', gap: '15px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <label style={{ fontWeight: 'bold' }}>Chọn Ngày:</label>
               <input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
@@ -144,6 +163,20 @@ export default function MassManager() {
                 🔄 ĐỒNG BỘ TỪ DỮ LIỆU GỐC
               </button>
             </div>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: '#fff', padding: '10px 15px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+              <label style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>⏱ Tốc độ chữ chạy (s):</label>
+              <input 
+                type="range" 
+                min="10" max="300" step="5"
+                value={tickerSpeed} 
+                onChange={e => handleSpeedChange(Number(e.target.value))} 
+                style={{ width: '150px' }}
+              />
+              <span style={{ fontWeight: 'bold', color: 'var(--color-brand-cyan)' }}>{tickerSpeed}s</span>
+              <span style={{ fontSize: '0.8rem', color: '#64748b' }}>(Càng nhỏ càng nhanh)</span>
+            </div>
+
             <button onClick={handleAddTodayMass} style={{ background: '#10b981', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
               + Thêm lễ linh động
             </button>

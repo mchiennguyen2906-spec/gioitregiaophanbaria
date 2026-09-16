@@ -584,19 +584,27 @@ export const syncTodayMasses = async (dateStr: string) => {
   logActivity('Đồng Bộ Giờ Lễ', 'system', `Đã đồng bộ dữ liệu cho ngày ${dateStr}`);
 };
 
-// ================= RADIO LỜI CHÚA =================
-export const getRadioLinkFromStore = async (): Promise<string> => {
-  if (typeof window === 'undefined') return '';
-  const { data, error } = await supabase.from('settings').select('value').eq('id', 'radio_link').single();
-  if (error || !data) return '';
+// ================= RADIO LỜI CHÚA & CÀI ĐẶT CHUNG =================
+export const getSettingFromStore = async (id: string, defaultValue: string = ''): Promise<string> => {
+  if (typeof window === 'undefined') return defaultValue;
+  const { data, error } = await supabase.from('settings').select('value').eq('id', id).single();
+  if (error || !data) return defaultValue;
   return data.value;
 };
 
-export const saveRadioLinkToStore = async (link: string) => {
-  const { error } = await supabase.from('settings').upsert({ id: 'radio_link', value: link });
+export const saveSettingToStore = async (id: string, value: string, logLabel: string = 'Cài đặt') => {
+  const { error } = await supabase.from('settings').upsert({ id, value });
   if (error) throw error;
   notifyUpdate();
-  logActivity('Cập nhật link Radio', 'system', `Link mới: ${link}`);
+  logActivity(`Cập nhật ${logLabel}`, 'system', `Đã cập nhật cấu hình: ${id}`);
+};
+
+export const getRadioLinkFromStore = async (): Promise<string> => {
+  return getSettingFromStore('radio_link', '');
+};
+
+export const saveRadioLinkToStore = async (link: string) => {
+  return saveSettingToStore('radio_link', link, 'link Radio');
 };
 
 // ================= FOOTER CONFIG =================
