@@ -12,6 +12,15 @@ export default function ParishSchedule() {
 
   const isOpen = isHovered || isPinned || search.trim().length > 0;
 
+  const togglePin = () => {
+    if (isPinned) {
+      setIsPinned(false);
+      setIsHovered(false); // Xóa trạng thái hover ảo trên điện thoại để có thể đóng ngay
+    } else {
+      setIsPinned(true);
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
     const load = async () => {
@@ -72,26 +81,26 @@ export default function ParishSchedule() {
         onMouseLeave={() => setIsHovered(false)}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
-          <div onClick={() => setIsPinned(!isPinned)} style={{ cursor: 'pointer', flex: 1, userSelect: 'none' }}>
-            <h3 style={{ margin: 0, color: 'var(--color-brand-cyan)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.2rem' }}>
-              <span style={{ background: 'var(--color-brand-red)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>TỔNG HỢP</span>
-              Giờ Lễ Các Giáo Xứ
-              {isPinned && <span style={{ fontSize: '0.8rem', background: '#e2e8f0', color: '#475569', padding: '2px 6px', borderRadius: '4px', fontWeight: 'normal' }}>📌 Đã ghim</span>}
+          <div onClick={togglePin} style={{ cursor: 'pointer', flex: '1 1 250px', userSelect: 'none' }}>
+            <h3 style={{ margin: 0, color: 'var(--color-brand-cyan)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.15rem', flexWrap: 'wrap' }}>
+              <span style={{ background: 'var(--color-brand-red)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>TỔNG HỢP</span>
+              <span style={{ whiteSpace: 'nowrap' }}>Giờ Lễ Các Giáo Xứ</span>
+              {isPinned && <span style={{ fontSize: '0.8rem', background: '#e2e8f0', color: '#475569', padding: '2px 6px', borderRadius: '4px', fontWeight: 'normal', whiteSpace: 'nowrap' }}>📌 Đã ghim</span>}
             </h3>
             {!isOpen && (
               <span style={{ fontStyle: 'italic', color: '#64748b', fontSize: '0.9rem', display: 'block', marginTop: '8px' }}>
-                👉 Nhấp vào để ghim lịch
+                👉 Nhấp vào đây để ghim lịch
               </span>
             )}
           </div>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flex: '1 1 200px' }}>
             <input 
               type="text" 
               placeholder="🔍 Tìm giáo xứ..." 
               value={search}
               onChange={e => setSearch(e.target.value)}
               onFocus={() => setIsPinned(true)}
-              style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #cbd5e1', outline: 'none', width: '100%', maxWidth: '250px', fontSize: '0.95rem' }}
+              style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #cbd5e1', outline: 'none', width: '100%', fontSize: '0.95rem' }}
             />
             {isOpen && filtered.length > 2 && (
               <div style={{ display: 'flex', gap: '5px' }}>
