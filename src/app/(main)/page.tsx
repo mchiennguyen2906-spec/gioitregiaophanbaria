@@ -180,8 +180,8 @@ export default function Home() {
           </div>
 
           {/* Col 2: Bản Tin Giáo Phận (1fr) */}
-          <div className={styles.heroNewsBox} style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', flexDirection: 'column' }}>
+          <div className={styles.heroNewsBox} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
               <div className="section-header" style={{borderBottom: '1px solid var(--color-brand-cyan)', padding: '0 0 10px 0', marginBottom: '20px', flexShrink: 0}}>
                 <h2 className="section-title" style={{fontSize: '0.95rem', textTransform: 'uppercase', color: 'var(--color-brand-cyan)', fontWeight: 'bold'}}>Bản Tin Giới Trẻ Giáo Phận</h2>
               </div>
@@ -218,8 +218,8 @@ export default function Home() {
           </div>
 
           {/* Col 3: Lời Chúa Mỗi Ngày & Các hạng mục (0.9fr) */}
-          <div className={styles.heroNewsBox} style={{ position: 'relative' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+          <div className={styles.heroNewsBox} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
               <LoiChuaWidget />
             </div>
           </div>
@@ -457,7 +457,7 @@ export default function Home() {
             <h2 className="section-title">Góc Đào Tạo & Đăng Ký</h2>
           </div>
           
-          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '30px'}}>
+          <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))', gap: '30px'}}>
             
             {/* Cột 1: Lớp Giáo lý */}
             <div className={styles.categoryBlock} style={{backgroundColor: '#ffffff', padding: '25px', borderRadius: '12px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)'}}>
@@ -527,7 +527,7 @@ export default function Home() {
                 <h2 className="section-title">Hình ảnh Giới trẻ Giáo phận</h2>
               </div>
               
-              <div style={{background: 'var(--color-bg-secondary)', padding: '20px', borderRadius: '12px', display: 'flex', overflow: 'hidden'}}>
+              <div style={{background: 'var(--color-bg-secondary)', padding: '20px', borderRadius: '12px', display: 'flex', overflowX: 'auto', WebkitOverflowScrolling: 'touch'}}>
                 <div className="album-ticker-track" style={{display: 'flex', gap: '20px'}}>
                   {featuredAlbums.length > 0 ? featuredAlbums.map((album) => (
                     <a href={`/hinh-anh/${album.id}`} key={album.id} style={{display: 'flex', gap: '20px', flexShrink: 0, textDecoration: 'none'}}>
