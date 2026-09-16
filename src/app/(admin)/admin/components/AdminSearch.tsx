@@ -140,7 +140,22 @@ export default function AdminSearch() {
                         {log.action}
                       </span>
                     </td>
-                    <td style={{ padding: '10px' }}>{log.details}</td>
+                    <td style={{ padding: '10px' }}>
+                      <pre style={{ 
+                        margin: 0, 
+                        whiteSpace: 'pre-wrap', 
+                        fontFamily: 'inherit',
+                        fontSize: '0.85rem',
+                        lineHeight: '1.4',
+                        color: '#334155',
+                        background: '#f8fafc',
+                        padding: '8px',
+                        borderLeft: '3px solid #cbd5e1',
+                        borderRadius: '4px'
+                      }}>
+                        {log.details}
+                      </pre>
+                    </td>
                   </tr>
                 ))}
               </tbody>

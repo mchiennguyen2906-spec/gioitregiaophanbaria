@@ -155,6 +155,12 @@ export const logActivity = async (action: string, targetType: string, details: s
       target_type: targetType,
       details
     }]);
+
+    // Tự động dọn dẹp: Xóa logs cũ hơn 3 tháng (90 ngày)
+    const ninetyDaysAgo = new Date();
+    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+    await supabase.from('activity_logs').delete().lt('created_at', ninetyDaysAgo.toISOString());
+
   } catch (err) {
     console.error('Failed to log activity', err);
   }
@@ -191,29 +197,54 @@ export const addArticle = async (article: Omit<Article, 'id' | 'date'> & { date?
 
 // Cập nhật bài viết đã có
 export const updateArticle = async (id: string, updatedFields: Partial<Article>) => {
+  // Lấy dữ liệu cũ để so sánh (Diff)
+  const { data: oldData } = await supabase.from('articles').select('*').eq('id', id).single();
+  
   const payload: any = {};
-  if (updatedFields.categoryId !== undefined) payload.category_id = updatedFields.categoryId;
-  if (updatedFields.title !== undefined) payload.title = updatedFields.title;
-  if (updatedFields.excerpt !== undefined) payload.excerpt = updatedFields.excerpt;
-  if (updatedFields.content !== undefined) payload.content = updatedFields.content;
-  if (updatedFields.author !== undefined) payload.author = updatedFields.author;
-  if (updatedFields.parish !== undefined) payload.parish = updatedFields.parish;
-  if (updatedFields.thumbnailUrl !== undefined) payload.thumbnail_url = updatedFields.thumbnailUrl;
-  if (updatedFields.audioUrl !== undefined) payload.audio_url = updatedFields.audioUrl;
-  if (updatedFields.attachmentUrl !== undefined) payload.attachment_url = updatedFields.attachmentUrl;
-  if (updatedFields.attachmentName !== undefined) payload.attachment_name = updatedFields.attachmentName;
-  if (updatedFields.date !== undefined) payload.date = updatedFields.date;
-  if (updatedFields.status !== undefined) payload.status = updatedFields.status;
-  if (updatedFields.isFeatured !== undefined) payload.is_featured = updatedFields.isFeatured;
-  if (updatedFields.isPriority !== undefined) payload.is_priority = updatedFields.isPriority;
-  if (updatedFields.isHomeFeatured !== undefined) payload.is_home_featured = updatedFields.isHomeFeatured;
-  if (updatedFields.isHomePriority !== undefined) payload.is_home_priority = updatedFields.isHomePriority;
-  if (updatedFields.metadata !== undefined) payload.metadata = updatedFields.metadata;
+  const diffs: string[] = [];
+
+  const compare = (key: string, oldVal: any, newVal: any, label: string) => {
+    if (newVal !== undefined && newVal !== oldVal) {
+      payload[key] = newVal;
+      // Tránh in HTML dài ra log, chỉ báo là đã đổi
+      if (key === 'content') {
+        diffs.push(`- Nội dung chi tiết (HTML): Đã được thay đổi`);
+      } else {
+        diffs.push(`- ${label}: [${oldVal || 'Trống'}] ➔ [${newVal}]`);
+      }
+    }
+  };
+
+  if (oldData) {
+    compare('category_id', oldData.category_id, updatedFields.categoryId, 'Chuyên mục');
+    compare('title', oldData.title, updatedFields.title, 'Tiêu đề');
+    compare('excerpt', oldData.excerpt, updatedFields.excerpt, 'Tóm tắt');
+    compare('content', oldData.content, updatedFields.content, 'Nội dung');
+    compare('author', oldData.author, updatedFields.author, 'Tác giả');
+    compare('status', oldData.status, updatedFields.status, 'Trạng thái');
+    compare('is_featured', oldData.is_featured, updatedFields.isFeatured, 'Nổi bật');
+    compare('is_priority', oldData.is_priority, updatedFields.isPriority, 'Ưu tiên');
+    compare('is_home_featured', oldData.is_home_featured, updatedFields.isHomeFeatured, 'Nổi bật Trang chủ');
+    
+    // So sánh metadata có thể phức tạp, ta ghi nhận chung nếu có thay đổi
+    if (updatedFields.metadata !== undefined && JSON.stringify(oldData.metadata) !== JSON.stringify(updatedFields.metadata)) {
+      payload.metadata = updatedFields.metadata;
+      diffs.push(`- Dữ liệu bổ sung (metadata): Đã được cập nhật`);
+    }
+  }
+
+  // Nếu không có thay đổi nào, vẫn lưu nhưng không cần log chi tiết dài
+  if (Object.keys(payload).length === 0) return; // Không có gì để update
 
   const { error } = await supabase.from('articles').update(payload).eq('id', id);
   if (error) throw error;
   notifyUpdate();
-  logActivity('Cập nhật bài viết', 'article', `ID: ${id} | Tiêu đề: ${updatedFields.title || 'Không đổi'}`);
+  
+  const details = diffs.length > 0 
+    ? `Sửa bài viết ID: ${id}\nCác thay đổi:\n${diffs.join('\n')}`
+    : `Sửa bài viết ID: ${id} (Không có thay đổi dữ liệu chính)`;
+    
+  logActivity('Cập nhật bài viết', 'article', details);
 };
 
 // Xóa bài viết
@@ -230,6 +261,7 @@ export const toggleArticleStatus = async (id: string, currentStatus: string) => 
   const { error } = await supabase.from('articles').update({ status: newStatus }).eq('id', id);
   if (error) throw error;
   notifyUpdate();
+  logActivity('Đổi trạng thái bài viết', 'article', `ID: ${id} | ${currentStatus} ➔ ${newStatus}`);
 };
 
 // ================= DONATION PROGRAMS =================
@@ -279,6 +311,7 @@ export const addDonation = async (donation: Omit<DonationProgram, 'id' | 'create
   }]);
   if (error) throw error;
   notifyUpdate();
+  logActivity('Tạo Chương trình Quyên góp', 'donation', `Tên: ${donation.name} | Mục tiêu: ${donation.targetAmount}`);
 };
 
 export const updateDonation = async (id: string, updatedFields: Partial<DonationProgram>) => {
@@ -294,12 +327,14 @@ export const updateDonation = async (id: string, updatedFields: Partial<Donation
   const { error } = await supabase.from('donation_programs').update(payload).eq('id', id);
   if (error) throw error;
   notifyUpdate();
+  logActivity('Cập nhật Quyên góp', 'donation', `Sửa thông tin quỹ ID: ${id}`);
 };
 
 export const deleteDonation = async (id: string) => {
   const { error } = await supabase.from('donation_programs').delete().eq('id', id);
   if (error) throw error;
   notifyUpdate();
+  logActivity('Xóa Quyên góp', 'donation', `Đã xóa quỹ ID: ${id}`);
 };
 
 // ================= Q&A PROGRAMS =================
@@ -392,6 +427,7 @@ export const saveWordOfGodsToStore = async (words: WordOfGod[]) => {
   const { error: insertError } = await supabase.from('word_of_gods').insert(payload);
   if (insertError) throw insertError;
   notifyUpdate();
+  logActivity('Cập nhật Lời Chúa', 'system', 'Đã lưu danh sách Lời Chúa mới cho cả tuần');
 };
 
 // ================= MASS SCHEDULE (GIỜ LỄ) =================
@@ -429,6 +465,7 @@ export const saveMassSchedulesToStore = async (schedules: MassSchedule[]) => {
   const { error: insertError } = await supabase.from('mass_schedules').insert(payload);
   if (insertError) throw insertError;
   notifyUpdate();
+  logActivity('Cập nhật Giờ Lễ', 'system', 'Đã lưu toàn bộ hệ thống giờ lễ mới');
 };
 
 // ================= RADIO LỜI CHÚA =================
@@ -443,6 +480,7 @@ export const saveRadioLinkToStore = async (link: string) => {
   const { error } = await supabase.from('settings').upsert({ id: 'radio_link', value: link });
   if (error) throw error;
   notifyUpdate();
+  logActivity('Cập nhật link Radio', 'system', `Link mới: ${link}`);
 };
 
 // ================= FOOTER CONFIG =================
@@ -513,5 +551,6 @@ export const saveFooterConfigToStore = async (config: FooterConfig) => {
   const { error } = await supabase.from('footer_config').update(payload).eq('id', 'main');
   if (error) throw error;
   notifyUpdate();
+  logActivity('Cập nhật Chân trang', 'system', 'Đã sửa thông tin liên hệ / mạng xã hội ở Footer');
 };
 
