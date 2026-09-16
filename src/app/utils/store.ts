@@ -451,7 +451,7 @@ export interface TodayMass {
 
 export const getParishesFromStore = async (): Promise<Parish[]> => {
   if (typeof window === 'undefined') return [];
-  const { data, error } = await supabase.from('parishes').select('*').order('name');
+  const { data, error } = await supabase.from('parishes').select('*').order('created_at', { ascending: false });
   if (error || !data) return [];
   return data.map((p: any) => ({
     id: p.id,
@@ -499,7 +499,7 @@ export const deleteParishFromStore = async (id: string) => {
 export const getTodayMassesFromStore = async (dateStr?: string): Promise<TodayMass[]> => {
   if (typeof window === 'undefined') return [];
   const targetDate = dateStr || new Date().toISOString().split('T')[0];
-  const { data, error } = await supabase.from('today_masses').select('*').eq('mass_date', targetDate).order('time');
+  const { data, error } = await supabase.from('today_masses').select('*').eq('mass_date', targetDate).order('created_at', { ascending: false });
   if (error || !data) return [];
   return data;
 };

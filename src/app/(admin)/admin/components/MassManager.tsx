@@ -56,24 +56,24 @@ export default function MassManager() {
     } catch (e: any) { toast.error(e.message); }
   };
 
-  const handleUpdateParish = async (id: string, field: keyof Parish, value: any) => {
+  const handleUpdateParishLocal = (id: string, field: keyof Parish, value: any) => {
+    setParishes(prev => prev.map(p => p.id === id ? { ...p, [field]: value } : p));
+  };
+
+  const handleSaveParish = async (p: Parish) => {
     try {
-      await updateParishInStore(id, { [field]: value });
-      toast.success('Đã lưu');
-      loadParishes();
+      await updateParishInStore(p.id, { name: p.name, address: p.address, map_url: p.map_url, schedules: p.schedules });
+      toast.success('Đã lưu thông tin Giáo xứ');
+      // Không gọi loadParishes để tránh mất focus
     } catch (e: any) { toast.error(e.message); }
   };
 
-  const handleUpdateParishSchedule = async (id: string, dayName: string, timesStr: string) => {
-    const p = parishes.find(x => x.id === id);
-    if (!p) return;
+  const handleUpdateParishScheduleLocal = (id: string, dayName: string, timesStr: string) => {
     const times = timesStr.split(',').map(t => t.trim()).filter(t => t);
-    const newSchedules = { ...p.schedules, [dayName]: times };
-    try {
-      await updateParishInStore(id, { schedules: newSchedules });
-      toast.success(`Đã lưu lịch ${dayName}`);
-      loadParishes();
-    } catch (e: any) { toast.error(e.message); }
+    setParishes(prev => prev.map(p => {
+      if (p.id !== id) return p;
+      return { ...p, schedules: { ...p.schedules, [dayName]: times } };
+    }));
   };
 
   const handleDeleteParish = async (id: string) => {
@@ -95,10 +95,14 @@ export default function MassManager() {
     } catch (e: any) { toast.error(e.message); }
   };
 
-  const handleUpdateTodayMass = async (id: string, field: keyof TodayMass, value: any) => {
+  const handleUpdateTodayMassLocal = (id: string, field: keyof TodayMass, value: any) => {
+    setTodayMasses(prev => prev.map(m => m.id === id ? { ...m, [field]: value } : m));
+  };
+
+  const handleSaveTodayMass = async (m: TodayMass) => {
     try {
-      await updateTodayMassInStore(id, { [field]: value });
-      loadTodayMasses();
+      await updateTodayMassInStore(m.id, { parish_name: m.parish_name, time: m.time });
+      toast.success('Đã lưu Giờ lễ');
     } catch (e: any) { toast.error(e.message); }
   };
 
@@ -159,15 +163,16 @@ export default function MassManager() {
                todayMasses.map(mass => (
                 <tr key={mass.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                   <td style={{ padding: '10px' }}>
-                    <input type="text" value={mass.time} placeholder="VD: 04:00, 17:00" onChange={e => handleUpdateTodayMass(mass.id, 'time', e.target.value)} style={{ padding: '5px', width: '100px' }} />
+                    <input type="text" value={mass.time} placeholder="VD: 04:00, 17:00" onChange={e => handleUpdateTodayMassLocal(mass.id, 'time', e.target.value)} style={{ padding: '5px', width: '100px' }} />
                   </td>
                   <td style={{ padding: '10px' }}>
-                    <input type="text" value={mass.parish_name} onChange={e => handleUpdateTodayMass(mass.id, 'parish_name', e.target.value)} style={{ padding: '5px', width: '100%' }} />
+                    <input type="text" value={mass.parish_name} onChange={e => handleUpdateTodayMassLocal(mass.id, 'parish_name', e.target.value)} style={{ padding: '5px', width: '100%' }} />
                   </td>
                   <td style={{ padding: '10px' }}>
                     {mass.is_custom ? <span style={{ color: '#d97706', fontWeight: 'bold', fontSize: '0.8rem' }}>Thêm tay</span> : <span style={{ color: '#16a34a', fontSize: '0.8rem' }}>Tự động</span>}
                   </td>
                   <td style={{ padding: '10px' }}>
+                    <button onClick={() => handleSaveTodayMass(mass)} style={{ color: 'white', background: '#3b82f6', cursor: 'pointer', border: 'none', padding: '5px 10px', borderRadius: '4px', marginRight: '10px' }}>💾 Lưu</button>
                     <button onClick={() => handleDeleteTodayMass(mass.id)} style={{ color: 'red', cursor: 'pointer', border: 'none', background: 'none' }}>🗑 Xóa</button>
                   </td>
                 </tr>
@@ -192,15 +197,16 @@ export default function MassManager() {
               <div key={p.id} style={{ border: '1px solid #cbd5e1', borderRadius: '8px', overflow: 'hidden' }}>
                 <div style={{ background: '#f8fafc', padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ flex: 1 }}>
-                    <input type="text" value={p.name} onChange={e => handleUpdateParish(p.id, 'name', e.target.value)} style={{ fontSize: '1.1rem', fontWeight: 'bold', padding: '5px', border: '1px solid transparent', background: 'transparent', width: '100%' }} />
-                    <input type="text" value={p.address} onChange={e => handleUpdateParish(p.id, 'address', e.target.value)} placeholder="Địa chỉ..." style={{ fontSize: '0.9rem', padding: '5px', width: '100%', marginTop: '5px' }} />
-                    <input type="text" value={p.map_url} onChange={e => handleUpdateParish(p.id, 'map_url', e.target.value)} placeholder="Link Google Map..." style={{ fontSize: '0.9rem', padding: '5px', width: '100%', marginTop: '5px' }} />
+                    <input type="text" value={p.name} onChange={e => handleUpdateParishLocal(p.id, 'name', e.target.value)} style={{ fontSize: '1.1rem', fontWeight: 'bold', padding: '5px', border: '1px solid transparent', background: 'transparent', width: '100%' }} />
+                    <input type="text" value={p.address} onChange={e => handleUpdateParishLocal(p.id, 'address', e.target.value)} placeholder="Địa chỉ..." style={{ fontSize: '0.9rem', padding: '5px', width: '100%', marginTop: '5px' }} />
+                    <input type="text" value={p.map_url} onChange={e => handleUpdateParishLocal(p.id, 'map_url', e.target.value)} placeholder="Link Google Map..." style={{ fontSize: '0.9rem', padding: '5px', width: '100%', marginTop: '5px' }} />
                   </div>
-                  <div style={{ display: 'flex', gap: '10px', marginLeft: '20px' }}>
+                  <div style={{ display: 'flex', gap: '10px', marginLeft: '20px', alignItems: 'center' }}>
+                    <button onClick={() => handleSaveParish(p)} style={{ padding: '8px 12px', cursor: 'pointer', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '4px' }}>💾 Lưu</button>
                     <button onClick={() => setEditingParishId(editingParishId === p.id ? null : p.id)} style={{ padding: '8px 12px', cursor: 'pointer' }}>
                       {editingParishId === p.id ? 'Đóng Lịch' : 'Sửa Lịch Tuần'}
                     </button>
-                    <button onClick={() => handleDeleteParish(p.id)} style={{ color: 'red', cursor: 'pointer', padding: '8px 12px' }}>Xóa</button>
+                    <button onClick={() => handleDeleteParish(p.id)} style={{ color: 'red', cursor: 'pointer', padding: '8px 12px', background: 'none', border: 'none' }}>Xóa</button>
                   </div>
                 </div>
 
@@ -213,8 +219,8 @@ export default function MassManager() {
                           <label style={{ width: '80px', fontWeight: 'bold', fontSize: '0.9rem' }}>{day}:</label>
                           <input 
                             type="text" 
-                            defaultValue={(p.schedules[day] || []).join(', ')}
-                            onBlur={e => handleUpdateParishSchedule(p.id, day, e.target.value)}
+                            value={(p.schedules[day] || []).join(', ')}
+                            onChange={e => handleUpdateParishScheduleLocal(p.id, day, e.target.value)}
                             placeholder="VD: 05:00, 17:30"
                             style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} 
                           />
