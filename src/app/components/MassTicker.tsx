@@ -18,19 +18,14 @@ export default function MassTicker() {
       const todayStr = now.toISOString().split('T')[0];
       const masses = await getTodayMassesFromStore(todayStr);
       
-      // Nhóm lại theo tên giáo xứ
-      const grouped: Record<string, string[]> = {};
+      const upcomingList: { name: string, times: string[] }[] = [];
+
       masses.forEach(m => {
-        if (!grouped[m.parish_name]) grouped[m.parish_name] = [];
-        grouped[m.parish_name].push(m.time);
-      });
-
-      let upcomingList: { name: string, times: string[] }[] = [];
-
-      Object.keys(grouped).forEach(name => {
-        const futureTimes = grouped[name].filter(t => t >= currentHHMM);
+        const timesArray = m.time.split(',').map(t => t.trim());
+        const futureTimes = timesArray.filter(t => t >= currentHHMM);
+        
         if (futureTimes.length > 0) {
-          upcomingList.push({ name, times: futureTimes });
+          upcomingList.push({ name: m.parish_name, times: futureTimes });
         }
       });
 
@@ -38,7 +33,7 @@ export default function MassTicker() {
 
       const displayNodes = upcomingList.map(item => (
         <span key={item.name} style={{ display: 'inline-flex', alignItems: 'center' }}>
-          Giáo xứ {item.name} - {item.times.join(', ')}
+          {item.name} - {item.times.join(', ')}
         </span>
       ));
       

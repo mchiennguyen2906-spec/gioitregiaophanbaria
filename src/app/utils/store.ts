@@ -507,8 +507,8 @@ export const getTodayMassesFromStore = async (dateStr?: string): Promise<TodayMa
 export const saveTodayMassToStore = async (mass: Omit<TodayMass, 'id' | 'is_custom'>) => {
   const payload = {
     parish_name: mass.parish_name,
-    address: mass.address,
-    map_url: mass.map_url,
+    address: '',
+    map_url: '',
     mass_date: mass.mass_date,
     time: mass.time,
     is_custom: true
@@ -550,25 +550,28 @@ export const syncTodayMasses = async (dateStr: string) => {
   // 1. Fetch tất cả Parishes
   const parishes = await getParishesFromStore();
   
-  // 2. Fetch tất cả today_masses đang có của ngày này (để không xóa các giờ lễ is_custom = true do admin tự thêm)
-  const existingToday = await getTodayMassesFromStore(dateStr);
-  
   // Xóa các giờ lễ tự động cũ (is_custom = false) để đồng bộ lại
   await supabase.from('today_masses').delete().eq('mass_date', dateStr).eq('is_custom', false);
   
   const newMasses: any[] = [];
   parishes.forEach(p => {
+    // 1. Kiểm tra tên hợp lệ
+    if (!p.name || p.name.trim() === '' || p.name === 'Giáo xứ Mới') return;
+
     const times = p.schedules[currentDayName] || [];
-    times.forEach(t => {
-      // Check trùng time với custom? Không bắt buộc, nhưng ta cứ push
-      newMasses.push({
-        parish_name: p.name,
-        address: p.address,
-        map_url: p.map_url,
-        mass_date: dateStr,
-        time: t,
-        is_custom: false
-      });
+    const validTimes = times.filter(t => t && t.trim() !== '');
+    if (validTimes.length === 0) return;
+    
+    // 2. Sắp xếp giờ từ sáng đến tối
+    validTimes.sort((a, b) => a.localeCompare(b));
+
+    newMasses.push({
+      parish_name: p.name,
+      address: '',
+      map_url: '',
+      mass_date: dateStr,
+      time: validTimes.join(', '),
+      is_custom: false
     });
   });
 

@@ -88,7 +88,7 @@ export default function MassManager() {
   const handleAddTodayMass = async () => {
     try {
       await saveTodayMassToStore({ 
-        parish_name: 'Giáo xứ Mới', address: '', map_url: '', mass_date: targetDate, time: '17:00' 
+        parish_name: '', address: '', map_url: '', mass_date: targetDate, time: '' 
       });
       toast.success('Đã thêm giờ lễ tay');
       loadTodayMasses();
@@ -150,7 +150,6 @@ export default function MassManager() {
               <tr style={{ background: '#e2e8f0', textAlign: 'left' }}>
                 <th style={{ padding: '10px' }}>Giờ</th>
                 <th style={{ padding: '10px' }}>Tên Giáo Xứ</th>
-                <th style={{ padding: '10px' }}>Địa chỉ</th>
                 <th style={{ padding: '10px' }}>Loại</th>
                 <th style={{ padding: '10px' }}>Thao tác</th>
               </tr>
@@ -160,13 +159,10 @@ export default function MassManager() {
                todayMasses.map(mass => (
                 <tr key={mass.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                   <td style={{ padding: '10px' }}>
-                    <input type="time" value={mass.time} onChange={e => handleUpdateTodayMass(mass.id, 'time', e.target.value)} style={{ padding: '5px' }} />
+                    <input type="text" value={mass.time} placeholder="VD: 04:00, 17:00" onChange={e => handleUpdateTodayMass(mass.id, 'time', e.target.value)} style={{ padding: '5px', width: '100px' }} />
                   </td>
                   <td style={{ padding: '10px' }}>
                     <input type="text" value={mass.parish_name} onChange={e => handleUpdateTodayMass(mass.id, 'parish_name', e.target.value)} style={{ padding: '5px', width: '100%' }} />
-                  </td>
-                  <td style={{ padding: '10px' }}>
-                    <input type="text" value={mass.address} placeholder="Địa chỉ..." onChange={e => handleUpdateTodayMass(mass.id, 'address', e.target.value)} style={{ padding: '5px', width: '100%' }} />
                   </td>
                   <td style={{ padding: '10px' }}>
                     {mass.is_custom ? <span style={{ color: '#d97706', fontWeight: 'bold', fontSize: '0.8rem' }}>Thêm tay</span> : <span style={{ color: '#16a34a', fontSize: '0.8rem' }}>Tự động</span>}
