@@ -11,10 +11,6 @@ export default function MassTicker() {
     
     const updateMasses = async () => {
       const now = new Date();
-      const currentH = now.getHours();
-      const currentM = now.getMinutes();
-      const currentHHMM = `${currentH.toString().padStart(2, '0')}:${currentM.toString().padStart(2, '0')}`;
-
       const todayStr = now.toISOString().split('T')[0];
       const masses = await getTodayMassesFromStore(todayStr);
       
@@ -22,10 +18,9 @@ export default function MassTicker() {
 
       masses.forEach(m => {
         const timesArray = m.time.split(',').map(t => t.trim());
-        const futureTimes = timesArray.filter(t => t >= currentHHMM);
         
-        if (futureTimes.length > 0) {
-          upcomingList.push({ name: m.parish_name, times: futureTimes });
+        if (timesArray.length > 0 && timesArray[0] !== '') {
+          upcomingList.push({ name: m.parish_name, times: timesArray });
         }
       });
 
