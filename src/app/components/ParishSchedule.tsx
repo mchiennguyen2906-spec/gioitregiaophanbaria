@@ -38,14 +38,8 @@ export default function ParishSchedule() {
 
   if (!mounted) return null;
 
-  // Lấy lịch của ngày hôm nay để hiển thị
-  const getTodaySchedule = (schedules: Record<string, string[]>) => {
-    const days = ["Chúa Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
-    const todayName = days[new Date().getDay()];
-    const times = schedules[todayName] || [];
-    if (times.length === 0) return "Không có lễ hôm nay";
-    return times.join(', ');
-  };
+  const daysOrder = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chúa Nhật"];
+  const shortDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
   return (
     <div className="container" style={{ marginTop: '20px' }}>
@@ -82,14 +76,33 @@ export default function ParishSchedule() {
               <div key={slideIndex} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px', minWidth: '100%', flexShrink: 0 }}>
                 {filtered.slice(slideIndex * 4, slideIndex * 4 + 4).map(p => (
                   <div key={p.id} style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)', display: 'flex', flexDirection: 'column' }}>
-                    <h4 style={{ margin: '0 0 12px 0', color: 'var(--color-text-main)', fontSize: '1.05rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    <h4 style={{ margin: '0 0 12px 0', color: 'var(--color-text-main)', fontSize: '1.05rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'center' }}>
                       {p.name}
                     </h4>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px dashed #e2e8f0', paddingBottom: '12px' }}>
-                      <span style={{ fontSize: '0.9rem', color: '#64748b', fontWeight: '500' }}>Hôm nay:</span>
-                      <span style={{ fontWeight: 'bold', color: 'var(--color-brand-cyan)', fontSize: '1.1rem' }}>
-                        {getTodaySchedule(p.schedules)}
-                      </span>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, minmax(0, 1fr))', gap: '2px', textAlign: 'center', marginBottom: '12px', borderBottom: '1px dashed #e2e8f0', paddingBottom: '12px' }}>
+                      {daysOrder.map((day, idx) => {
+                        // Tách giờ trong trường hợp user nhập "05:00 18:00" thay vì dùng dấu phẩy
+                        const rawTimes = p.schedules[day] || [];
+                        const times = rawTimes.flatMap(t => t.includes(',') ? t.split(',') : t.split(' ')).map(t => t.trim()).filter(t => t);
+                        
+                        const isToday = new Date().getDay() === (idx === 6 ? 0 : idx + 1); // JS Date.getDay(): 0 is Sunday
+                        
+                        return (
+                          <div key={day} style={{ display: 'flex', flexDirection: 'column', background: isToday ? '#f0f9ff' : 'transparent', borderRadius: '4px', padding: '4px 0' }}>
+                            <div style={{ fontSize: '0.75rem', fontWeight: 'bold', color: isToday ? '#0284c7' : '#64748b', borderBottom: '1px solid #e2e8f0', paddingBottom: '4px', marginBottom: '4px' }}>
+                              {shortDays[idx]}
+                            </div>
+                            {times.map((time, tIdx) => (
+                              <div key={tIdx} style={{ fontSize: '0.75rem', fontWeight: 'bold', color: 'var(--color-brand-cyan)', marginTop: '2px', letterSpacing: '-0.5px' }}>
+                                {time}
+                              </div>
+                            ))}
+                            {times.length === 0 && (
+                              <div style={{ fontSize: '0.75rem', color: '#cbd5e1' }}>-</div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                     <div style={{ fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 'auto' }}>
                       {p.map_url ? (
