@@ -4,6 +4,7 @@ import styles from '../page.module.css';
 import RadioPlayer from "../components/RadioPlayer";
 import LoiChuaWidget from "../components/LoiChuaWidget";
 import QuestionFormPopup from "../components/QuestionFormPopup";
+import ParishSchedule from "../components/ParishSchedule";
 import { getArticlesFromStore, Article } from "../utils/store";
 
 export default function Home() {
@@ -224,6 +225,9 @@ export default function Home() {
           </div>
         </section>
       </div>
+
+      {/* TỔNG HỢP GIỜ LỄ CÁC GIÁO XỨ (4 CỘT) */}
+      <ParishSchedule />
 
       {/* DẢI 1: SỨ VỤ, Q&A, GƯƠNG MẶT */}
       <section style={{padding: '15px 0', borderBottom: '1px solid var(--border-color)'}}>

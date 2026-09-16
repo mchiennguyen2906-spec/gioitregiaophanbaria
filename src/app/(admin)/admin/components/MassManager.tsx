@@ -1,109 +1,237 @@
+"use client";
 import React, { useState, useEffect } from 'react';
-import { getMassSchedulesFromStore, saveMassSchedulesToStore, MassSchedule } from "../../../utils/store";
+import { 
+  getParishesFromStore, saveParishToStore, updateParishInStore, deleteParishFromStore, Parish,
+  getTodayMassesFromStore, saveTodayMassToStore, updateTodayMassInStore, deleteTodayMassFromStore, syncTodayMasses, TodayMass
+} from "../../../utils/store";
 import toast from 'react-hot-toast';
 
 export default function MassManager() {
-  const [schedules, setSchedules] = useState<MassSchedule[]>([]);
+  const [activeTab, setActiveTab] = useState<'TODAY' | 'MASTER'>('TODAY');
+  
+  // -- State for Master (Parishes) --
+  const [parishes, setParishes] = useState<Parish[]>([]);
+  const [loadingParishes, setLoadingParishes] = useState(false);
+  const [editingParishId, setEditingParishId] = useState<string | null>(null);
+  
+  // -- State for Today Masses --
+  const [todayMasses, setTodayMasses] = useState<TodayMass[]>([]);
+  const [loadingToday, setLoadingToday] = useState(false);
+  const [targetDate, setTargetDate] = useState<string>(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
-    const load = async () => setSchedules(await getMassSchedulesFromStore());
-    load();
-  }, []);
+    if (activeTab === 'MASTER') loadParishes();
+    if (activeTab === 'TODAY') loadTodayMasses();
+  }, [activeTab, targetDate]);
 
-  const handleAdd = () => {
-    setSchedules([...schedules, { id: Date.now().toString(), parishName: '', times: ['05:00'] }]);
+  const loadParishes = async () => {
+    setLoadingParishes(true);
+    setParishes(await getParishesFromStore());
+    setLoadingParishes(false);
   };
 
-  const handleUpdate = (id: string, field: keyof MassSchedule, value: string) => {
-    setSchedules(schedules.map(s => s.id === id ? { ...s, [field]: value } : s));
+  const loadTodayMasses = async () => {
+    setLoadingToday(true);
+    setTodayMasses(await getTodayMassesFromStore(targetDate));
+    setLoadingToday(false);
   };
 
-  const handleUpdateTimes = (id: string, timesStr: string) => {
-    const times = timesStr.split(',').map(t => t.trim()).filter(t => t);
-    setSchedules(schedules.map(s => s.id === id ? { ...s, times } : s));
-  };
-
-  const handleDelete = (id: string) => {
-    setSchedules(schedules.filter(s => s.id !== id));
-  };
-
-  const handleSave = async () => {
-    // Validate
-    if (schedules.some(s => !s.parishName || s.times.length === 0)) {
-      toast.error('Vui lòng điền đầy đủ Tên Giáo xứ và Giờ lễ cho tất cả các dòng!');
-      return;
-    }
+  const handleSyncToday = async () => {
+    if (!confirm(`Bạn có chắc muốn ĐỒNG BỘ GIỜ LỄ ngày (${targetDate}) từ Dữ liệu gốc không? Các giờ lễ tự động hiện tại sẽ bị xóa và tạo lại.`)) return;
     try {
-      await saveMassSchedulesToStore(schedules);
-      toast.success('Đã cập nhật Giờ Lễ!');
+      toast.loading('Đang đồng bộ...', { id: 'sync' });
+      await syncTodayMasses(targetDate);
+      await loadTodayMasses();
+      toast.success('Đồng bộ thành công!', { id: 'sync' });
     } catch (err: any) {
-      toast.error('Lỗi khi lưu Giờ Lễ: ' + err.message);
+      toast.error('Lỗi đồng bộ: ' + err.message, { id: 'sync' });
     }
   };
+
+  const handleAddParish = async () => {
+    try {
+      await saveParishToStore({ name: 'Giáo xứ Mới', address: '', map_url: '', schedules: {} });
+      toast.success('Đã thêm giáo xứ mới');
+      loadParishes();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const handleUpdateParish = async (id: string, field: keyof Parish, value: any) => {
+    try {
+      await updateParishInStore(id, { [field]: value });
+      toast.success('Đã lưu');
+      loadParishes();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const handleUpdateParishSchedule = async (id: string, dayName: string, timesStr: string) => {
+    const p = parishes.find(x => x.id === id);
+    if (!p) return;
+    const times = timesStr.split(',').map(t => t.trim()).filter(t => t);
+    const newSchedules = { ...p.schedules, [dayName]: times };
+    try {
+      await updateParishInStore(id, { schedules: newSchedules });
+      toast.success(`Đã lưu lịch ${dayName}`);
+      loadParishes();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const handleDeleteParish = async (id: string) => {
+    if (!confirm('Xóa giáo xứ này?')) return;
+    try {
+      await deleteParishFromStore(id);
+      loadParishes();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  // --- Today Masses Actions ---
+  const handleAddTodayMass = async () => {
+    try {
+      await saveTodayMassToStore({ 
+        parish_name: 'Giáo xứ Mới', address: '', map_url: '', mass_date: targetDate, time: '17:00' 
+      });
+      toast.success('Đã thêm giờ lễ tay');
+      loadTodayMasses();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const handleUpdateTodayMass = async (id: string, field: keyof TodayMass, value: any) => {
+    try {
+      await updateTodayMassInStore(id, { [field]: value });
+      loadTodayMasses();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const handleDeleteTodayMass = async (id: string) => {
+    if (!confirm('Xóa giờ lễ này?')) return;
+    try {
+      await deleteTodayMassFromStore(id);
+      loadTodayMasses();
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const btnStyle = (active: boolean) => ({
+    padding: '10px 20px', background: active ? 'var(--color-brand-cyan)' : '#e2e8f0', color: active ? 'white' : '#475569',
+    border: 'none', fontWeight: 'bold', cursor: 'pointer', borderRadius: '8px 8px 0 0'
+  });
+
+  const dayNames = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chúa Nhật"];
 
   return (
     <div style={{ background: '#fff', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '10px' }}>
-        <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>Quản lý Giờ Lễ</h2>
-        <button onClick={handleAdd} style={{ background: '#3b82f6', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>
-          + Thêm Giáo xứ
+      <h2 style={{ color: 'var(--color-brand-cyan)', margin: '0 0 20px 0' }}>⛪ Quản lý Giờ Lễ</h2>
+      
+      <div style={{ display: 'flex', gap: '5px', borderBottom: '2px solid var(--color-brand-cyan)', marginBottom: '20px' }}>
+        <button style={btnStyle(activeTab === 'TODAY')} onClick={() => setActiveTab('TODAY')}>
+          📅 Giờ Lễ Hôm Nay
+        </button>
+        <button style={btnStyle(activeTab === 'MASTER')} onClick={() => setActiveTab('MASTER')}>
+          ⚙️ Dữ Liệu Gốc (Danh sách Giáo xứ)
         </button>
       </div>
 
-      <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px' }}>
-        Nhập danh sách các Nhà thờ / Giáo xứ và giờ lễ. Các giờ lễ nhập cách nhau bằng dấu phẩy (VD: 05:00, 17:30). Dữ liệu này sẽ chạy tự động trên thanh Ticker ở trang chủ mỗi ngày.
-      </p>
+      {activeTab === 'TODAY' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', background: '#f8fafc', padding: '15px', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+              <label style={{ fontWeight: 'bold' }}>Chọn Ngày:</label>
+              <input type="date" value={targetDate} onChange={e => setTargetDate(e.target.value)} style={{ padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }} />
+              <button onClick={handleSyncToday} style={{ background: '#0284c7', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                🔄 ĐỒNG BỘ TỪ DỮ LIỆU GỐC
+              </button>
+            </div>
+            <button onClick={handleAddTodayMass} style={{ background: '#10b981', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+              + Thêm lễ linh động
+            </button>
+          </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '20px' }}>
-        <thead>
-          <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
-            <th style={{ padding: '12px', width: '40%' }}>Nhà thờ / Giáo xứ *</th>
-            <th style={{ padding: '12px', width: '45%' }}>Các Giờ Lễ * (cách nhau dấu phẩy)</th>
-            <th style={{ padding: '12px', width: '15%', textAlign: 'center' }}>Thao tác</th>
-          </tr>
-        </thead>
-        <tbody>
-          {schedules.map(schedule => (
-            <tr key={schedule.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-              <td style={{ padding: '10px' }}>
-                <input 
-                  type="text" 
-                  value={schedule.parishName} 
-                  onChange={e => handleUpdate(schedule.id, 'parishName', e.target.value)}
-                  placeholder="VD: Nhà thờ Chính Tòa"
-                  style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-                />
-              </td>
-              <td style={{ padding: '10px' }}>
-                <input 
-                  type="text" 
-                  value={schedule.times.join(', ')} 
-                  onChange={e => handleUpdateTimes(schedule.id, e.target.value)}
-                  placeholder="05:00, 17:30"
-                  style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #cbd5e1' }}
-                />
-              </td>
-              <td style={{ padding: '10px', textAlign: 'center' }}>
-                <button onClick={() => handleDelete(schedule.id)} style={{ background: '#fef2f2', color: '#ef4444', border: '1px solid #f87171', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          ))}
-          {schedules.length === 0 && (
-            <tr>
-              <td colSpan={3} style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Chưa có dữ liệu. Hãy thêm mới.</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr style={{ background: '#e2e8f0', textAlign: 'left' }}>
+                <th style={{ padding: '10px' }}>Giờ</th>
+                <th style={{ padding: '10px' }}>Tên Giáo Xứ</th>
+                <th style={{ padding: '10px' }}>Địa chỉ</th>
+                <th style={{ padding: '10px' }}>Loại</th>
+                <th style={{ padding: '10px' }}>Thao tác</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loadingToday ? <tr><td colSpan={5} style={{ padding: '20px', textAlign: 'center' }}>Đang tải...</td></tr> : 
+               todayMasses.map(mass => (
+                <tr key={mass.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <td style={{ padding: '10px' }}>
+                    <input type="time" value={mass.time} onChange={e => handleUpdateTodayMass(mass.id, 'time', e.target.value)} style={{ padding: '5px' }} />
+                  </td>
+                  <td style={{ padding: '10px' }}>
+                    <input type="text" value={mass.parish_name} onChange={e => handleUpdateTodayMass(mass.id, 'parish_name', e.target.value)} style={{ padding: '5px', width: '100%' }} />
+                  </td>
+                  <td style={{ padding: '10px' }}>
+                    <input type="text" value={mass.address} placeholder="Địa chỉ..." onChange={e => handleUpdateTodayMass(mass.id, 'address', e.target.value)} style={{ padding: '5px', width: '100%' }} />
+                  </td>
+                  <td style={{ padding: '10px' }}>
+                    {mass.is_custom ? <span style={{ color: '#d97706', fontWeight: 'bold', fontSize: '0.8rem' }}>Thêm tay</span> : <span style={{ color: '#16a34a', fontSize: '0.8rem' }}>Tự động</span>}
+                  </td>
+                  <td style={{ padding: '10px' }}>
+                    <button onClick={() => handleDeleteTodayMass(mass.id)} style={{ color: 'red', cursor: 'pointer', border: 'none', background: 'none' }}>🗑 Xóa</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {todayMasses.length === 0 && !loadingToday && <p style={{ textAlign: 'center', color: '#64748b', marginTop: '20px' }}>Chưa có giờ lễ nào. Hãy bấm ĐỒNG BỘ.</p>}
+        </div>
+      )}
 
-      <button 
-        onClick={handleSave}
-        style={{ background: 'var(--color-brand-red)', color: 'white', border: 'none', padding: '12px 25px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '1.05rem' }}
-      >
-        Lưu Tất Cả Giờ Lễ
-      </button>
+      {activeTab === 'MASTER' && (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
+            <p style={{ margin: 0, color: '#64748b' }}>Nhập lịch cố định cho các giáo xứ. Dữ liệu này sẽ dùng để tự động bốc ra cho "Giờ Lễ Hôm Nay".</p>
+            <button onClick={handleAddParish} style={{ background: '#10b981', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+              + Thêm Giáo Xứ Mới
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+            {loadingParishes ? <p>Đang tải...</p> : parishes.map(p => (
+              <div key={p.id} style={{ border: '1px solid #cbd5e1', borderRadius: '8px', overflow: 'hidden' }}>
+                <div style={{ background: '#f8fafc', padding: '15px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div style={{ flex: 1 }}>
+                    <input type="text" value={p.name} onChange={e => handleUpdateParish(p.id, 'name', e.target.value)} style={{ fontSize: '1.1rem', fontWeight: 'bold', padding: '5px', border: '1px solid transparent', background: 'transparent', width: '100%' }} />
+                    <input type="text" value={p.address} onChange={e => handleUpdateParish(p.id, 'address', e.target.value)} placeholder="Địa chỉ..." style={{ fontSize: '0.9rem', padding: '5px', width: '100%', marginTop: '5px' }} />
+                    <input type="text" value={p.map_url} onChange={e => handleUpdateParish(p.id, 'map_url', e.target.value)} placeholder="Link Google Map..." style={{ fontSize: '0.9rem', padding: '5px', width: '100%', marginTop: '5px' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', marginLeft: '20px' }}>
+                    <button onClick={() => setEditingParishId(editingParishId === p.id ? null : p.id)} style={{ padding: '8px 12px', cursor: 'pointer' }}>
+                      {editingParishId === p.id ? 'Đóng Lịch' : 'Sửa Lịch Tuần'}
+                    </button>
+                    <button onClick={() => handleDeleteParish(p.id)} style={{ color: 'red', cursor: 'pointer', padding: '8px 12px' }}>Xóa</button>
+                  </div>
+                </div>
+
+                {editingParishId === p.id && (
+                  <div style={{ padding: '15px', borderTop: '1px solid #cbd5e1', background: '#fff' }}>
+                    <p style={{ margin: '0 0 15px 0', fontSize: '0.85rem', color: '#64748b' }}>Nhập giờ theo định dạng 24h, cách nhau bằng dấu phẩy. VD: 05:00, 17:30</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                      {dayNames.map(day => (
+                        <div key={day} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <label style={{ width: '80px', fontWeight: 'bold', fontSize: '0.9rem' }}>{day}:</label>
+                          <input 
+                            type="text" 
+                            defaultValue={(p.schedules[day] || []).join(', ')}
+                            onBlur={e => handleUpdateParishSchedule(p.id, day, e.target.value)}
+                            placeholder="VD: 05:00, 17:30"
+                            style={{ flex: 1, padding: '8px', border: '1px solid #cbd5e1', borderRadius: '4px' }} 
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

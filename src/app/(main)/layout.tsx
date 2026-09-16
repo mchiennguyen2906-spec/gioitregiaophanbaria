@@ -144,7 +144,7 @@ export default function RootLayout({
 
         </header>
 
-        {/* THANH GIỜ LỄ THỜI GIAN THỰC (MASS TICKER) - Đặt ngoài header để Sticky hoạt động */}
+        {/* THANH GIỜ LỄ HÔM NAY (CHẠY NGANG TRÊN CÙNG) */}
         <MassTicker />
 
         <main>{children}</main>

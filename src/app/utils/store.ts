@@ -430,42 +430,155 @@ export const saveWordOfGodsToStore = async (words: WordOfGod[]) => {
   logActivity('Cập nhật Lời Chúa', 'system', 'Đã lưu danh sách Lời Chúa mới cho cả tuần');
 };
 
-// ================= MASS SCHEDULE (GIỜ LỄ) =================
-export interface MassSchedule {
+// ================= QUẢN LÝ GIÁO XỨ (PARISHES) & GIỜ LỄ HÔM NAY =================
+export interface Parish {
   id: string;
-  parishName: string;
-  times: string[];
+  name: string;
+  address: string;
+  map_url: string;
+  schedules: Record<string, string[]>; // { "Thứ Hai": ["05:00", "17:30"] }
 }
 
-const defaultMassSchedules: MassSchedule[] = [
-  { id: 'm-1', parishName: 'Nhà thờ Chánh Toà', times: ['05:00', '17:30', '19:00'] },
-  { id: 'm-2', parishName: 'Giáo xứ Long Hương', times: ['04:30', '17:30'] },
-  { id: 'm-3', parishName: 'Giáo xứ Vũng Tàu', times: ['05:00', '18:00'] },
-  { id: 'm-4', parishName: 'Giáo xứ Hòa Bình', times: ['04:45', '17:45'] }
-];
+export interface TodayMass {
+  id: string;
+  parish_name: string;
+  address: string;
+  map_url: string;
+  mass_date: string;
+  time: string;
+  is_custom: boolean;
+}
 
-export const getMassSchedulesFromStore = async (): Promise<MassSchedule[]> => {
-  if (typeof window === 'undefined') return defaultMassSchedules;
-  const { data, error } = await supabase.from('mass_schedules').select('*');
-  if (error || !data || data.length === 0) return defaultMassSchedules;
-  return data.map((m: any) => ({
-    id: m.id,
-    parishName: m.parish_name,
-    times: m.times || []
+export const getParishesFromStore = async (): Promise<Parish[]> => {
+  if (typeof window === 'undefined') return [];
+  const { data, error } = await supabase.from('parishes').select('*').order('name');
+  if (error || !data) return [];
+  return data.map((p: any) => ({
+    id: p.id,
+    name: p.name,
+    address: p.address || '',
+    map_url: p.map_url || '',
+    schedules: p.schedules || {}
   }));
 };
 
-export const saveMassSchedulesToStore = async (schedules: MassSchedule[]) => {
-  // Clear all and insert new
-  await supabase.from('mass_schedules').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-  const payload = schedules.map(s => ({
-    parish_name: s.parishName,
-    times: s.times
-  }));
-  const { error: insertError } = await supabase.from('mass_schedules').insert(payload);
-  if (insertError) throw insertError;
+export const saveParishToStore = async (parish: Omit<Parish, 'id'>) => {
+  const payload = {
+    name: parish.name,
+    address: parish.address,
+    map_url: parish.map_url,
+    schedules: parish.schedules
+  };
+  const { error } = await supabase.from('parishes').insert(payload);
+  if (error) throw error;
   notifyUpdate();
-  logActivity('Cập nhật Giờ Lễ', 'system', 'Đã lưu toàn bộ hệ thống giờ lễ mới');
+  logActivity('Thêm Giáo xứ', 'system', `Tên giáo xứ: ${parish.name}`);
+};
+
+export const updateParishInStore = async (id: string, parish: Partial<Parish>) => {
+  const payload: any = {};
+  if (parish.name !== undefined) payload.name = parish.name;
+  if (parish.address !== undefined) payload.address = parish.address;
+  if (parish.map_url !== undefined) payload.map_url = parish.map_url;
+  if (parish.schedules !== undefined) payload.schedules = parish.schedules;
+  
+  const { error } = await supabase.from('parishes').update(payload).eq('id', id);
+  if (error) throw error;
+  notifyUpdate();
+  logActivity('Cập nhật Giáo xứ', 'system', `Sửa thông tin giáo xứ ID: ${id}`);
+};
+
+export const deleteParishFromStore = async (id: string) => {
+  const { error } = await supabase.from('parishes').delete().eq('id', id);
+  if (error) throw error;
+  notifyUpdate();
+  logActivity('Xóa Giáo xứ', 'system', `Đã xóa giáo xứ ID: ${id}`);
+};
+
+// ================= GIỜ LỄ HÔM NAY =================
+export const getTodayMassesFromStore = async (dateStr?: string): Promise<TodayMass[]> => {
+  if (typeof window === 'undefined') return [];
+  const targetDate = dateStr || new Date().toISOString().split('T')[0];
+  const { data, error } = await supabase.from('today_masses').select('*').eq('mass_date', targetDate).order('time');
+  if (error || !data) return [];
+  return data;
+};
+
+export const saveTodayMassToStore = async (mass: Omit<TodayMass, 'id' | 'is_custom'>) => {
+  const payload = {
+    parish_name: mass.parish_name,
+    address: mass.address,
+    map_url: mass.map_url,
+    mass_date: mass.mass_date,
+    time: mass.time,
+    is_custom: true
+  };
+  const { error } = await supabase.from('today_masses').insert(payload);
+  if (error) throw error;
+  notifyUpdate();
+  logActivity('Thêm Giờ Lễ Hôm Nay', 'system', `Giáo xứ: ${mass.parish_name}, Giờ: ${mass.time}`);
+};
+
+export const updateTodayMassInStore = async (id: string, mass: Partial<TodayMass>) => {
+  const payload: any = {};
+  if (mass.parish_name !== undefined) payload.parish_name = mass.parish_name;
+  if (mass.address !== undefined) payload.address = mass.address;
+  if (mass.map_url !== undefined) payload.map_url = mass.map_url;
+  if (mass.mass_date !== undefined) payload.mass_date = mass.mass_date;
+  if (mass.time !== undefined) payload.time = mass.time;
+  
+  const { error } = await supabase.from('today_masses').update(payload).eq('id', id);
+  if (error) throw error;
+  notifyUpdate();
+  logActivity('Cập nhật Giờ Lễ Hôm Nay', 'system', `Đã sửa ID: ${id}`);
+};
+
+export const deleteTodayMassFromStore = async (id: string) => {
+  const { error } = await supabase.from('today_masses').delete().eq('id', id);
+  if (error) throw error;
+  notifyUpdate();
+  logActivity('Xóa Giờ Lễ Hôm Nay', 'system', `Đã xóa ID: ${id}`);
+};
+
+export const syncTodayMasses = async (dateStr: string) => {
+  const [yyyy, mm, dd] = dateStr.split('-');
+  const dateObj = new Date(parseInt(yyyy), parseInt(mm) - 1, parseInt(dd));
+  const dayIndex = dateObj.getDay(); // 0 = CN, 1 = T2...
+  const dayNames = ["Chúa Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+  const currentDayName = dayNames[dayIndex];
+
+  // 1. Fetch tất cả Parishes
+  const parishes = await getParishesFromStore();
+  
+  // 2. Fetch tất cả today_masses đang có của ngày này (để không xóa các giờ lễ is_custom = true do admin tự thêm)
+  const existingToday = await getTodayMassesFromStore(dateStr);
+  
+  // Xóa các giờ lễ tự động cũ (is_custom = false) để đồng bộ lại
+  await supabase.from('today_masses').delete().eq('mass_date', dateStr).eq('is_custom', false);
+  
+  const newMasses: any[] = [];
+  parishes.forEach(p => {
+    const times = p.schedules[currentDayName] || [];
+    times.forEach(t => {
+      // Check trùng time với custom? Không bắt buộc, nhưng ta cứ push
+      newMasses.push({
+        parish_name: p.name,
+        address: p.address,
+        map_url: p.map_url,
+        mass_date: dateStr,
+        time: t,
+        is_custom: false
+      });
+    });
+  });
+
+  if (newMasses.length > 0) {
+    const { error } = await supabase.from('today_masses').insert(newMasses);
+    if (error) throw error;
+  }
+  
+  notifyUpdate();
+  logActivity('Đồng Bộ Giờ Lễ', 'system', `Đã đồng bộ dữ liệu cho ngày ${dateStr}`);
 };
 
 // ================= RADIO LỜI CHÚA =================
