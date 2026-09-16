@@ -7,6 +7,10 @@ export default function ParishSchedule() {
   const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState('');
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isPinned, setIsPinned] = useState(false);
+
+  const isOpen = isHovered || isPinned || search.trim().length > 0;
 
   useEffect(() => {
     setMounted(true);
@@ -43,21 +47,34 @@ export default function ParishSchedule() {
 
   return (
     <div className="container" style={{ marginTop: '20px' }}>
-      <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '15px 20px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap', gap: '15px' }}>
-          <h3 style={{ margin: 0, color: 'var(--color-brand-cyan)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.2rem' }}>
-            <span style={{ background: 'var(--color-brand-red)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>TỔNG HỢP</span>
-            Giờ Lễ Các Giáo Xứ
-          </h3>
+      <div 
+        style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '15px 20px', boxShadow: '0 4px 15px rgba(0,0,0,0.03)', transition: 'all 0.3s ease-in-out' }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '15px' }}>
+          <div onClick={() => setIsPinned(!isPinned)} style={{ cursor: 'pointer', flex: 1, userSelect: 'none' }}>
+            <h3 style={{ margin: 0, color: 'var(--color-brand-cyan)', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '1.2rem' }}>
+              <span style={{ background: 'var(--color-brand-red)', color: 'white', padding: '4px 8px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>TỔNG HỢP</span>
+              Giờ Lễ Các Giáo Xứ
+              {isPinned && <span style={{ fontSize: '0.8rem', background: '#e2e8f0', color: '#475569', padding: '2px 6px', borderRadius: '4px', fontWeight: 'normal' }}>📌 Đã ghim</span>}
+            </h3>
+            {!isOpen && (
+              <span style={{ fontStyle: 'italic', color: '#64748b', fontSize: '0.9rem', display: 'block', marginTop: '8px' }}>
+                👉 Nhấp vào để ghim lịch
+              </span>
+            )}
+          </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
             <input 
               type="text" 
               placeholder="🔍 Tìm giáo xứ..." 
               value={search}
               onChange={e => setSearch(e.target.value)}
+              onFocus={() => setIsPinned(true)}
               style={{ padding: '8px 15px', borderRadius: '20px', border: '1px solid #cbd5e1', outline: 'none', width: '250px', fontSize: '0.95rem' }}
             />
-            {filtered.length > 4 && (
+            {isOpen && filtered.length > 4 && (
               <div style={{ display: 'flex', gap: '5px' }}>
                 <button onClick={handlePrev} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer', fontWeight: 'bold', color: '#64748b' }}>❮</button>
                 <button onClick={handleNext} style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid #cbd5e1', background: '#fff', cursor: 'pointer', fontWeight: 'bold', color: '#64748b' }}>❯</button>
@@ -66,7 +83,8 @@ export default function ParishSchedule() {
           </div>
         </div>
 
-        <div style={{ overflow: 'hidden', position: 'relative' }}>
+        {isOpen && (
+          <div style={{ overflow: 'hidden', position: 'relative', marginTop: '15px' }}>
           <div style={{ 
             display: 'flex', 
             transition: 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)',
@@ -125,6 +143,7 @@ export default function ParishSchedule() {
             </div>
           )}
         </div>
+        )}
       </div>
     </div>
   );
