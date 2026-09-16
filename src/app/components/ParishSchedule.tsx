@@ -4,6 +4,7 @@ import { getParishesFromStore, Parish } from '../utils/store';
 
 export default function ParishSchedule() {
   const [parishes, setParishes] = useState<Parish[]>([]);
+  const [mounted, setMounted] = useState(false);
   const [search, setSearch] = useState('');
   const [isHovered, setIsHovered] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
