@@ -66,6 +66,14 @@ export default function MassTicker() {
 
   if (!mounted) return null;
 
+  // Đảm bảo danh sách đủ dài để khi scroll -50% không bị hụt khoảng trống
+  let displayList = [...upcoming];
+  if (displayList.length > 0) {
+    while (displayList.length < 8) {
+      displayList = [...displayList, ...upcoming];
+    }
+  }
+
   return (
     <div className="mass-ticker-wrapper">
       <div className="ticker-label">
@@ -74,7 +82,7 @@ export default function MassTicker() {
       
       <div className="ticker-content-container">
         <div className="ticker-track" style={{ animationDuration: `${speed}s` }}>
-          {[...upcoming, ...upcoming].map((item, index) => (
+          {[...displayList, ...displayList].map((item, index) => (
             <span key={index} className="ticker-item">
               <span style={{color: 'var(--color-brand-gold)', marginRight: '8px'}}>✦</span>
               {item}

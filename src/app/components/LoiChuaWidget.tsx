@@ -82,7 +82,7 @@ export default function LoiChuaWidget() {
 
         {/* Banners */}
         <div style={{ marginTop: 'auto', flexShrink: 0 }}>
-          <a href="#" style={{
+          <a href="/loi-chua" style={{
             background: 'linear-gradient(to right, #e0e7ff, #c7d2fe)',
             height: '75px',
             display: 'flex',
