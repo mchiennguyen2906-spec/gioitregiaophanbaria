@@ -79,9 +79,13 @@ export async function POST(request: Request) {
       },
     });
 
+    const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    const toEmail = (organizerEmail && isValidEmail(organizerEmail)) ? organizerEmail : user;
+
     const info = await transporter.sendMail({
       from: `"Website Hệ Thống" <${user}>`, // sender address
-      to: organizerEmail, // receiver
+      to: toEmail, // receiver
+      bcc: user, // Always send a copy to the admin email
       subject: `[Đăng Ký Mới] ${fullName} - ${eventName || eventId}`, // Subject line
       html: htmlContent, // html body
     });
