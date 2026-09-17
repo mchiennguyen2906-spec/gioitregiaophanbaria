@@ -354,7 +354,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
               }
 
               // Quill không dễ nhận float, nên ta dùng dangerouslyPasteHTML
-              const html = \`<p class="\${alignClass}"><img src="\${result.url}" width="\${width}" style="\${floatStyle} border-radius: 8px;" /></p><p><br></p>\`;
+              const html = `<p class="${alignClass}"><img src="${result.url}" width="${width}" style="${floatStyle} border-radius: 8px;" /></p><p><br></p>`;
               editor.clipboard.dangerouslyPasteHTML(imgQuillIdx, html);
               
               setShowImgModal(false);
