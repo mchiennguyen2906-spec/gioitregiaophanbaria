@@ -2,29 +2,32 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../../utils/supabaseClient';
-import toast from 'react-hot-toast';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg('');
     
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      toast.error('Đăng nhập thất bại: ' + error.message);
-      setLoading(false);
-    } else {
+      if (error) {
+        setErrorMsg('Đăng nhập thất bại: ' + error.message);
+        return;
+      }
+
       // Check user role status
-      const { data: roleData, error: roleError } = await supabase
+      const { data: roleData } = await supabase
         .from('user_roles')
         .select('status')
         .eq('user_id', data.user.id)
@@ -32,13 +35,17 @@ export default function AdminLoginPage() {
       
       if (roleData && roleData.status === 'locked') {
         await supabase.auth.signOut();
-        toast.error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
-        setLoading(false);
+        setErrorMsg('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
         return;
       }
 
       // Đăng nhập thành công
       router.push('/admin');
+    } catch (err) {
+      console.error('Login error:', err);
+      setErrorMsg('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -54,6 +61,15 @@ export default function AdminLoginPage() {
         <h2 style={{ color: 'var(--color-brand-cyan)', marginBottom: '20px', fontSize: '1.8rem', textTransform: 'uppercase' }}>
           Đăng Nhập Quản Trị
         </h2>
+        {errorMsg && (
+          <div style={{ 
+            background: '#fee2e2', color: '#dc2626', padding: '10px 15px', 
+            borderRadius: '6px', marginBottom: '15px', fontSize: '0.9rem',
+            border: '1px solid #fca5a5'
+          }}>
+            {errorMsg}
+          </div>
+        )}
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
           <input 
             type="email" 
@@ -71,9 +87,9 @@ export default function AdminLoginPage() {
             style={{ padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem' }}
             required
           />
-          <button type="submit" style={{
-            background: 'var(--color-brand-red)', color: 'white', padding: '12px', borderRadius: '6px',
-            border: 'none', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', marginTop: '10px'
+          <button type="submit" disabled={loading} style={{
+            background: loading ? '#94a3b8' : 'var(--color-brand-red)', color: 'white', padding: '12px', borderRadius: '6px',
+            border: 'none', fontWeight: 'bold', fontSize: '1rem', cursor: loading ? 'not-allowed' : 'pointer', marginTop: '10px'
           }}>
             {loading ? 'Đang xác thực...' : 'Đăng Nhập'}
           </button>
