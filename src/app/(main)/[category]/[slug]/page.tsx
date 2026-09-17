@@ -122,7 +122,7 @@ export default function SubPage({ params }: { params: any }) {
               <div style={{ padding: '20px', background: '#fef2f2', borderLeft: '4px solid var(--color-brand-red)', borderRadius: '0 8px 8px 0', marginBottom: '30px', fontSize: '1.2rem', fontStyle: 'italic', color: '#991b1b', lineHeight: 1.6 }}>
                 "{articleDetail.excerpt}"
               </div>
-              <div dangerouslySetInnerHTML={{ __html: articleDetail.content }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem' }} />
+              <div dangerouslySetInnerHTML={{ __html: articleDetail.content }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
             </div>
           ) : (
             // Giao diện bài viết thông thường
@@ -136,9 +136,29 @@ export default function SubPage({ params }: { params: any }) {
               <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
                 Đăng bởi: {articleDetail.author} {articleDetail.parish ? `(${articleDetail.parish})` : ''} | {new Date(articleDetail.date).toLocaleDateString('vi-VN')}
               </p>
-              <div style={{ fontSize: '1.1rem', fontStyle: 'italic', color: '#334155', marginBottom: '20px', lineHeight: 1.6 }}>
-                {articleDetail.excerpt}
-              </div>
+              
+              {articleDetail.thumbnailUrl && (
+                <div style={{ marginBottom: '20px' }}>
+                  <img src={articleDetail.thumbnailUrl} alt="Thumbnail" style={{ width: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+                </div>
+              )}
+
+              {articleDetail.excerpt && (
+                <div style={{ 
+                  fontSize: '1.15rem', 
+                  fontStyle: 'italic', 
+                  color: '#0f766e',
+                  marginBottom: '25px', 
+                  lineHeight: 1.7,
+                  background: 'linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%)',
+                  padding: '20px 25px',
+                  borderRadius: '12px',
+                  borderLeft: '4px solid var(--color-brand-cyan)',
+                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+                }}>
+                  {articleDetail.excerpt}
+                </div>
+              )}
               
               {articleDetail.audioUrl && (
                 <div style={{ marginBottom: '25px', padding: '15px', background: '#f1f5f9', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
@@ -153,7 +173,7 @@ export default function SubPage({ params }: { params: any }) {
                 </div>
               )}
 
-              <div dangerouslySetInnerHTML={{ __html: articleDetail.content }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem' }} />
+              <div dangerouslySetInnerHTML={{ __html: articleDetail.content }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
             </div>
           )}
         </div>

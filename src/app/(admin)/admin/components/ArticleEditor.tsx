@@ -41,6 +41,16 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
   const [isUploadingFile, setIsUploadingFile] = useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
+  // Custom Image Upload cho Quill
+  const quillRef = React.useRef<any>(null);
+  const [showImgModal, setShowImgModal] = useState(false);
+  const [imgQuillIdx, setImgQuillIdx] = useState(0);
+  const [customImgFile, setCustomImgFile] = useState<File | null>(null);
+  const [customImgPreview, setCustomImgPreview] = useState('');
+  const [customImgSize, setCustomImgSize] = useState('medium');
+  const [customImgAlign, setCustomImgAlign] = useState('center');
+  const [isUploadingCustom, setIsUploadingCustom] = useState(false);
+
   useEffect(() => {
     const getLocalDatetime = (dateVal?: string) => {
       const d = dateVal ? new Date(dateVal) : new Date();
@@ -144,22 +154,33 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
         let width = img.width;
         let height = img.height;
         
-        // Max 800x800
-        const MAX_SIZE = 800;
-        if (width > height && width > MAX_SIZE) {
-          height *= MAX_SIZE / width;
-          width = MAX_SIZE;
-        } else if (height > MAX_SIZE) {
-          width *= MAX_SIZE / height;
-          height = MAX_SIZE;
+        // Cắt ép tỷ lệ 16:9
+        let targetRatio = 16 / 9;
+        let currentRatio = img.width / img.height;
+        let sx = 0, sy = 0, sWidth = img.width, sHeight = img.height;
+
+        if (currentRatio > targetRatio) {
+          sWidth = img.height * targetRatio;
+          sx = (img.width - sWidth) / 2;
+        } else if (currentRatio < targetRatio) {
+          sHeight = img.width / targetRatio;
+          sy = (img.height - sHeight) / 2;
         }
 
-        canvas.width = width;
-        canvas.height = height;
+        let canvasWidth = sWidth;
+        let canvasHeight = sHeight;
+        const MAX_WIDTH = 800;
+        if (canvasWidth > MAX_WIDTH) {
+          canvasWidth = MAX_WIDTH;
+          canvasHeight = MAX_WIDTH / targetRatio;
+        }
+
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, canvasWidth, canvasHeight);
         canvas.toBlob(async (blob) => {
           if (!blob) return;
           const formData = new FormData();
@@ -255,17 +276,119 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
 
   const categories = allowedCategories || Object.keys(slugMap).map(key => ({ id: key, name: slugMap[key] }));
 
-  // Cấu hình Toolbar cho Quill
-  const modules = {
-    toolbar: [
-      [{ 'header': [1, 2, 3, false] }, { 'font': [] }],
-      ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-      ['link', 'image', 'video'],
-      [{ 'color': [] }, { 'background': [] }, { 'align': [] }],
-      ['clean']
-    ],
+  // Custom Image Handler cho Quill
+  const customImageHandler = () => {
+    if (quillRef.current) {
+      const editor = quillRef.current.getEditor();
+      const range = editor.getSelection();
+      setImgQuillIdx(range ? range.index : 0);
+      setShowImgModal(true);
+      setCustomImgFile(null);
+      setCustomImgPreview('');
+      setCustomImgSize('medium');
+      setCustomImgAlign('center');
+    }
   };
+
+  const handleSelectCustomImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCustomImgFile(file);
+      const reader = new FileReader();
+      reader.onload = (event) => setCustomImgPreview(event.target?.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const submitCustomImage = async () => {
+    if (!customImgFile) return;
+    setIsUploadingCustom(true);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Scale based on selected size
+        let targetWidth = width;
+        if (customImgSize === 'small') targetWidth = 300;
+        else if (customImgSize === 'medium') targetWidth = 500;
+        else if (customImgSize === 'large') targetWidth = 800;
+        else targetWidth = Math.min(width, 1200); // max original
+
+        if (width > targetWidth) {
+          height *= targetWidth / width;
+          width = targetWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+          const formData = new FormData();
+          formData.append('file', new File([blob], customImgFile.name, { type: 'image/jpeg' }));
+
+          try {
+            const res = await fetch('/api/upload', { method: 'POST', body: formData });
+            const result = await res.json();
+            if (result.success) {
+              const editor = quillRef.current.getEditor();
+              
+              // Tạo block HTML để chèn ảnh với class căn lề
+              let alignClass = 'ql-align-center';
+              let floatStyle = '';
+              
+              if (customImgAlign === 'left') {
+                alignClass = 'ql-align-left';
+                floatStyle = 'float: left; margin: 0 15px 15px 0;';
+              } else if (customImgAlign === 'right') {
+                alignClass = 'ql-align-right';
+                floatStyle = 'float: right; margin: 0 0 15px 15px;';
+              }
+
+              // Quill không dễ nhận float, nên ta dùng dangerouslyPasteHTML
+              const html = \`<p class="\${alignClass}"><img src="\${result.url}" width="\${width}" style="\${floatStyle} border-radius: 8px;" /></p><p><br></p>\`;
+              editor.clipboard.dangerouslyPasteHTML(imgQuillIdx, html);
+              
+              setShowImgModal(false);
+              toast.success('Đã chèn ảnh vào bài viết!');
+            } else {
+              toast.error('Lỗi khi tải ảnh lên!');
+            }
+          } catch (err) {
+            toast.error('Lỗi kết nối khi tải ảnh!');
+          }
+          setIsUploadingCustom(false);
+        }, 'image/jpeg', 0.85);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(customImgFile);
+  };
+
+  // Cấu hình Toolbar cho Quill
+  const modules = React.useMemo(() => ({
+    toolbar: {
+      container: [
+        [{ 'header': [1, 2, 3, false] }, { 'font': [] }],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+        [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+        ['link', 'image', 'video'],
+        [{ 'color': [] }, { 'background': [] }, { 'align': [] }],
+        ['clean']
+      ],
+      handlers: {
+        image: customImageHandler
+      }
+    }
+  }), []);
 
   const formats = [
     'header', 'font',
@@ -278,7 +401,9 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '50px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-        <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>Soạn Thảo Bài Viết Mới</h2>
+        <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>
+          {articleToEdit && articleToEdit.id ? 'Chỉnh Sửa Bài Viết' : 'Soạn Thảo Bài Viết Mới'}
+        </h2>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button onClick={() => setShowPreview(true)} style={{
             background: '#f1f5f9', color: '#334155', padding: '10px 15px', 
@@ -286,10 +411,12 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
           }}>Lưu & Xem Trước</button>
           
           <button onClick={handlePublish} style={{
-            background: 'var(--color-brand-cyan)', color: 'white', padding: '10px 20px', 
+            background: articleToEdit && articleToEdit.id ? '#f59e0b' : 'var(--color-brand-cyan)', color: 'white', padding: '10px 20px', 
             borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold',
-            boxShadow: '0 4px 6px -1px rgba(6, 182, 212, 0.4)'
-          }}>🚀 XÁC NHẬN ĐĂNG</button>
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          }}>
+            {articleToEdit && articleToEdit.id ? '🔄 CẬP NHẬT BÀI VIẾT' : '🚀 ĐĂNG BÀI MỚI'}
+          </button>
         </div>
       </div>
 
@@ -325,6 +452,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
               <label style={labelStyle}>Nội dung bài viết *</label>
               <div style={{ background: '#fff', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
                 <ReactQuill 
+                  ref={quillRef}
                   theme="snow"
                   value={content}
                   onChange={setContent}
@@ -504,7 +632,9 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
               <span>⚠️ <b>CHẾ ĐỘ XEM TRƯỚC (PREVIEW)</b></span>
               <div style={{ display: 'flex', gap: '10px' }}>
                 <button onClick={() => setShowPreview(false)} style={{ padding: '8px 15px', borderRadius: '4px', border: '1px solid #b45309', background: 'transparent', color: '#b45309', cursor: 'pointer', fontWeight: 'bold' }}>Chỉnh sửa lại</button>
-                <button onClick={() => { setShowPreview(false); handlePublish(); }} style={{ padding: '8px 15px', borderRadius: '4px', border: 'none', background: 'var(--color-brand-cyan)', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>Xác nhận đăng</button>
+                <button onClick={() => { setShowPreview(false); handlePublish(); }} style={{ padding: '8px 15px', borderRadius: '4px', border: 'none', background: articleToEdit && articleToEdit.id ? '#f59e0b' : 'var(--color-brand-cyan)', color: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
+                  {articleToEdit && articleToEdit.id ? 'Xác nhận cập nhật' : 'Xác nhận đăng'}
+                </button>
               </div>
             </div>
 
@@ -518,6 +648,54 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
             <p style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '30px', color: '#334155' }}>{excerpt || '[Chưa nhập lời dẫn]'}</p>
             
             <div className="article-content" dangerouslySetInnerHTML={{ __html: content || '[Chưa nhập nội dung]' }} style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#1e293b' }} />
+          </div>
+        </div>
+      )}
+
+      {/* Modal Upload Ảnh Nâng Cao */}
+      {showImgModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
+          background: 'rgba(0,0,0,0.6)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <div style={{ background: 'white', padding: '30px', borderRadius: '12px', width: '500px', maxWidth: '90%', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ margin: '0 0 20px 0', color: 'var(--color-brand-cyan)' }}>🖼️ Chèn Hình Ảnh Vào Bài</h3>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <label style={labelStyle}>1. Chọn ảnh từ máy tính</label>
+              <input type="file" accept="image/*" onChange={handleSelectCustomImage} style={inputStyle} />
+              {customImgPreview && (
+                <div style={{ marginTop: '10px', textAlign: 'center', background: '#f1f5f9', padding: '10px', borderRadius: '8px' }}>
+                  <img src={customImgPreview} style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }} alt="Preview" />
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={labelStyle}>2. Kích cỡ hiển thị</label>
+              <select style={inputStyle} value={customImgSize} onChange={e => setCustomImgSize(e.target.value)}>
+                <option value="small">Nhỏ (Dùng cho icon/ảnh phụ)</option>
+                <option value="medium">Vừa (Khuyên dùng)</option>
+                <option value="large">Lớn (Rộng bằng khung chữ)</option>
+                <option value="original">Nguyên bản (Chất lượng cao nhất)</option>
+              </select>
+            </div>
+
+            <div style={{ marginBottom: '25px' }}>
+              <label style={labelStyle}>3. Vị trí ảnh (Canh lề)</label>
+              <select style={inputStyle} value={customImgAlign} onChange={e => setCustomImgAlign(e.target.value)}>
+                <option value="center">⏸️ Chính giữa (Mặc định)</option>
+                <option value="left">⬅️ Bên Trái (Chữ bọc bên phải)</option>
+                <option value="right">➡️ Bên Phải (Chữ bọc bên trái)</option>
+              </select>
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
+              <button onClick={() => setShowImgModal(false)} disabled={isUploadingCustom} style={{ padding: '10px 15px', background: '#e2e8f0', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Hủy</button>
+              <button onClick={submitCustomImage} disabled={!customImgFile || isUploadingCustom} style={{ padding: '10px 20px', background: 'var(--color-brand-cyan)', color: 'white', border: 'none', borderRadius: '6px', cursor: (customImgFile && !isUploadingCustom) ? 'pointer' : 'not-allowed', fontWeight: 'bold' }}>
+                {isUploadingCustom ? '⏳ Đang xử lý...' : '✅ Chèn vào bài'}
+              </button>
+            </div>
           </div>
         </div>
       )}

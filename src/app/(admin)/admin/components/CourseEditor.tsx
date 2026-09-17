@@ -101,7 +101,7 @@ export default function CourseEditor({ onSave, onPublish, articleToEdit }: { onS
           <button onClick={handlePublish} disabled={isSaving} style={{
             background: 'var(--color-brand-cyan)', color: 'white', padding: '10px 15px', 
             borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
-          }}>{isSaving ? 'Đang lưu...' : 'Đăng Khóa Học'}</button>
+          }}>{isSaving ? 'Đang lưu...' : (articleToEdit ? 'Cập nhật Khóa Học' : 'Đăng Khóa Học')}</button>
         </div>
       </div>
 

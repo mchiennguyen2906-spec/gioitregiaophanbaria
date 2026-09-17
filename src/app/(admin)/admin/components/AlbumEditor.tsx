@@ -201,7 +201,7 @@ export default function AlbumEditor({ onSave, onPublish, articleToEdit }: { onSa
           <h3 style={boxTitleStyle}>Đăng Tải</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             <button disabled={isSaving} onClick={handlePublish} style={primaryBtnStyle}>
-              {isSaving ? 'Đang đăng...' : 'Đăng Album'}
+              {isSaving ? 'Đang lưu...' : (articleToEdit ? 'Cập nhật Album' : 'Đăng Album')}
             </button>
             <button disabled={isSaving} onClick={onSave} style={secondaryBtnStyle}>
               Hủy bỏ / Quay lại

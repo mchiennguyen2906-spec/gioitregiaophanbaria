@@ -88,7 +88,7 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
           <button onClick={handlePublish} disabled={isSaving} style={{
             background: 'var(--color-brand-cyan)', color: 'white', padding: '10px 15px', 
             borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold'
-          }}>{isSaving ? 'Đang lưu...' : 'Xác Nhận Đăng Mẫu Đăng Ký'}</button>
+          }}>{isSaving ? 'Đang lưu...' : (articleToEdit ? 'Cập nhật Mẫu Đăng Ký' : 'Xác Nhận Đăng Mẫu Đăng Ký')}</button>
         </div>
       </div>
 

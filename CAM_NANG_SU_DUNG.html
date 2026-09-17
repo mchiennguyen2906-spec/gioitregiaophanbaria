@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cẩm Nang Quản Trị Website Giới Trẻ - Hỏi & Đáp Từ A đến Z</title>
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0369a1;
+            --danger: #ef4444;
+            --danger-bg: #fef2f2;
+            --warning: #f59e0b;
+            --warning-bg: #fffbeb;
+            --success: #22c55e;
+            --success-bg: #f0fdf4;
+            --gray-bg: #f8fafc;
+            --text-main: #334155;
+            --text-light: #64748b;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.7;
+            color: var(--text-main);
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #e2e8f0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 50px;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        h1 {
+            color: var(--primary-dark);
+            text-align: center;
+            border-bottom: 4px solid #e0f2fe;
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 1.1rem;
+            margin-bottom: 50px;
+            font-style: italic;
+        }
+        
+        .qa-block {
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        
+        .question {
+            background-color: #f1f5f9;
+            padding: 20px 25px;
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+        }
+        .question::before {
+            content: 'Hỏi:';
+            color: var(--primary);
+            font-weight: 900;
+        }
+        
+        .answer {
+            padding: 30px 25px;
+        }
+        .answer-label {
+            color: #10b981;
+            font-weight: 900;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        h3 {
+            color: var(--primary-dark);
+            margin-top: 25px;
+            font-size: 1.15rem;
+            border-bottom: 2px dashed #bae6fd;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+        
+        ul, ol { margin-bottom: 20px; padding-left: 25px; }
+        li { margin-bottom: 10px; }
+        strong { color: #0f172a; }
+        
+        .box {
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 5px solid;
+        }
+        .box-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .danger { background-color: var(--danger-bg); border-color: var(--danger); }
+        .danger .box-title { color: #991b1b; }
+        
+        .warning { background-color: var(--warning-bg); border-color: var(--warning); }
+        .warning .box-title { color: #b45309; }
+        
+        .rule { background-color: #eff6ff; border-color: #3b82f6; }
+        .rule .box-title { color: #1e40af; }
+        
+        code { background-color: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #db2777; font-weight: bold;}
+        .highlight { background-color: #fef08a; padding: 2px 5px; border-radius: 4px; color: #854d0e; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>CẨM NANG HƯỚNG DẪN QUẢN TRỊ WEBSITE TỪ A ĐẾN Z</h1>
+    <div class="subtitle">Được biên soạn dưới dạng Câu hỏi - Đáp án thực tế giúp Ban Truyền Thông nắm bắt nhanh nhất</div>
+
+    <!-- CÂU 1: PHÂN QUYỀN -->
+    <div class="qa-block">
+        <div class="question">Phân quyền User làm sao? Tại sao khi Cộng tác viên nghỉ việc lại nên khóa tài khoản mà không được xóa?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <p>Hệ thống chia làm 3 cấp độ tài khoản chính:</p>
+            <ul>
+                <li><strong>Super Admin:</strong> Toàn quyền, thấy mọi menu, cấu hình được hệ thống lõi.</li>
+                <li><strong>Category Admin:</strong> Quản trị viên theo mảng. Khi tạo tài khoản này, bạn phải tick (✔) vào các chuyên mục cho phép họ quản lý.</li>
+                <li><strong>Editor:</strong> Tương tự Category Admin nhưng chỉ được phép lưu nháp, không được ấn Đăng bài (Publish). Phải chờ duyệt.</li>
+            </ul>
+            <div class="danger box">
+                <div class="box-title">⛔ CẢNH BÁO: KHÔNG ĐƯỢC XÓA TÀI KHOẢN</div>
+                Khi một nhân sự nghỉ việc, <strong>Tuyệt đối không nhấn nút Xóa</strong>. Tại sao? Vì nếu xóa, toàn bộ các bài viết cũ do người đó đăng sẽ bị lỗi trắng tên Tác giả (vô danh).
+                <br><strong>Cách xử lý đúng:</strong> Hãy bấm nút <strong>Khóa tài khoản</strong>. Người đó sẽ không thể đăng nhập được nữa, nhưng tên tác giả ở các bài viết cũ vẫn được giữ nguyên vẹn.
+            </div>
+        </div>
+    </div>
+
+    <!-- CÂU 2: BÀI VIẾT -->
+    <div class="qa-block">
+        <div class="question">Tư duy thiết kế bài đăng, bố cục nội dung (Sapo, Số lượng chữ) như thế nào là chuẩn báo chí? Tại sao có bài ra trang chủ có bài lại không?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <p>Để giao diện đọc trên Điện thoại không bị ngợp, hãy tuân thủ nguyên tắc sau khi Viết bài:</p>
+            <ul>
+                <li><strong>Tiêu đề:</strong> Ngắn gọn 10-15 chữ, không viết IN HOA toàn bộ.</li>
+                <li><strong>Sapo (Mô tả ngắn):</strong> Giới hạn <strong>40-50 chữ</strong>. Chỉ tóm tắt ý chính nhất để "câu khách", nó sẽ hiển thị ở ngoài trang chủ. Đừng copy cả đoạn văn dài vào Sapo sẽ làm nát giao diện.</li>
+                <li><strong>Nội dung chính:</strong> Khoảng <strong>300 - 800 chữ</strong>. Chia nhỏ thành nhiều đoạn văn ngắn (mỗi đoạn 3-4 dòng), chèn hình ảnh xen kẽ để mắt người xem được "nghỉ ngơi". Hình ảnh chèn vào phải bấm Căn giữa.</li>
+            </ul>
+            
+            <h3>Tại sao có bài ra Trang Chủ có bài không?</h3>
+            <p>Vì hệ thống có 3 bộ lọc điều hướng. Ở cột phải của khung đăng bài có 3 ô tick:</p>
+            <ol>
+                <li><strong>Hiện ở Slider (VIP):</strong> Nếu tick ô này, bài sẽ chạy ra cái băng chuyền ngang siêu to ở đầu trang chủ. (Chỉ dùng cho tin đặc biệt quan trọng).</li>
+                <li><strong>Hiện ở Bản tin Trang chủ:</strong> Nếu tick ô này, bài sẽ nằm ở 4 cục gạch dọc nổi bật bên phải Slider.</li>
+                <li><strong>Không tick gì cả:</strong> Bài sẽ tự động chui vào danh sách Băng chuyền thời gian ở phía dưới theo thứ tự bài mới nhất.</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- CÂU 3: SỰ KIỆN -->
+    <div class="qa-block">
+        <div class="question">Hướng dẫn tạo form đăng ký Sự Kiện chi tiết từng bước. Cái gì có trước, cái gì có sau?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <div class="rule box">
+                <div class="box-title">📘 NGUYÊN TẮC: Bài Viết Đi Trước, Form Đăng Ký Đi Sau</div>
+                Mọi sự kiện phải có bài viết thông báo để người ta hiểu mục đích trước khi điền thông tin.
+            </div>
+            <ul>
+                <li><strong>Bước 1:</strong> Vào Quản Lý Bài Viết, đăng một bài viết (Thư mời Đại hội, Thông báo hội trại...) cho thật đẹp.</li>
+                <li><strong>Bước 2:</strong> Chuyển sang <strong>Quản Lý Sự Kiện</strong> -> <em>Tạo sự kiện mới</em>.</li>
+                <li><strong>Bước 3:</strong> Tại ô <strong>Liên kết bài viết gốc</strong>, hãy chọn cái bài viết vừa đăng ở Bước 1. Lúc này Form đăng ký sẽ tự động dính chặt vào cuối bài báo đó.</li>
+                <li><strong>Bước 4: Thiết lập Chặn Số Lượng:</strong> Nhập ngày giờ diễn ra, Địa điểm. <em>Đặc biệt:</em> Nhập số vào ô <strong>Max Attendees (Giới hạn người)</strong>. Ví dụ sức chứa hội trường chỉ có 500, gõ 500. Đủ 500 người, Form tự động khóa sập lại, báo Hết chỗ.</li>
+                <li><strong>Bước 5: Tùy chỉnh Form:</strong> Mặc định form đã xin Tên, Tuổi, SĐT. Bạn bấm <strong>[+ Thêm trường tùy chỉnh]</strong> để xin thêm thông tin như Giáo xứ (nhập chữ ngắn) hay Size Áo (dạng Lựa chọn Dropdown). Cuối cùng ấn Đăng Sự Kiện.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- CÂU 4: KHÓA HỌC -->
+    <div class="qa-block">
+        <div class="question">Hướng dẫn tạo Khóa học (Đào tạo Huynh trưởng/Giáo lý viên) và cách tự động khóa Form?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <p>Tương tự như Sự kiện, Khóa học cũng tuân theo nguyên tắc "Bài viết trước, Form đi sau".</p>
+            <ul>
+                <li>Vào <strong>Quản lý Khóa Học</strong> -> Tạo mới. Chọn bài viết gốc để liên kết.</li>
+                <li>Điền Tên khóa, Loại chứng chỉ được cấp.</li>
+                <li><strong>Ngày Bế Giảng (Tự động khóa):</strong> Hệ thống rất thông minh, hãy chọn ngày Khai giảng và ngày Bế giảng chính xác. <strong>Đúng 0h ngày Bế Giảng, hệ thống sẽ tự động gỡ nút Đăng ký, chặn đứng mọi hồ sơ nộp trễ.</strong></li>
+                <li><strong>Tạo Lịch Trình (Lesson):</strong> Bấm <em>[+ Thêm Bài Học]</em>. Gõ tên buổi học, Người dạy (VD: Cha Đặc trách), Thời gian. Lịch này sẽ tự động vẽ ra giao diện cực kỳ chuyên nghiệp ngoài web.</li>
+                <li>Bổ sung các trường đăng ký (như Size áo, Giáo xứ) và Xuất bản.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- CÂU 5: TÀI LIỆU -->
+    <div class="qa-block">
+        <div class="question">Hướng dẫn upload file trong phần Tài liệu & Biểu mẫu. Hỗ trợ định dạng gì?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <p>Dành cho việc up Đơn xin Hôn phối, Danh sách phân bảng thi đấu...</p>
+            <ul>
+                <li>Vào <strong>Văn Bản & Biểu Mẫu</strong> -> Thêm mới.</li>
+                <li>Điền Tên tài liệu và mô tả ngắn.</li>
+                <li><strong>Quy định File:</strong> Bấm vào khung chọn file. Hệ thống <strong>CHỈ CHẤP NHẬN</strong> 3 định dạng: PDF, Word (.doc/docx) và Excel (.xls/xlsx). Khuyên dùng PDF để không lỗi Font.</li>
+                <li><strong>Dung lượng:</strong> Tối đa <span class="highlight">10MB/file</span>. Bấm Đăng biểu mẫu để hoàn tất.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- CÂU 6: VIDEO -->
+    <div class="qa-block">
+        <div class="question">Hướng dẫn upload Video (Thánh ca, Bài giảng). Cách lấy link như thế nào cho hợp lý?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <div class="danger box">
+                <div class="box-title">⛔ KHÔNG ĐƯỢC UPLOAD FILE MP4</div>
+                Tuyệt đối không up thẳng Video lên Web để tránh sập máy chủ. Bắt buộc dùng link nhúng.
+            </div>
+            <h3>Cách lấy Link chuẩn:</h3>
+            <ul>
+                <li><strong>Youtube:</strong> Mở Video -> Chia sẻ -> Sao chép. Link đúng có dạng <code>https://youtu.be/...</code>. Dán vào ô Đường dẫn.</li>
+                <li><strong>Google Drive:</strong> Mở Video -> Chia sẻ -> <strong>BẮT BUỘC đổi quyền thành "Bất kỳ ai có đường liên kết"</strong> -> Sao chép. (Nếu quên đổi quyền, web sẽ báo lỗi màn hình đen).</li>
+            </ul>
+            <p><strong>Đặt tiêu đề:</strong> Tránh IN HOA hết. Nên đặt theo cú pháp: <code>[Loại] Tiêu Đề - Người trình bày</code>. (VD: <em>[Thánh Ca] Bài ca tạ ơn - Ca đoàn Vũng Tàu</em>). Bạn có thể tick ô "Hiện ở Không gian Thánh Ca" để video chiếm spotlight to nhất trang chủ.</p>
+        </div>
+    </div>
+
+    <!-- CÂU 7: ALBUM ẢNH -->
+    <div class="qa-block">
+        <div class="question">Hướng dẫn đăng Album hình ảnh. Bao nhiêu hình ảnh, size như thế nào? Chú thích ra sao?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <p>Tránh biến web thành "bãi rác hình ảnh", hãy tuân thủ Luật Đãi Cát Tìm Vàng:</p>
+            <ul>
+                <li><strong>Số lượng (Luật cứng):</strong> Tuyệt đối <strong>không up quá 30 tấm/1 Album</strong>. Nhiều hơn sẽ làm tràn RAM, giật lag điện thoại người xem. Nếu nhiều ảnh, hãy tách ra 2 phần hoặc chèn link Google Drive tải trọn bộ vào cuối bài.</li>
+                <li><strong>Size & Chất lượng:</strong> Nén ảnh dưới 2MB/tấm. Không up ảnh RAW. Ưu tiên ảnh ngang (16:9).</li>
+                <li><strong>Cách Up:</strong> Chọn [+ Tạo Album], tải 1 Ảnh đại diện (Thumbnail ngang 16:9) thật đẹp. Sau đó bấm [+ Chọn nhiều ảnh] quét 30 tấm tải lên 1 lượt.</li>
+                <li><strong>Chú thích:</strong> Dưới mỗi tấm ảnh có ô "Ghi chú". Hãy làm việc có tâm bằng cách viết 1-2 câu giải thích bối cảnh bức ảnh (VD: Cha Xứ dâng hương) để bức ảnh có hồn hơn.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- CÂU 8: TỪ THIỆN -->
+    <div class="qa-block">
+        <div class="question">Hướng dẫn sử dụng phần Từ thiện và Quyên góp. Làm sao để đóng quỹ?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <ul>
+                <li><strong>Bước 1:</strong> Viết 1 bài kêu gọi hoàn cảnh cụ thể.</li>
+                <li><strong>Bước 2:</strong> Vào <strong>Chương trình Quyên Góp</strong> -> Tạo mới. Nhìn sang cột phải, <strong>Gắn Link</strong> bài kêu gọi đó vào quỹ.</li>
+                <li><strong>Bước 3:</strong> Điền Tên quỹ, Số Tiền Mục Tiêu (VD: 50000000), Thông tin Ngân hàng. Tải ảnh QR Code chuyển khoản lên để người xem tiện quét mã.</li>
+            </ul>
+            <div class="warning box">
+                <div class="box-title">🔄 Tự Động Đóng Quỹ (Minh bạch)</div>
+                Mỗi ngày Ban Tài chính vào cập nhật ô "Số tiền đã đạt được". Khi <strong>Đạt được >= Mục tiêu</strong>, hệ thống tự động gỡ quỹ khỏi vị trí kêu gọi trang chủ và dán nhãn "Đã hoàn thành". Bạn cũng có thể tick đóng quỹ thủ công bất kỳ lúc nào.
+            </div>
+        </div>
+    </div>
+
+    <!-- CÂU 9: GIỜ LỄ -->
+    <div class="qa-block">
+        <div class="question">Hướng dẫn cách chỉnh sửa giờ, thêm giờ mới và quản trị thời gian đi lễ. Cách đồng bộ thông tin giờ lễ hôm nay?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <p>Hệ thống chia làm 2 khoang làm việc:</p>
+            <ul>
+                <li><strong>Khoang 1: DỮ LIỆU GỐC (Làm 1 lần)</strong>. Nhấn "Thêm Giáo xứ mới", nhập tên, địa chỉ, link Google Map. Bấm "Sửa Lịch Tuần", nhập giờ cố định (định dạng: <code>04:30, 17:30</code>).</li>
+                <li><strong>Khoang 2: GIỜ LỄ HÔM NAY (Mở hàng ngày)</strong>. Mỗi sáng, vào Tab này, bấm nút to <strong>[🔄 ĐỒNG BỘ TỪ DỮ LIỆU GỐC]</strong>. Thuật toán tự động tra cứu xem hôm nay là thứ mấy, sau đó lục trong Dữ Liệu Gốc lấy đúng giờ lễ ngày hôm đó của tất cả Giáo xứ kéo ra ngoài trang chủ. Rất nhàn!</li>
+            </ul>
+            <p><strong>Ca Đột Xuất:</strong> Nhấn nút "Thêm lễ linh động" ở Tab Giờ Lễ Hôm Nay để gõ tay (VD Lễ An táng). Giờ này chỉ hiện đúng ngày hôm nay, qua ngày mai đồng bộ lại nó sẽ biến mất, không làm rác lịch gốc.</p>
+        </div>
+    </div>
+
+    <!-- CÂU 10: HỎI ĐÁP -->
+    <div class="qa-block">
+        <div class="question">Hướng dẫn sử dụng phần Hỏi đáp tâm lý chi tiết. Có tính năng gì nổi bật?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <ul>
+                <li>Các câu hỏi của giới trẻ gửi qua Form ẩn danh sẽ chảy về menu <strong>Hỏi Đáp Tâm Lý</strong>. Câu mới sẽ sáng màu trắng với nhãn đỏ <span class="highlight">Chưa giải đáp</span>.</li>
+                <li>Ban tư vấn liên hệ xử lý (qua email/SĐT) hoặc chọn ra câu hay để viết thành 1 bài báo trả lời công khai.</li>
+                <li><strong>Nghiệp vụ bắt buộc:</strong> Xử lý xong phải bấm nút <strong>[Đánh dấu Xong]</strong>. Câu hỏi sẽ chuyển nhãn xanh <span style="color:#16a34a; font-weight:bold;">Đã giải đáp</span> và chìm xuống dưới. Thao tác này giúp admin biết câu nào tồn đọng chưa xử lý. Gặp thư rác (Spam) thì bấm nút [Xóa].</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- CÂU 11: FOOTER -->
+    <div class="qa-block">
+        <div class="question">Hướng dẫn phần cấu hình chân trang (Footer). Chỉnh sửa ở đâu?</div>
+        <div class="answer">
+            <span class="answer-label">Trả lời:</span>
+            <p>Toàn bộ thông tin cuối trang (Số Hotline, Email trực tiếp, Link Fanpage, Link Tiktok, Tên Giáo xứ...) được quản lý tập trung ở menu <strong>Quản lý Footer</strong>.</p>
+            <p>Anh chị chỉ việc vào đó, sửa các ô chữ (Text), dán lại đường link và ấn nút <strong>[Lưu Footer]</strong>. Ngay lập tức, 100% các trang lớn nhỏ trên hệ thống sẽ tự động cập nhật chân trang mới mà không phải đi sửa thủ công từng trang.</p>
+        </div>
+    </div>
+
+    <hr>
+    <div style="text-align: center; color: var(--text-light); font-weight: bold; margin-top: 30px;">
+        "Hành trang đã đủ. Chúc Ban Truyền Thông Giáo Phận có những trải nghiệm tuyệt vời cùng hệ thống!"
+    </div>
+</div>
+
+</body>
+</html>
