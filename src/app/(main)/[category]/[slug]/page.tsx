@@ -18,7 +18,7 @@ export default function SubPage({ params }: { params: any }) {
   const slug = resolvedParams?.slug || '';
 
   const titleStr = getTitle(category, slug).toUpperCase();
-  const isEventRegistration = category === 'dao-tao' && (slug === 'su-kien' || slug === 'lich-hoc');
+  const isEventRegistration = category === 'dao-tao' && slug === 'su-kien';
 
   useEffect(() => {
     const fetchData = async () => {
