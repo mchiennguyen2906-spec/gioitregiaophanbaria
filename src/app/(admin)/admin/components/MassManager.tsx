@@ -29,7 +29,7 @@ export default function MassManager() {
     }
   }, [activeTab, targetDate]);
 
-  const loadTickerSpeed = async () => {
+  async function loadTickerSpeed() {
     const spd = await getSettingFromStore('mass_ticker_speed', '60');
     setTickerSpeed(Number(spd));
   };
@@ -43,13 +43,13 @@ export default function MassManager() {
     }
   };
 
-  const loadParishes = async () => {
+  async function loadParishes() {
     setLoadingParishes(true);
     setParishes(await getParishesFromStore());
     setLoadingParishes(false);
   };
 
-  const loadTodayMasses = async () => {
+  async function loadTodayMasses() {
     setLoadingToday(true);
     setTodayMasses(await getTodayMassesFromStore(targetDate));
     setLoadingToday(false);
@@ -182,7 +182,7 @@ export default function MassManager() {
             </button>
           </div>
 
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div style={{ overflowX: 'auto', width: '100%' }}><table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#e2e8f0', textAlign: 'left' }}>
                 <th style={{ padding: '10px' }}>Giờ</th>
@@ -211,7 +211,7 @@ export default function MassManager() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
           {todayMasses.length === 0 && !loadingToday && <p style={{ textAlign: 'center', color: '#64748b', marginTop: '20px' }}>Chưa có giờ lễ nào. Hãy bấm ĐỒNG BỘ.</p>}
         </div>
       )}
@@ -270,3 +270,4 @@ export default function MassManager() {
     </div>
   );
 }
+

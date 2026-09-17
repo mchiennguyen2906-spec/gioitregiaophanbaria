@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { supabase } from '../../utils/supabaseClient';
+import { z } from 'zod';
+
+const registrationSchema = z.object({
+  orgId: z.any().optional(),
+  eventId: z.any().optional(),
+  eventName: z.any().optional(),
+  fullName: z.string().min(2, 'Họ tên không hợp lệ').max(100, 'Họ tên không hợp lệ'),
+  phone: z.string().regex(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/, 'Số điện thoại không hợp lệ'),
+  email: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
+  parish: z.any().optional(),
+  address: z.any().optional(),
+  organizerEmail: z.any().optional(),
+});
 
 export async function POST(request: Request) {
   const logs: string[] = [];
@@ -8,7 +21,13 @@ export async function POST(request: Request) {
 
   try {
     const data = await request.json();
-    const { orgId, eventId, eventName, fullName, phone, email, parish, address, organizerEmail } = data;
+
+    const result = registrationSchema.safeParse(data);
+    if (!result.success) {
+      return NextResponse.json({ success: false, error: result.error.errors[0].message, logs }, { status: 400 });
+    }
+
+    const { orgId, eventId, eventName, fullName, phone, email, parish, address, organizerEmail } = result.data;
     log(`[1/5] Received registration: ${fullName} for ${eventName}`);
     log(`[1/5] organizerEmail from frontend: "${organizerEmail}"`);
 
@@ -106,7 +125,8 @@ export async function POST(request: Request) {
 
   } catch (error: any) {
     log(`❌ FATAL ERROR: ${error.message}`);
-    console.error('Full error:', error);
+    // Don't log full error object to avoid leaking PII
+    console.error('Lỗi khi gửi email đăng ký:', error instanceof Error ? error.message : 'Unknown error');
     return NextResponse.json({ success: false, error: error.message, logs }, { status: 500 });
   }
 }

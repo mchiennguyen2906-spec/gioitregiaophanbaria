@@ -25,7 +25,7 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const arts = await getArticlesFromStore();
+      const arts = await getArticlesFromStore(true);
       setArticles(arts);
     };
     fetchArticles();
@@ -217,7 +217,7 @@ export default function DonationEditor({ donationToEdit, onSave, onCancel }: Don
           <h3 style={boxTitleStyle}>Ảnh QR Code</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {qrCodeUrl && (
-              <img src={qrCodeUrl} alt="QR" style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0', objectFit: 'cover' }} />
+              <img loading="lazy" src={qrCodeUrl} alt="QR" style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0', objectFit: 'cover' }} />
             )}
             <input 
               type="file" 
@@ -272,3 +272,4 @@ const boxStyle = { background: '#f8fafc', padding: '20px', borderRadius: '8px', 
 const boxTitleStyle = { marginTop: 0, marginBottom: '15px', color: '#1e293b', fontSize: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' };
 const primaryBtnStyle = { background: 'var(--color-brand-cyan)', color: 'white', padding: '12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };
 const secondaryBtnStyle = { background: '#f1f5f9', color: '#475569', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };
+

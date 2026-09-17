@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { addQuestion } from '../utils/store';
 
 export default function QuestionFormPopup({ onClose }: { onClose: () => void }) {
@@ -12,10 +12,47 @@ export default function QuestionFormPopup({ onClose }: { onClose: () => void }) 
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Khôi phục nháp
+  useEffect(() => {
+    const draft = localStorage.getItem('question_form_draft');
+    if (draft) {
+      try {
+        const parsed = JSON.parse(draft);
+        if (parsed.senderName) setSenderName(parsed.senderName);
+        if (parsed.dob) setDob(parsed.dob);
+        if (parsed.phone) setPhone(parsed.phone);
+        if (parsed.email) setEmail(parsed.email);
+        if (parsed.recipient) setRecipient(parsed.recipient);
+        if (parsed.questionText) setQuestionText(parsed.questionText);
+        if (parsed.isAnonymous !== undefined) setIsAnonymous(parsed.isAnonymous);
+      } catch (e) {}
+    }
+  }, []);
+
+  // Lưu nháp khi có thay đổi
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem('question_form_draft', JSON.stringify({
+        senderName, dob, phone, email, recipient, questionText, isAnonymous
+      }));
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [senderName, dob, phone, email, recipient, questionText, isAnonymous]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!senderName || !dob || !phone || !questionText || !recipient) {
       alert('Vui lòng điền đủ các trường có dấu (*)');
+      return;
+    }
+
+    const phoneRegex = /^(0|\+84)[3|5|7|8|9][0-9]{8}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+      alert("Số điện thoại không hợp lệ. Vui lòng nhập đúng định dạng Việt Nam.");
+      return;
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert("Email không hợp lệ. Vui lòng kiểm tra lại.");
       return;
     }
 
@@ -41,6 +78,7 @@ ${questionText}
         questionText: formattedContent
       });
       alert('Gửi thông tin thành công! Cám ơn bạn đã tin tưởng chia sẻ. Ban tư vấn sẽ sớm liên hệ lại với bạn.');
+      localStorage.removeItem('question_form_draft');
       onClose();
     } catch (err) {
       alert('Có lỗi xảy ra, vui lòng thử lại sau.');
@@ -66,7 +104,7 @@ ${questionText}
         {/* Header */}
         <div style={{ background: 'var(--color-brand-cyan)', color: 'white', padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '16px 16px 0 0' }}>
           <h3 style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800 }}>💬 Gửi Câu Hỏi / Tâm Sự</h3>
-          <button type="button" onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '1.8rem', cursor: 'pointer', lineHeight: 1 }}>×</button>
+          <button type="button" aria-label="Đóng popup" onClick={onClose} style={{ background: 'transparent', border: 'none', color: 'white', fontSize: '1.8rem', cursor: 'pointer', lineHeight: 1 }}>×</button>
         </div>
 
         {/* Body (Scrollable) */}

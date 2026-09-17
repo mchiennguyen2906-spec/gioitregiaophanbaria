@@ -1,0 +1,14 @@
+import sanitizeHtml from 'sanitize-html';
+
+export const sanitize = (html: string) => {
+  return sanitizeHtml(html, {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img', 'iframe' ]),
+    allowedAttributes: {
+      ...sanitizeHtml.defaults.allowedAttributes,
+      '*': ['style', 'class'],
+      'iframe': ['src', 'width', 'height', 'allow', 'allowfullscreen', 'frameborder'],
+      'img': ['src', 'alt', 'width', 'height']
+    },
+    allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
+  });
+};

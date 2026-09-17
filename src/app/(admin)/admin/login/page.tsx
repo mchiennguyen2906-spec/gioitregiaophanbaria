@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../../utils/supabaseClient';
+import toast from 'react-hot-toast';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -19,7 +20,7 @@ export default function AdminLoginPage() {
     });
 
     if (error) {
-      alert('Đăng nhập thất bại: ' + error.message);
+      toast.error('Đăng nhập thất bại: ' + error.message);
       setLoading(false);
     } else {
       // Check user role status
@@ -31,7 +32,7 @@ export default function AdminLoginPage() {
       
       if (roleData && roleData.status === 'locked') {
         await supabase.auth.signOut();
-        alert('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
+        toast.error('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
         setLoading(false);
         return;
       }

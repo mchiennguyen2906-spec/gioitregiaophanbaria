@@ -1,14 +1,29 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '../../utils/supabaseClient';
+import { verifyAdmin } from '../../utils/supabaseServer';
 
 export async function POST(request: Request) {
   try {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;
     const oldFileUrl: string | null = data.get('oldFileUrl') as string;
 
     if (!file) {
       return NextResponse.json({ success: false, message: 'No file uploaded' }, { status: 400 });
+    }
+
+    // Size limit 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      return NextResponse.json({ success: false, message: 'File too large, max 5MB allowed' }, { status: 400 });
+    }
+
+    // Type validation
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    if (!allowedTypes.includes(file.type) || file.name.toLowerCase().endsWith('.svg')) {
+      return NextResponse.json({ success: false, message: 'Invalid file type. SVG is not allowed for security reasons.' }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();

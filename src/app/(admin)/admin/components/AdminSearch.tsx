@@ -26,7 +26,7 @@ export default function AdminSearch() {
     }
   }, [activeTab]);
 
-  const fetchLogs = async () => {
+  async function fetchLogs() {
     setLoadingLogs(true);
     const { data, error } = await supabase
       .from('activity_logs')
@@ -115,7 +115,7 @@ export default function AdminSearch() {
           </div>
           
           {loadingLogs ? <p>Đang tải lịch sử...</p> : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+            <div style={{ overflowX: 'auto', width: '100%' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
               <thead>
                 <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
                   <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>Thời gian</th>
@@ -159,7 +159,7 @@ export default function AdminSearch() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       )}
@@ -234,7 +234,7 @@ export default function AdminSearch() {
 
           {/* Search Results */}
           <h3 style={{ margin: '0 0 15px 0', color: '#334155' }}>Kết quả tìm kiếm ({searchResults.length})</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+          <div style={{ overflowX: 'auto', width: '100%' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
             <thead>
               <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
                 <th style={{ padding: '10px', borderBottom: '1px solid #e2e8f0' }}>Ngày đăng</th>
@@ -263,9 +263,10 @@ export default function AdminSearch() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </div>
       )}
     </div>
   );
 }
+

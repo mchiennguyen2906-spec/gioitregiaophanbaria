@@ -55,7 +55,7 @@ export default function QuestionManager() {
         </div>
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+      <div style={{ overflowX: 'auto', width: '100%' }}><table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
         <thead>
           <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
             <th style={{ padding: '12px', width: '5%' }}>STT</th>
@@ -109,7 +109,7 @@ export default function QuestionManager() {
             ))
           )}
         </tbody>
-      </table>
+      </table></div>
 
       {showConfirmModal && (
         <div style={{
@@ -147,3 +147,4 @@ export default function QuestionManager() {
     </div>
   );
 }
+

@@ -163,7 +163,7 @@ export default function DonateButton() {
                           <div style={{ marginTop: '20px', padding: '20px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', gap: '20px', animation: 'fadeIn 0.3s ease-out' }}>
                             {donation.qrCodeUrl && (
                               <div style={{ textAlign: 'center' }}>
-                                <img src={donation.qrCodeUrl} alt="QR Code" style={{ width: '120px', height: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #cbd5e1' }} />
+                                <img loading="lazy" src={donation.qrCodeUrl} alt="QR Code" style={{ width: '120px', height: '120px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #cbd5e1' }} />
                                 <p style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '5px' }}>Quét mã QR</p>
                               </div>
                             )}

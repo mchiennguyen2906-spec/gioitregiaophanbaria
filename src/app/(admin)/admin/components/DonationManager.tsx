@@ -59,7 +59,7 @@ export default function DonationManager({ onEdit, onCreateNew }: DonationManager
       </div>
 
       <div style={{ background: '#fff', borderRadius: '8px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        <div style={{ overflowX: 'auto', width: '100%' }}><table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
           <thead>
             <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
               <th style={{ padding: '15px', color: '#475569', fontSize: '0.9rem' }}>Tên Chương Trình</th>
@@ -108,7 +108,7 @@ export default function DonationManager({ onEdit, onCreateNew }: DonationManager
               </tr>
             )}
           </tbody>
-        </table>
+        </table></div>
       </div>
 
       {showConfirmModal && (
@@ -142,3 +142,4 @@ export default function DonationManager({ onEdit, onCreateNew }: DonationManager
     </div>
   );
 }
+

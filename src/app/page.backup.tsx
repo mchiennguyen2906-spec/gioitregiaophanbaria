@@ -75,7 +75,7 @@ export default function Home() {
         
           {/* Col 1: Slider Lớn (2.2fr) */}
           <div className={`${styles.heroSlider} slider-hover-container`} style={{position: 'relative', overflow: 'hidden'}}>
-            <img src={slides[currentSlide].img} className={styles.sliderImg} alt="News" style={{transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'}} />
+            <img loading="lazy" src={slides[currentSlide].img} className={styles.sliderImg} alt="News" style={{transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'}} />
             <div className={styles.sliderText} style={{transition: 'all 0.4s ease-in-out', padding: '30px', background: 'linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent)'}}>
               <h3 className="text-fluid-hero" style={{color: '#fff'}}>{slides[currentSlide].title}</h3>
               <p style={{fontSize: '1.05rem', color: '#f1f5f9', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginTop: '10px'}}>{slides[currentSlide].desc}</p>
@@ -140,7 +140,7 @@ export default function Home() {
             <h2 className="section-title">Tin Tức Giáo Phận</h2>
           </div>
           <div className={styles.categoryTop}>
-            <img src="/news_choir_1789327541049.jpg" className={styles.categoryMainImg} alt="News" />
+            <img loading="lazy" src="/news_choir_1789327541049.jpg" className={styles.categoryMainImg} alt="News" />
             <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '5px'}}>Lễ tạ ơn khánh thành và cung hiến nhà thờ giáo xứ Tân Lập</a>
             <p className={styles.excerpt}>Đức Giám Mục Giáo phận đã chủ sự thánh lễ tạ ơn và nghi thức cung hiến bàn thờ mới trong niềm hân hoan của hàng ngàn giáo dân...</p>
           </div>
@@ -160,7 +160,7 @@ export default function Home() {
             <h2 className="section-title">Lời Chúa & Suy Niệm</h2>
           </div>
           <div className={styles.categoryTop}>
-            <img src="/hero_cathedral_1789327489297.jpg" className={styles.categoryMainImg} alt="Bible" />
+            <img loading="lazy" src="/hero_cathedral_1789327489297.jpg" className={styles.categoryMainImg} alt="Bible" />
             <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '5px'}}>Suy niệm Phúc âm hằng ngày: Thứ Tư tuần 24 TN</a>
             <p className={styles.excerpt}>"Chúng tôi thổi sáo, sao các người không múa nhảy; chúng tôi hát bài đưa đám, sao các người không khóc than?"...</p>
           </div>
@@ -239,7 +239,7 @@ export default function Home() {
             <h2 className="section-title">Tin Giáo Hội Toàn Cầu</h2>
           </div>
           <div className={styles.categoryTop}>
-            <img src="/news_vatican_1789327528906.jpg" className={styles.categoryMainImg} alt="Vatican" />
+            <img loading="lazy" src="/news_vatican_1789327528906.jpg" className={styles.categoryMainImg} alt="Vatican" />
             <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '5px'}}>Đức Thánh Cha Phanxicô công bố Tông sắc Năm Thánh 2025</a>
             <p className={styles.excerpt}>Năm Thánh 2025 với chủ đề "Những người hành hương của Hy vọng" sẽ chính thức bắt đầu vào đêm Giáng Sinh...</p>
           </div>
@@ -259,7 +259,7 @@ export default function Home() {
             <h2 className="section-title">Mục Vụ Ban Ngành</h2>
           </div>
           <div className={styles.categoryTop}>
-            <img src="/news_community_1789327516209.jpg" className={styles.categoryMainImg} alt="Giao Xu" />
+            <img loading="lazy" src="/news_community_1789327516209.jpg" className={styles.categoryMainImg} alt="Giao Xu" />
             <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '5px'}}>Giới Trẻ & Sinh Viên: Trại hè "Vươn Lên"</a>
             <p className={styles.excerpt}>Hơn 300 bạn trẻ đã tham dự kỳ trại hè kéo dài 3 ngày 2 đêm đầy sôi động và ý nghĩa đức tin...</p>
           </div>
@@ -279,7 +279,7 @@ export default function Home() {
             <h2 className="section-title">Văn Kiện Giáo Hội</h2>
           </div>
           <div className={styles.categoryTop}>
-            <img src="/hero_mass_1789327504165.jpg" className={styles.categoryMainImg} alt="Van Kien" />
+            <img loading="lazy" src="/hero_mass_1789327504165.jpg" className={styles.categoryMainImg} alt="Van Kien" />
             <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '5px'}}>Tuyên ngôn "Dignitas Infinita" về Phẩm giá Con người</a>
           </div>
           <ul className={styles.categoryTitleList}>
@@ -313,7 +313,7 @@ export default function Home() {
                 <div key={idx} className={styles.charitySlideGrid} style={{width: `${100 / charitySlides.length}%`}}>
                   {/* Cột Ảnh */}
                   <div style={{overflow: 'hidden'}}>
-                    <img src={slide.img} alt="Từ thiện" style={{width: '100%', aspectRatio: '16/10', objectFit: 'cover'}} />
+                    <img loading="lazy" src={slide.img} alt="Từ thiện" style={{width: '100%', aspectRatio: '16/10', objectFit: 'cover'}} />
                   </div>
                   
                   {/* Cột Nội dung */}

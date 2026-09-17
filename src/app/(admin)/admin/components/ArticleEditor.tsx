@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { v4 as uuidv4 } from 'uuid';
+import { sanitize } from '../../../utils/sanitize';
 import { slugMap } from "../../../utils/categoryMap";
 import { addArticle, updateArticle, Article } from "../../../utils/store";
 import toast from 'react-hot-toast';
@@ -354,7 +356,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
               }
 
               // Quill không dễ nhận float, nên ta dùng dangerouslyPasteHTML
-              const html = `<p class="${alignClass}"><img src="${result.url}" width="${width}" style="${floatStyle} border-radius: 8px;" /></p><p><br></p>`;
+              const html = `<p class="${alignClass}"><img loading="lazy" src="${result.url}" width="${width}" style="${floatStyle} border-radius: 8px;" /></p><p><br></p>`;
               editor.clipboard.dangerouslyPasteHTML(imgQuillIdx, html);
               
               setShowImgModal(false);
@@ -387,6 +389,9 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       handlers: {
         image: customImageHandler
       }
+    },
+    clipboard: {
+      matchVisual: false // Chống dính khoảng trắng thừa khi copy từ Word
     }
   }), []);
 
@@ -558,7 +563,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
               <label style={labelStyle}>Ảnh đại diện (Thumbnail) *</label>
               {thumbnailUrl && (
                 <div style={{ marginBottom: '10px', position: 'relative' }}>
-                  <img src={thumbnailUrl} alt="Thumbnail" style={{ width: '100%', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                  <img loading="lazy" src={thumbnailUrl} alt="Thumbnail" style={{ width: '100%', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                 </div>
               )}
               <input 
@@ -566,9 +571,14 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
                 accept="image/*" 
                 onChange={handleImageUpload} 
                 disabled={isUploading}
-                style={{ width: '100%', padding: '10px', border: '1px dashed #cbd5e1', borderRadius: '6px', background: '#f8fafc', cursor: 'pointer', fontSize: '0.85rem' }}
+                style={{ width: '100%', padding: '10px', border: '1px dashed #cbd5e1', borderRadius: '6px', background: isUploading ? '#fef08a' : '#f8fafc', cursor: isUploading ? 'not-allowed' : 'pointer', fontSize: '0.85rem' }}
               />
-              {isUploading && <span style={{ color: '#ea580c', fontSize: '0.85rem', marginTop: '5px', display: 'block' }}>⏳ Đang tải ảnh...</span>}
+              {isUploading && (
+                <div style={{ background: '#fff7ed', border: '1px solid #fdba74', padding: '10px', borderRadius: '6px', marginTop: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span>
+                  <span style={{ color: '#c2410c', fontWeight: 'bold', fontSize: '0.9rem' }}>Đang nén và tải ảnh lên (vui lòng đợi)...</span>
+                </div>
+              )}
             </div>
 
             {/* File đính kèm */}
@@ -605,12 +615,18 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
                   onClick={() => fileInputRef.current?.click()}
                   disabled={isUploadingFile}
                   style={{
-                    width: '100%', padding: '10px', border: '1px dashed #cbd5e1', borderRadius: '6px',
-                    background: '#f8fafc', cursor: isUploadingFile ? 'wait' : 'pointer', color: '#475569',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '0.85rem'
+                    width: '100%', padding: '12px', border: '1px dashed #cbd5e1', borderRadius: '6px',
+                    background: isUploadingFile ? '#fff7ed' : '#f8fafc', 
+                    cursor: isUploadingFile ? 'wait' : 'pointer', 
+                    color: isUploadingFile ? '#c2410c' : '#475569',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', 
+                    fontSize: '0.9rem', fontWeight: isUploadingFile ? 'bold' : 'normal',
+                    borderStyle: isUploadingFile ? 'solid' : 'dashed', borderColor: isUploadingFile ? '#fdba74' : '#cbd5e1'
                   }}
                 >
-                  {isUploadingFile ? '⏳ Đang tải...' : '📎 Chọn file...'}
+                  {isUploadingFile ? (
+                    <><span style={{ animation: 'spin 1s linear infinite', display: 'inline-block' }}>⏳</span> Đang tải file lên Server...</>
+                  ) : '📎 Bấm vào đây để Chọn file đính kèm...'}
                 </button>
               )}
             </div>
@@ -643,12 +659,12 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
             <p style={{ color: '#64748b', fontStyle: 'italic', marginBottom: '20px' }}>Người đăng: {author || '[Tác giả]'} {parish ? `- ${parish}` : ''} | Ngày đăng: {publishDate ? new Date(publishDate).toLocaleDateString('vi-VN') : 'Hôm nay'}</p>
             
             {thumbnailUrl && (
-              <img src={thumbnailUrl} alt="Cover" style={{ width: '100%', borderRadius: '8px', marginBottom: '20px' }} />
+              <img loading="lazy" src={thumbnailUrl} alt="Cover" style={{ width: '100%', borderRadius: '8px', marginBottom: '20px' }} />
             )}
 
             <p style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '30px', color: '#334155' }}>{excerpt || '[Chưa nhập lời dẫn]'}</p>
             
-            <div className="article-content" dangerouslySetInnerHTML={{ __html: content || '[Chưa nhập nội dung]' }} style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#1e293b' }} />
+            <div className="article-content" dangerouslySetInnerHTML={{ __html: content ? sanitize(content) : '[Chưa nhập nội dung]' }} style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#1e293b' }} />
           </div>
         </div>
       )}
@@ -667,7 +683,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
               <input type="file" accept="image/*" onChange={handleSelectCustomImage} style={inputStyle} />
               {customImgPreview && (
                 <div style={{ marginTop: '10px', textAlign: 'center', background: '#f1f5f9', padding: '10px', borderRadius: '8px' }}>
-                  <img src={customImgPreview} style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }} alt="Preview" />
+                  <img loading="lazy" src={customImgPreview} style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }} alt="Preview" />
                 </div>
               )}
             </div>
@@ -706,3 +722,4 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
 
 const labelStyle = { display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155', fontSize: '0.9rem' };
 const inputStyle = { width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem', outlineColor: 'var(--color-brand-cyan)' };
+

@@ -21,7 +21,7 @@ export default function MainFooter() {
         {/* Cột 1: Thông tin Tòa Giám Mục */}
         <div className="footer-col">
           <div className="footer-logo">
-            <img src="/logo_gioitre_new.png" alt="Logo Giới Trẻ Bà Rịa" style={{height: '50px', marginRight: '15px'}} />
+            <img loading="lazy" src="/logo_gioitre_new.png" alt="Logo Giới Trẻ Bà Rịa" style={{height: '50px', marginRight: '15px'}} />
             <h3>GIỚI TRẺ <br/>GIÁO PHẬN BÀ RỊA</h3>
           </div>
           <p className="footer-desc">

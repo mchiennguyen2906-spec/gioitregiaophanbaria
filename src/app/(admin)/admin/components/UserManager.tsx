@@ -257,7 +257,7 @@ export default function UserManager() {
       {loading ? (
         <p>Đang tải danh sách tài khoản...</p>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px', background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+        <div style={{ overflowX: 'auto', width: '100%' }}><table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px', background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <thead>
             <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1' }}>
               <th style={thStyle}>Email</th>
@@ -332,7 +332,7 @@ export default function UserManager() {
               <tr><td colSpan={5} style={{ padding: '20px', textAlign: 'center', color: '#64748b' }}>Chưa có tài khoản nào</td></tr>
             )}
           </tbody>
-        </table>
+        </table></div>
       )}
 
       {/* Custom Delete Modal */}
@@ -360,3 +360,4 @@ const labelStyle = { display: 'block', fontWeight: 'bold', marginBottom: '8px', 
 const inputStyle = { width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem' };
 const thStyle = { padding: '12px 15px', textAlign: 'left' as const, color: '#334155' };
 const tdStyle = { padding: '12px 15px', color: '#475569' };
+

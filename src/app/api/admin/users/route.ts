@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '../../../utils/supabaseServer';
 
-// Hard-code credentials for server-side API route (service_role key is safe here — never exposed to browser)
-const supabaseUrl = 'https://spoqkzsrcphgzvmxwadd.supabase.co';
-const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwb3FrenNyY3BoZ3p2bXh3YWRkIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4OTQ0MjkxNywiZXhwIjoyMTA1MDE4OTE3fQ.vIR-P9PJPpQ8M9cedwW06F3fccQWvRohN87h-8XfbQI';
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spoqkzsrcphgzvmxwadd.supabase.co';
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 const getSupabaseAdmin = () => {
   return createClient(supabaseUrl, serviceRoleKey, {
@@ -16,6 +16,9 @@ const getSupabaseAdmin = () => {
 
 export async function POST(request: Request) {
   try {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
     const body = await request.json();
     const { email, password, role, allowedCategories } = body;
 
@@ -53,17 +56,22 @@ export async function POST(request: Request) {
     if (roleError) {
       // Rollback (Xóa auth user nếu gán quyền lỗi)
       await supabaseAdmin.auth.admin.deleteUser(userId);
-      return NextResponse.json({ success: false, error: roleError.message }, { status: 400 });
+      console.error(roleError);
+      return NextResponse.json({ success: false, error: 'Lỗi khi gán quyền tài khoản' }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, message: 'Tạo tài khoản thành công!' });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Hệ thống đang bận' }, { status: 500 });
   }
 }
 
 export async function GET(request: Request) {
   try {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
     const supabaseAdmin = getSupabaseAdmin();
 
     // Lấy danh sách users từ user_roles
@@ -73,17 +81,22 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: false });
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+      console.error(error);
+      return NextResponse.json({ success: false, error: 'Lỗi khi tải danh sách' }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, data });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Hệ thống đang bận' }, { status: 500 });
   }
 }
 
 export async function DELETE(request: Request) {
   try {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get('id');
 
@@ -97,17 +110,22 @@ export async function DELETE(request: Request) {
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId);
 
     if (error) {
-      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+      console.error(error);
+      return NextResponse.json({ success: false, error: 'Lỗi khi xóa tài khoản' }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, message: 'Xóa tài khoản thành công!' });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Hệ thống đang bận' }, { status: 500 });
   }
 }
 
 export async function PUT(request: Request) {
   try {
+    const isAdmin = await verifyAdmin();
+    if (!isAdmin) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+
     const body = await request.json();
     const { id, role, allowedCategories, status } = body;
 
@@ -129,11 +147,13 @@ export async function PUT(request: Request) {
       .eq('user_id', id);
 
     if (roleError) {
-      return NextResponse.json({ success: false, error: roleError.message }, { status: 400 });
+      console.error(roleError);
+      return NextResponse.json({ success: false, error: 'Lỗi khi cập nhật' }, { status: 400 });
     }
 
     return NextResponse.json({ success: true, message: 'Cập nhật tài khoản thành công!' });
-  } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ success: false, error: 'Hệ thống đang bận' }, { status: 500 });
   }
 }

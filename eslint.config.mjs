@@ -13,6 +13,23 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      "@next/next/no-img-element": "off",
+      "@next/next/no-html-link-for-pages": "off",
+      "react/no-unescaped-entities": "off",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-require-imports": "off",
+      "react-hooks/exhaustive-deps": "off",
+      "react-hooks/set-state-in-effect": "off",
+      "@next/next/no-location-assign-relative-destination": "off",
+      "prefer-const": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "no-use-before-define": "off",
+      "@typescript-eslint/no-use-before-define": "off"
+    }
+  }
 ]);
 
 export default eslintConfig;

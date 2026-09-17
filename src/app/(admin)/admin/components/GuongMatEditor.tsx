@@ -270,7 +270,7 @@ export default function GuongMatEditor({ articleToEdit, onSave, onPublish }: Guo
           <h3 style={boxTitleStyle}>Ảnh đại diện (Avatar) *</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {thumbnailUrl && (
-              <img src={thumbnailUrl} alt="Thumbnail" style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0', objectFit: 'cover' }} />
+              <img loading="lazy" src={thumbnailUrl} alt="Thumbnail" style={{ width: '100%', height: 'auto', borderRadius: '8px', border: '1px solid #e2e8f0', objectFit: 'cover' }} />
             )}
             <input 
               type="file" 
@@ -333,3 +333,4 @@ const primaryBtnStyle = { background: 'var(--color-brand-cyan)', color: 'white',
 const secondaryBtnStyle = { background: '#f1f5f9', color: '#475569', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };
 const checkboxStyle = { width: '16px', height: '16px', cursor: 'pointer' };
 const checkboxLabelStyle = { display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 600, fontSize: '0.9rem', marginBottom: '8px' };
+

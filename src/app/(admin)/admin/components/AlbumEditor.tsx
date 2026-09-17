@@ -170,7 +170,7 @@ export default function AlbumEditor({ onSave, onPublish, articleToEdit }: { onSa
                   )}
                   <button onClick={() => removeImage(img.id)} style={{ position: 'absolute', top: 5, right: 5, background: 'rgba(255,0,0,0.8)', color: 'white', border: 'none', borderRadius: '50%', width: '24px', height: '24px', cursor: 'pointer' }}>×</button>
                   
-                  <img src={img.url} alt="preview" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
+                  <img loading="lazy" src={img.url} alt="preview" style={{ width: '100%', height: '140px', objectFit: 'cover' }} />
                   
                   <div style={{ padding: '10px' }}>
                     <input 
@@ -229,3 +229,4 @@ const boxStyle = { background: '#f8fafc', padding: '20px', borderRadius: '8px', 
 const boxTitleStyle = { marginTop: 0, marginBottom: '15px', color: '#1e293b', fontSize: '1rem', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' };
 const primaryBtnStyle = { background: 'var(--color-brand-cyan)', color: 'white', padding: '12px', borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };
 const secondaryBtnStyle = { background: '#f1f5f9', color: '#475569', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold', width: '100%', transition: 'background 0.2s' };
+

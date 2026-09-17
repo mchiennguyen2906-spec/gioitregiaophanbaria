@@ -150,3 +150,4 @@ export default function RegistrationManager({ articles }: { articles: Article[] 
     </div>
   );
 }
+

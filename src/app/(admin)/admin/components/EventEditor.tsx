@@ -19,7 +19,7 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
 
   useEffect(() => {
     const fetchArticles = async () => {
-      const all = await getArticlesFromStore();
+      const all = await getArticlesFromStore(true);
       // Lấy các bài viết thông thường (không phải form/sự kiện) để làm bài liên kết
       setArticles(all.filter(a => a.categoryId !== 'su-kien' && a.categoryId !== 'bieu-mau'));
     };
@@ -206,3 +206,4 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
 
 const labelStyle = { display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#334155', fontSize: '0.9rem' };
 const inputStyle = { width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '1rem', outlineColor: 'var(--color-brand-cyan)' };
+

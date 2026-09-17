@@ -1,5 +1,6 @@
 "use client";
 import { supabase } from './supabaseClient';
+import { slugMap, getTitle } from './categoryMap';
 
 // Định nghĩa cấu trúc Article chuẩn
 export interface Article {
@@ -105,35 +106,41 @@ export const defaultArticles: Article[] = [
 ];
 
 
+// Hàm tiện ích để map dữ liệu từ DB (snake_case) sang Interface (camelCase)
+export const mapArticleFromDB = (item: any): Article => ({
+  id: item.id,
+  categoryId: item.category_id || item.categoryId,
+  title: item.title,
+  excerpt: item.excerpt,
+  content: item.content,
+  author: item.author,
+  parish: item.parish,
+  date: item.date,
+  thumbnailUrl: item.thumbnail_url || item.thumbnailUrl,
+  audioUrl: item.audio_url || item.audioUrl,
+  attachmentUrl: item.attachment_url || item.attachmentUrl,
+  attachmentName: item.attachment_name || item.attachmentName,
+  status: item.status,
+  isFeatured: item.is_featured || item.isFeatured,
+  isPriority: item.is_priority || item.isPriority,
+  isHomeFeatured: item.is_home_featured || item.isHomeFeatured,
+  isHomePriority: item.is_home_priority || item.isHomePriority,
+  metadata: item.metadata
+});
+
 // Khởi tạo và đọc dữ liệu từ Supabase
-export const getArticlesFromStore = async (): Promise<Article[]> => {
+export const getArticlesFromStore = async (adminMode: boolean = false): Promise<Article[]> => {
   if (typeof window === 'undefined') return []; // SSR an toàn
-  const { data, error } = await supabase.from('articles').select('*').order('date', { ascending: false });
+  let query = supabase.from('articles').select('*').order('date', { ascending: false });
+  if (!adminMode) {
+    query = query.eq('status', 'published').limit(200);
+  }
+  const { data, error } = await query;
   if (error) {
     console.error('Lỗi khi tải bài viết từ Supabase:', error);
     return defaultArticles;
   }
-  // Convert snake_case from DB to camelCase for UI
-  return data.map(item => ({
-    id: item.id,
-    categoryId: item.category_id,
-    title: item.title,
-    excerpt: item.excerpt,
-    content: item.content,
-    author: item.author,
-    parish: item.parish,
-    date: item.date,
-    thumbnailUrl: item.thumbnail_url,
-    audioUrl: item.audio_url,
-    attachmentUrl: item.attachment_url,
-    attachmentName: item.attachment_name,
-    status: item.status,
-    isFeatured: item.is_featured,
-    isPriority: item.is_priority,
-    isHomeFeatured: item.is_home_featured,
-    isHomePriority: item.is_home_priority,
-    metadata: item.metadata
-  }));
+  return data.map(mapArticleFromDB);
 };
 
 // Trigger UI re-render

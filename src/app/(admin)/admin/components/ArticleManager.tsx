@@ -6,6 +6,7 @@ import RegistrationManager from './RegistrationManager';
 export default function ArticleManager({ categoryId, categoryName, onEdit, onCreateNew, onViewQuestions }: { categoryId: string, categoryName: string, onEdit: (article: Article) => void, onCreateNew: () => void, onViewQuestions?: () => void }) {
   const [articles, setArticles] = useState<Article[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -15,7 +16,7 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
   useEffect(() => {
     // Load from Supabase and filter by categoryId
     const loadArticles = async () => {
-      const all = await getArticlesFromStore();
+      const all = await getArticlesFromStore(true);
       if (categoryId) {
         setArticles(all.filter(a => a.categoryId === categoryId));
       } else {
@@ -32,7 +33,15 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
   // Reset page when search or category changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, categoryId]);
+  }, [debouncedSearchTerm, categoryId]);
+
+  // Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
 
   const [questionsCount, setQuestionsCount] = useState(0);
 
@@ -61,8 +70,8 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
 
   // Filter and Paginate
   const filteredArticles = articles.filter(a => 
-    a.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (a.author && a.author.toLowerCase().includes(searchTerm.toLowerCase()))
+    a.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
+    (a.author && a.author.toLowerCase().includes(debouncedSearchTerm.toLowerCase()))
   );
   
   const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
@@ -125,7 +134,7 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
         <RegistrationManager articles={articles} />
       ) : (
         <>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+          <div style={{ overflowX: 'auto', width: '100%' }}><table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
             <thead>
           <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
             <th style={{ padding: '12px', width: '30%' }}>Tên Bài Viết</th>
@@ -177,7 +186,7 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
             ))
           )}
         </tbody>
-      </table>
+      </table></div>
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
@@ -233,3 +242,4 @@ const actionBtnStyle = (color: string) => ({
   fontSize: '1rem',
   transition: 'all 0.2s'
 });
+

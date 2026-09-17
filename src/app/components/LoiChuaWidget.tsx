@@ -61,7 +61,7 @@ export default function LoiChuaWidget() {
               </h4>
             </div>
             <a href={`/${todayArticle.categoryId}/${todayArticle.id}`}>
-              <img src={todayArticle.thumbnailUrl || "https://images.unsplash.com/photo-1570222094114-d054a817e56b?q=80&w=200&auto=format&fit=crop"} style={{ width: '70px', height: '55px', objectFit: 'cover', borderRadius: '4px' }} alt={todayArticle.title} />
+              <img loading="lazy" src={todayArticle.thumbnailUrl || "https://images.unsplash.com/photo-1570222094114-d054a817e56b?q=80&w=200&auto=format&fit=crop"} style={{ width: '70px', height: '55px', objectFit: 'cover', borderRadius: '4px' }} alt={todayArticle.title} />
             </a>
           </div>
         ) : null}
@@ -91,7 +91,7 @@ export default function LoiChuaWidget() {
             textDecoration: 'none',
             borderRadius: '8px'
           }}>
-            <img src="https://images.unsplash.com/photo-1507434965515-61970f2bd7c6?q=80&w=200&auto=format&fit=crop" style={{ width: '75px', height: '100%', objectFit: 'cover' }} alt="Suy niệm" />
+            <img loading="lazy" src="https://images.unsplash.com/photo-1507434965515-61970f2bd7c6?q=80&w=200&auto=format&fit=crop" style={{ width: '75px', height: '100%', objectFit: 'cover' }} alt="Suy niệm" />
             <div style={{ flex: 1, textAlign: 'center', color: '#dc2626', fontWeight: 'bold', fontSize: '1.1rem', lineHeight: '1.3' }}>
               Suy Niệm<br />Tin Mừng Chúa Nhật
             </div>

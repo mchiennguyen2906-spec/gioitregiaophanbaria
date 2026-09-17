@@ -6,10 +6,16 @@ import MassTicker from "../components/MassTicker";
 import BibleTicker from "../components/BibleTicker";
 import MainFooter from "../components/MainFooter";
 import Image from "next/image";
+import BackToTop from "../components/BackToTop";
 
 export const metadata: Metadata = {
   title: "Giới Trẻ Giáo Phận Bà Rịa",
   description: "Trang thông tin cộng đồng Giới trẻ Giáo phận Bà Rịa - Cập nhật sự kiện, hoạt động tình nguyện, và nhịp sống trẻ.",
+};
+
+import type { Viewport } from 'next'
+export const viewport: Viewport = {
+  themeColor: '#b91c1c',
 };
 
 export default function RootLayout({
@@ -29,7 +35,7 @@ export default function RootLayout({
             <div className="container header-content">
               <div className="header-left" style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
                 <div className="header-logo" style={{flex: 'unset'}}>
-                  <img src="/logo_gioitre_new.png" alt="Logo Giới Trẻ Bà Rịa" />
+                  <img loading="lazy" src="/logo_gioitre_new.png" alt="Logo Giới Trẻ Bà Rịa" />
                 </div>
                 <div className="header-title" style={{flex: 'unset', alignItems: 'flex-start', padding: 0, textAlign: 'left'}}>
                   <div className="title-top">GIỚI TRẺ</div>
@@ -151,6 +157,7 @@ export default function RootLayout({
         
         {/* FOOTER */}
         <MainFooter />
+        <BackToTop />
       </body>
     </html>
   );

@@ -1,8 +1,10 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import { getTitle } from '../../../../utils/categoryMap';
+import QuestionFormPopup from '../../../../components/QuestionFormPopup';
 
 export default function ArticleDetail({ params }: { params: any }) {
+  const [showQuestionPopup, setShowQuestionPopup] = useState(false);
   // Xử lý params cho Next.js 15+ 
   const resolvedParams = params instanceof Promise ? React.use(params) : params;
   const category = resolvedParams?.category || '';
@@ -17,6 +19,38 @@ export default function ArticleDetail({ params }: { params: any }) {
 
   return (
     <div style={{ background: '#f8fafc', paddingBottom: '60px' }}>
+      {showQuestionPopup && <QuestionFormPopup onClose={() => setShowQuestionPopup(false)} />}
+      
+      {slug === 'tam-ly' && (
+        <button 
+          onClick={() => setShowQuestionPopup(true)}
+          style={{
+            position: 'fixed',
+            bottom: '30px',
+            right: '30px',
+            backgroundColor: 'var(--color-brand-cyan)',
+            color: 'white',
+            border: 'none',
+            borderRadius: '50%',
+            width: '60px',
+            height: '60px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 9999,
+            transition: 'transform 0.2s ease',
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          title="Gửi câu hỏi ẩn danh"
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+      )}
       
       {/* Breadcrumb */}
       <div className="container" style={{ padding: '20px 15px' }}>
@@ -147,7 +181,7 @@ export default function ArticleDetail({ params }: { params: any }) {
               flexDirection: 'column'
             }}>
               <div style={{ height: '160px', overflow: 'hidden' }}>
-                <img src={`https://images.unsplash.com/photo-${1510000000000 + item}?q=80&w=400&auto=format&fit=crop`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Thumb" />
+                <img loading="lazy" src={`https://images.unsplash.com/photo-${1510000000000 + item}?q=80&w=400&auto=format&fit=crop`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Thumb" />
               </div>
               <div style={{ padding: '15px' }}>
                 <h3 style={{ fontSize: '1rem', color: 'var(--color-text-heading)', fontWeight: 700, marginBottom: '8px', lineHeight: 1.4 }}>

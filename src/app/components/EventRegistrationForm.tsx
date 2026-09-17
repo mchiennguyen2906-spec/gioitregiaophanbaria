@@ -68,6 +68,15 @@ export default function EventRegistrationForm() {
       alert("Vui lòng điền đầy đủ các thông tin bắt buộc (*)");
       return;
     }
+    const phoneRegex = /^(0|\+84)[3|5|7|8|9][0-9]{8}$/;
+    if (!phoneRegex.test(formData.phone.replace(/\s/g, ''))) {
+      alert("Số điện thoại không hợp lệ. Vui lòng nhập đúng định dạng Việt Nam.");
+      return;
+    }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      alert("Email không hợp lệ. Vui lòng kiểm tra lại.");
+      return;
+    }
     setStep(2);
   };
 
@@ -326,7 +335,7 @@ export default function EventRegistrationForm() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {events.slice(0, 3).map((item, idx) => (
                 <a key={idx} href={`/${item.categoryId}/${item.id}`} style={{ display: 'flex', gap: '12px', alignItems: 'center', textDecoration: 'none' }}>
-                  <img src={item.thumbnailUrl || 'https://via.placeholder.com/80x65?text=Event'} style={{ width: '80px', height: '65px', objectFit: 'cover', borderRadius: '6px' }} alt="Thumb" />
+                  <img loading="lazy" src={item.thumbnailUrl || 'https://via.placeholder.com/80x65?text=Event'} style={{ width: '80px', height: '65px', objectFit: 'cover', borderRadius: '6px' }} alt="Thumb" />
                   <div>
                     <h4 style={{ fontSize: '0.9rem', marginBottom: '5px', color: 'var(--color-text-heading)', lineHeight: '1.4', fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.title}</h4>
                     <span style={{ fontSize: '0.75rem', color: 'var(--color-brand-cyan)', fontWeight: 'bold' }}>Tìm hiểu thêm &raquo;</span>
