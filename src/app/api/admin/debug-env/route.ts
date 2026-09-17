@@ -9,6 +9,7 @@ export async function GET(request: Request) {
     serviceRolePrefix: serviceRole ? serviceRole.substring(0, 15) : "MISSING",
     serviceRoleLength: serviceRole ? serviceRole.length : 0,
     isMatchingAnon: serviceRole === anonKey,
-    anonKeyPrefix: anonKey ? anonKey.substring(0, 15) : "MISSING"
+    anonKeyPrefix: anonKey ? anonKey.substring(0, 15) : "MISSING",
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL
   });
 }
