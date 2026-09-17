@@ -40,7 +40,7 @@ export default function AdminLoginPage() {
       }
 
       // Đăng nhập thành công
-      router.push('/admin');
+      window.location.href = '/admin';
     } catch (err) {
       console.error('Login error:', err);
       setErrorMsg('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.');
