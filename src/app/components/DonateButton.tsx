@@ -13,10 +13,9 @@ export default function DonateButton() {
     if (isOpen) {
       const loadDonations = async () => {
         const allDonations = await getDonationsFromStore();
-        const activeDonations = allDonations
-          .filter(d => !d.isCompleted)
+        const sortedDonations = allDonations
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        setDonations(activeDonations.slice(0, 5));
+        setDonations(sortedDonations.slice(0, 5));
       };
       loadDonations();
       window.addEventListener('donation_update', loadDonations);
@@ -122,7 +121,12 @@ export default function DonateButton() {
                   <div key={donation.id} style={{marginBottom: '30px', paddingBottom: '30px', borderBottom: '1px dashed #e2e8f0'}}>
                     <div style={{display: 'flex', gap: '20px'}}>
                       <div style={{flex: 1}}>
-                        <h4 style={{margin: '0 0 8px 0', fontSize: '1.1rem', color: 'var(--color-text-heading)'}}>{index + 1}. {donation.name}</h4>
+                        <h4 style={{margin: '0 0 8px 0', fontSize: '1.1rem', color: 'var(--color-text-heading)'}}>
+                          {index + 1}. {donation.name}
+                          {donation.isCompleted && (
+                            <span style={{ fontSize: '0.8rem', background: '#22c55e', color: 'white', padding: '3px 8px', borderRadius: '4px', marginLeft: '10px', verticalAlign: 'middle', fontWeight: 'bold' }}>✓ Đã hoàn thành</span>
+                          )}
+                        </h4>
                         <p style={{margin: '0 0 15px 0', fontSize: '0.9rem', color: '#64748b', lineHeight: 1.5, whiteSpace: 'pre-wrap'}}>{donation.description}</p>
                         
                         <div style={{background: '#f1f5f9', height: '6px', borderRadius: '3px', marginBottom: '10px', overflow: 'hidden'}}>
@@ -143,12 +147,14 @@ export default function DonateButton() {
                                 Xem chi tiết bài viết ➔
                               </a>
                             )}
-                            <button 
-                              onClick={() => setExpandedId(isExpanded ? null : donation.id)}
-                              style={{background: isExpanded ? '#475569' : 'var(--color-brand-cyan)', color: 'white', border: 'none', padding: '6px 15px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold'}}
-                            >
-                              {isExpanded ? 'Đóng Lại' : 'Đóng Góp Ngay ➔'}
-                            </button>
+                            {!donation.isCompleted && (
+                              <button 
+                                onClick={() => setExpandedId(isExpanded ? null : donation.id)}
+                                style={{background: isExpanded ? '#475569' : 'var(--color-brand-cyan)', color: 'white', border: 'none', padding: '6px 15px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 'bold'}}
+                              >
+                                {isExpanded ? 'Đóng Lại' : 'Đóng Góp Ngay ➔'}
+                              </button>
+                            )}
                           </div>
                         </div>
 
