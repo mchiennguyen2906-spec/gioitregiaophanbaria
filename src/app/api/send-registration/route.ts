@@ -85,6 +85,7 @@ export async function POST(request: Request) {
     const info = await transporter.sendMail({
       from: `"Website Hệ Thống" <${user}>`, // sender address
       to: toEmail, // receiver
+      cc: (email && isValidEmail(email)) ? email : undefined, // CC cho người đăng ký
       bcc: user, // Always send a copy to the admin email
       subject: `[Đăng Ký Mới] ${fullName} - ${eventName || eventId}`, // Subject line
       html: htmlContent, // html body
