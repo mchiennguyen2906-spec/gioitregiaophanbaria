@@ -1,10 +1,29 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { supabase } from '../../utils/supabaseClient';
 
 export async function POST(request: Request) {
   try {
     const data = await request.json();
     const { orgId, eventId, eventName, fullName, phone, email, parish, address, organizerEmail } = data;
+
+    // Lưu vào database
+    const { error: dbError } = await supabase.from('event_registrations').insert({
+      event_id: eventId,
+      event_name: eventName,
+      org_id: orgId,
+      full_name: fullName,
+      phone,
+      email,
+      parish,
+      address
+    });
+
+    if (dbError) {
+      console.error('Lỗi khi lưu vào database:', dbError);
+      // Tiếp tục thực hiện gửi email kể cả khi lưu DB có lỗi, để đảm bảo luồng cũ vẫn chạy.
+      // Tuy nhiên có thể ném lỗi nếu muốn bắt buộc phải lưu DB thành công.
+    }
 
     // Use provided env vars or default to a dummy log mechanism if not configured
     const user = process.env.SMTP_EMAIL || '';

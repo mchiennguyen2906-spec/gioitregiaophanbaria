@@ -13,6 +13,7 @@ export default function CourseEditor({ onSave, onPublish, articleToEdit }: { onS
   const [location, setLocation] = useState('');
   const [lessonCount, setLessonCount] = useState('');
   const [certType, setCertType] = useState('Cấp Chứng Chỉ (Có phôi chuẩn)');
+  const [organizerNotes, setOrganizerNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const [lessons, setLessons] = useState([{ id: 1, title: '', trainer: '', time: '' }]);
@@ -37,6 +38,7 @@ export default function CourseEditor({ onSave, onPublish, articleToEdit }: { onS
         setLocation(articleToEdit.metadata.location || '');
         setLessonCount(articleToEdit.metadata.lessonCount || '');
         setCertType(articleToEdit.metadata.certType || 'Cấp Chứng Chỉ (Có phôi chuẩn)');
+        setOrganizerNotes(articleToEdit.metadata.organizerNotes || '');
         setLessons(articleToEdit.metadata.lessons || [{ id: 1, title: '', trainer: '', time: '' }]);
         setCustomFields(articleToEdit.metadata.customFields || [{ id: 1, label: 'Giáo xứ', type: 'text' }]);
       }
@@ -69,6 +71,7 @@ export default function CourseEditor({ onSave, onPublish, articleToEdit }: { onS
           location,
           lessonCount,
           certType,
+          organizerNotes,
           lessons,
           customFields
         }
@@ -237,6 +240,16 @@ export default function CourseEditor({ onSave, onPublish, articleToEdit }: { onS
               </div>
             ))}
             <button onClick={addCustomField} style={{ marginTop: '10px', padding: '8px 15px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>+ Thêm Trường Tùy Chỉnh</button>
+          </div>
+
+          <div>
+            <label style={labelStyle}>Lưu ý của Ban tổ chức (Dặn dò học viên/người tham gia)</label>
+            <textarea 
+              style={{...inputStyle, minHeight: '80px', resize: 'vertical'}} 
+              placeholder="Ví dụ: Các bạn học viên nhớ mang theo sách, có mặt lúc 7h00 sáng..." 
+              value={organizerNotes} 
+              onChange={e => setOrganizerNotes(e.target.value)} 
+            />
           </div>
           
         </div>

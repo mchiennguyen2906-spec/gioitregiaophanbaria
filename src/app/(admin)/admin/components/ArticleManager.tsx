@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getArticlesFromStore, toggleArticleStatus, deleteArticle, Article, getQuestionsFromStore } from "../../../utils/store";
 import toast from 'react-hot-toast';
+import RegistrationManager from './RegistrationManager';
 
 export default function ArticleManager({ categoryId, categoryName, onEdit, onCreateNew, onViewQuestions }: { categoryId: string, categoryName: string, onEdit: (article: Article) => void, onCreateNew: () => void, onViewQuestions?: () => void }) {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -8,6 +9,8 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const isEventOrCourse = categoryId === 'su-kien' || categoryId === 'lich-hoc';
+  const [activeTab, setActiveTab] = useState<'articles' | 'registrations'>('articles');
 
   useEffect(() => {
     // Load from Supabase and filter by categoryId
@@ -71,13 +74,32 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
         <h2 style={{ color: 'var(--color-brand-cyan)', margin: 0 }}>Quản lý: {categoryName || 'Tất cả'}</h2>
         
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <input 
-            type="text" 
-            placeholder="🔍 Tìm kiếm bài viết, tác giả..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '250px' }}
-          />
+          {isEventOrCourse && activeTab === 'articles' && (
+            <button onClick={() => setActiveTab('registrations')} style={{
+              background: '#f8fafc', color: '#1e293b', padding: '8px 15px', 
+              borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
+            }}>
+              📋 Xem Danh sách Đăng ký
+            </button>
+          )}
+          {isEventOrCourse && activeTab === 'registrations' && (
+            <button onClick={() => setActiveTab('articles')} style={{
+              background: '#f8fafc', color: '#1e293b', padding: '8px 15px', 
+              borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
+            }}>
+              ← Quay lại Quản lý Bài viết
+            </button>
+          )}
+
+          {activeTab === 'articles' && (
+            <input 
+              type="text" 
+              placeholder="🔍 Tìm kiếm bài viết, tác giả..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', width: '250px' }}
+            />
+          )}
 
           {categoryId === 'tam-ly' && onViewQuestions && (
             <button onClick={onViewQuestions} style={{
@@ -87,18 +109,24 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
               📋 Câu hỏi ({questionsCount})
             </button>
           )}
-          <button onClick={onCreateNew} style={{
-            background: 'var(--color-brand-cyan)', color: 'white', padding: '8px 15px', 
-            borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold',
-            boxShadow: '0 2px 4px rgba(6,182,212,0.3)'
-          }}>
-            + TẠO BÀI MỚI
-          </button>
+          {activeTab === 'articles' && (
+            <button onClick={onCreateNew} style={{
+              background: 'var(--color-brand-cyan)', color: 'white', padding: '8px 15px', 
+              borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold',
+              boxShadow: '0 2px 4px rgba(6,182,212,0.3)'
+            }}>
+              + TẠO BÀI MỚI
+            </button>
+          )}
         </div>
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
-        <thead>
+      {activeTab === 'registrations' ? (
+        <RegistrationManager articles={articles} />
+      ) : (
+        <>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px' }}>
+            <thead>
           <tr style={{ background: '#f8fafc', borderBottom: '2px solid #cbd5e1', textAlign: 'left' }}>
             <th style={{ padding: '12px', width: '30%' }}>Tên Bài Viết</th>
             <th style={{ padding: '12px' }}>Người Đăng</th>
@@ -187,6 +215,8 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
             </div>
           </div>
         </div>
+      )}
+      </>
       )}
     </div>
   );

@@ -510,6 +510,28 @@ export const getTodayMassesFromStore = async (dateStr?: string): Promise<TodayMa
   return data;
 };
 
+export interface EventRegistration {
+  id: string;
+  event_id?: string;
+  eventTitle?: string;
+  fullName: string;
+  phone: string;
+  email?: string;
+  parish?: string;
+  notes?: string;
+  createdAt: string;
+  [key: string]: any;
+}
+
+export async function getRegistrations(): Promise<EventRegistration[]> {
+  const { data, error } = await supabase.from('event_registrations').select('*').order('created_at', { ascending: false });
+  if (error) {
+    console.error('Error fetching registrations:', error);
+    return [];
+  }
+  return data as EventRegistration[];
+}
+
 export const saveTodayMassToStore = async (mass: Omit<TodayMass, 'id' | 'is_custom'>) => {
   const payload = {
     parish_name: mass.parish_name,

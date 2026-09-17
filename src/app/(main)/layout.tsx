@@ -87,8 +87,8 @@ export default function RootLayout({
                 <li className="nav-item">
                   <a href="#" className="nav-link">ĐÀO TẠO & ĐĂNG KÝ ▾</a>
                   <div className="dropdown-menu">
-                    <a href="/dao-tao/lich-hoc" className="dropdown-item">Lịch học Khai giảng</a>
-                    <a href="/dao-tao/su-kien" className="dropdown-item">Đăng ký Khóa học - Sự kiện</a>
+                    <a href="/dao-tao/lich-hoc" className="dropdown-item">Lịch Khóa học</a>
+                    <a href="/dao-tao/su-kien" className="dropdown-item">Lịch Sự kiện</a>
                   </div>
                 </li>
 

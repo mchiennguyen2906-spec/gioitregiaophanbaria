@@ -61,8 +61,8 @@ export default function MobileMenu() {
               <a href="#" onClick={(e) => toggleSub(e, 'dao-tao')}>ĐÀO TẠO & ĐĂNG KÝ <span className="caret">{openSubmenu === 'dao-tao' ? '▴' : '▾'}</span></a>
               {openSubmenu === 'dao-tao' && (
                 <ul className="mobile-sub-list">
-                  <li><a href="/dao-tao/lich-hoc">Lịch học Khai giảng</a></li>
-                  <li><a href="/dao-tao/su-kien">Đăng ký Khóa học - Sự kiện</a></li>
+                  <li><a href="/dao-tao/lich-hoc">Lịch Khóa học</a></li>
+                  <li><a href="/dao-tao/su-kien">Lịch Sự kiện</a></li>
                 </ul>
               )}
             </li>

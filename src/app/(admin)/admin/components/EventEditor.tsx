@@ -13,6 +13,7 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
   const [contactName, setContactName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
+  const [organizerNotes, setOrganizerNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -34,6 +35,7 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
         setContactName(articleToEdit.metadata.contactName || '');
         setPhone(articleToEdit.metadata.phone || '');
         setEmail(articleToEdit.metadata.email || '');
+        setOrganizerNotes(articleToEdit.metadata.organizerNotes || '');
       }
     }
   }, [articleToEdit]);
@@ -57,7 +59,8 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
           organizer,
           contactName,
           phone,
-          email
+          email,
+          organizerNotes
         }
       };
 
@@ -153,9 +156,19 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
                 <input style={inputStyle} type="text" placeholder="SĐT liên hệ..." value={phone} onChange={e => setPhone(e.target.value)} />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Email (Tùy chọn)</label>
-                <input style={inputStyle} type="email" placeholder="Email hỗ trợ..." value={email} onChange={e => setEmail(e.target.value)} />
+                <label style={labelStyle}>Email nhận thông báo (Không bắt buộc)</label>
+                <input style={inputStyle} type="email" placeholder="Ví dụ: gioitrebvt@gmail.com" value={email} onChange={e => setEmail(e.target.value)} />
               </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Lưu ý của Ban tổ chức (Dặn dò học viên/người tham gia)</label>
+              <textarea 
+                style={{...inputStyle, minHeight: '80px', resize: 'vertical'}} 
+                placeholder="Ví dụ: Các bạn nhớ mang theo áo đồng phục, có mặt lúc 7h00 sáng..." 
+                value={organizerNotes} 
+                onChange={e => setOrganizerNotes(e.target.value)} 
+              />
             </div>
             
             <div style={{ marginTop: '20px', background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>

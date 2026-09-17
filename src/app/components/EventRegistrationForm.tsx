@@ -18,6 +18,7 @@ export default function EventRegistrationForm() {
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setStep] = useState(1);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -61,13 +62,16 @@ export default function EventRegistrationForm() {
     }
   };
 
-  const handleStep1Submit = async (e: React.FormEvent) => {
+  const handleStep1Submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.eventId || !formData.fullName || !formData.phone || !formData.parish) {
       alert("Vui lòng điền đầy đủ các thông tin bắt buộc (*)");
       return;
     }
-    
+    setStep(2);
+  };
+
+  const submitRegistration = async () => {
     const currentEvent = events.find(ev => ev.id === formData.eventId);
     const organizerEmail = currentEvent?.metadata?.email;
     
@@ -125,6 +129,7 @@ export default function EventRegistrationForm() {
           {loadingEvents ? (
             <div style={{ padding: '40px', textAlign: 'center', color: '#64748b' }}>Đang tải danh sách sự kiện...</div>
           ) : (
+            step === 1 ? (
             <form onSubmit={handleStep1Submit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   
                   {/* PHẦN 1: THÔNG TIN SỰ KIỆN */}
@@ -223,17 +228,84 @@ export default function EventRegistrationForm() {
                   <div style={{ marginTop: '10px' }}>
                     <button 
                       type="submit" 
-                      disabled={isSubmitting}
                       style={{ 
-                        background: isSubmitting ? '#94a3b8' : 'var(--color-brand-red)', 
+                        background: 'var(--color-brand-cyan)', 
                         color: 'white', border: 'none', padding: '15px 30px', fontSize: '1.1rem', fontWeight: 'bold', borderRadius: '8px', 
-                        cursor: isSubmitting ? 'not-allowed' : 'pointer', width: '100%', 
-                        boxShadow: isSubmitting ? 'none' : '0 4px 12px rgba(220, 38, 38, 0.3)', transition: 'all 0.3s' 
+                        cursor: 'pointer', width: '100%', 
+                        boxShadow: '0 4px 12px rgba(6, 182, 212, 0.3)', transition: 'all 0.3s' 
                       }}>
-                      {isSubmitting ? 'ĐANG XỬ LÝ VÀ GỬI THÔNG TIN...' : 'GỬI BIỂU MẪU & ĐĂNG KÝ'}
+                      TIẾP TỤC BƯỚC XÁC NHẬN ➔
                     </button>
                   </div>
                 </form>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '25px' }}>
+                  <h3 style={{ fontSize: '1.2rem', color: '#0f172a', margin: '0 0 15px 0', borderBottom: '2px solid #e2e8f0', paddingBottom: '10px' }}>Kiểm tra lại thông tin</h3>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', color: '#334155' }}>
+                    <div style={{ gridColumn: '1 / -1' }}>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#64748b' }}>Sự kiện / Khóa học đăng ký:</p>
+                      <p style={{ margin: 0, fontWeight: 'bold', fontSize: '1.1rem', color: 'var(--color-brand-red)' }}>{currentEvent?.title}</p>
+                    </div>
+                    <div>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#64748b' }}>Họ và tên:</p>
+                      <p style={{ margin: 0, fontWeight: 'bold' }}>{formData.fullName}</p>
+                    </div>
+                    <div>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#64748b' }}>Số điện thoại:</p>
+                      <p style={{ margin: 0, fontWeight: 'bold' }}>{formData.phone}</p>
+                    </div>
+                    <div>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#64748b' }}>Email:</p>
+                      <p style={{ margin: 0, fontWeight: 'bold' }}>{formData.email || 'Không cung cấp'}</p>
+                    </div>
+                    <div>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#64748b' }}>Giáo xứ:</p>
+                      <p style={{ margin: 0, fontWeight: 'bold' }}>{formData.parish}</p>
+                    </div>
+                    <div style={{ gridColumn: '1 / -1' }}>
+                      <p style={{ margin: '0 0 5px 0', fontSize: '0.9rem', color: '#64748b' }}>Địa chỉ:</p>
+                      <p style={{ margin: 0, fontWeight: 'bold' }}>{formData.address || 'Không cung cấp'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {currentEvent?.metadata?.organizerNotes && (
+                  <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '8px', padding: '20px' }}>
+                    <h3 style={{ margin: '0 0 10px 0', color: '#b91c1c', fontSize: '1.1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span>⚠️</span> Lưu ý từ Ban Tổ Chức
+                    </h3>
+                    <p style={{ margin: 0, color: '#7f1d1d', whiteSpace: 'pre-wrap', lineHeight: '1.6' }}>
+                      {currentEvent.metadata.organizerNotes}
+                    </p>
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', gap: '15px' }}>
+                  <button 
+                    onClick={() => setStep(1)}
+                    disabled={isSubmitting}
+                    style={{ 
+                      flex: 1, background: '#f1f5f9', color: '#334155', border: '1px solid #cbd5e1', 
+                      padding: '15px', fontSize: '1.1rem', fontWeight: 'bold', borderRadius: '8px', 
+                      cursor: isSubmitting ? 'not-allowed' : 'pointer', transition: 'all 0.3s' 
+                    }}>
+                    ← CHỈNH SỬA LẠI
+                  </button>
+                  <button 
+                    onClick={submitRegistration}
+                    disabled={isSubmitting}
+                    style={{ 
+                      flex: 1, background: isSubmitting ? '#94a3b8' : 'var(--color-brand-red)', color: 'white', border: 'none', 
+                      padding: '15px', fontSize: '1.1rem', fontWeight: 'bold', borderRadius: '8px', 
+                      cursor: isSubmitting ? 'not-allowed' : 'pointer', boxShadow: isSubmitting ? 'none' : '0 4px 12px rgba(220, 38, 38, 0.3)', transition: 'all 0.3s' 
+                    }}>
+                    {isSubmitting ? 'ĐANG GỬI...' : 'XÁC NHẬN GỬI'}
+                  </button>
+                </div>
+              </div>
+            )
           )}
 
         </div>
