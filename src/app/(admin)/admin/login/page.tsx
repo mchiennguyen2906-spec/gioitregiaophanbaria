@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../../../utils/supabaseClient';
+import { loginWithEmail } from './actions';
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
@@ -16,26 +16,10 @@ export default function AdminLoginPage() {
     setErrorMsg('');
     
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const result = await loginWithEmail(email, password);
 
-      if (error) {
-        setErrorMsg('Đăng nhập thất bại: ' + error.message);
-        return;
-      }
-
-      // Check user role status
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('status')
-        .eq('user_id', data.user.id)
-        .single();
-      
-      if (roleData && roleData.status === 'locked') {
-        await supabase.auth.signOut();
-        setErrorMsg('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ Admin.');
+      if (result.error) {
+        setErrorMsg('Đăng nhập thất bại: ' + result.error);
         return;
       }
 
