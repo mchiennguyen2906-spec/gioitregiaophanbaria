@@ -452,6 +452,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
               <label style={labelStyle}>Nội dung bài viết *</label>
               <div style={{ background: '#fff', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
                 <ReactQuill 
+                  // @ts-expect-error
                   ref={quillRef}
                   theme="snow"
                   value={content}
