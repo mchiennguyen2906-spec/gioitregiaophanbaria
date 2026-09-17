@@ -23,9 +23,9 @@ export default function EventRegistrationForm() {
   useEffect(() => {
     const fetchEvents = async () => {
       const allArticles = await getArticlesFromStore();
-      // Filter articles that are events and have metadata
+      // Filter articles that are events/courses and have metadata
       const validEvents = allArticles.filter(a => 
-        (a.categoryId === 'su-kien') && 
+        (a.categoryId === 'su-kien' || a.categoryId === 'lich-hoc' || a.categoryId === 'bieu-mau') && 
         a.metadata && a.metadata.organizer
       );
       
@@ -95,6 +95,12 @@ export default function EventRegistrationForm() {
       });
       
       const result = await response.json();
+      
+      // Log server diagnostics
+      if (result.logs) {
+        console.log('--- Server Logs ---');
+        result.logs.forEach((l: string) => console.log(l));
+      }
       
       if (result.success) {
         alert("Chúc mừng bạn đã đăng ký thành công!");

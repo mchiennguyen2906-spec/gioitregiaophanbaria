@@ -3,9 +3,14 @@ import nodemailer from 'nodemailer';
 import { supabase } from '../../utils/supabaseClient';
 
 export async function POST(request: Request) {
+  const logs: string[] = [];
+  const log = (msg: string) => { console.log(msg); logs.push(msg); };
+
   try {
     const data = await request.json();
     const { orgId, eventId, eventName, fullName, phone, email, parish, address, organizerEmail } = data;
+    log(`[1/5] Received registration: ${fullName} for ${eventName}`);
+    log(`[1/5] organizerEmail from frontend: "${organizerEmail}"`);
 
     // Lưu vào database
     const { error: dbError } = await supabase.from('event_registrations').insert({
@@ -20,18 +25,26 @@ export async function POST(request: Request) {
     });
 
     if (dbError) {
-      console.error('Lỗi khi lưu vào database:', dbError);
-      // Tiếp tục thực hiện gửi email kể cả khi lưu DB có lỗi, để đảm bảo luồng cũ vẫn chạy.
-      // Tuy nhiên có thể ném lỗi nếu muốn bắt buộc phải lưu DB thành công.
+      log(`[2/5] ❌ DB insert failed: ${dbError.message}`);
+    } else {
+      log(`[2/5] ✅ DB insert success`);
     }
 
-    // Use provided env vars or default to a dummy log mechanism if not configured
+    // SMTP config
     const user = process.env.SMTP_EMAIL || '';
     const pass = process.env.SMTP_PASSWORD || '';
     const host = process.env.SMTP_HOST || 'smtp.gmail.com';
     const port = Number(process.env.SMTP_PORT) || 465;
 
-    // Build the email HTML content
+    log(`[3/5] SMTP config: host=${host}, port=${port}, user=${user ? user.substring(0, 5) + '***' : 'EMPTY'}, pass=${pass ? '***SET***' : 'EMPTY'}`);
+
+    if (!user || !pass) {
+      log(`[3/5] ❌ SMTP credentials missing! Simulating email.`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      return NextResponse.json({ success: true, message: 'Simulated (no SMTP creds)', logs });
+    }
+
+    // Build email HTML
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
         <div style="background: #0f766e; color: white; padding: 20px; text-align: center;">
@@ -57,45 +70,43 @@ export async function POST(request: Request) {
       </div>
     `;
 
-    if (!user || !pass) {
-      console.log('--- MÔ PHỎNG GỬI EMAIL THÀNH CÔNG (Chưa cấu hình SMTP) ---');
-      console.log('To:', organizerEmail);
-      console.log('Subject:', `[Đăng Ký Mới] ${eventName || eventId}`);
-      console.log('HTML Body (Length):', htmlContent.length);
-      console.log('---------------------------------------------------------');
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return NextResponse.json({ success: true, message: 'Simulated email sent' });
-    }
-
     const transporter = nodemailer.createTransport({
       host,
       port,
-      secure: port === 465, // true for 465, false for other ports
-      auth: {
-        user,
-        pass,
-      },
+      secure: port === 465,
+      auth: { user, pass },
     });
 
-    const isValidEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    // Verify SMTP connection
+    try {
+      await transporter.verify();
+      log(`[4/5] ✅ SMTP connection verified`);
+    } catch (verifyErr: any) {
+      log(`[4/5] ❌ SMTP verify failed: ${verifyErr.message}`);
+      return NextResponse.json({ success: false, error: `SMTP connection failed: ${verifyErr.message}`, logs }, { status: 500 });
+    }
+
+    const isValidEmail = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e);
     const toEmail = (organizerEmail && isValidEmail(organizerEmail)) ? organizerEmail : user;
+    const ccEmail = (email && isValidEmail(email)) ? email : undefined;
+
+    log(`[5/5] Sending email: to=${toEmail}, cc=${ccEmail || 'none'}, bcc=${user}`);
 
     const info = await transporter.sendMail({
-      from: `"Website Hệ Thống" <${user}>`, // sender address
-      to: toEmail, // receiver
-      cc: (email && isValidEmail(email)) ? email : undefined, // CC cho người đăng ký
-      bcc: user, // Always send a copy to the admin email
-      subject: `[Đăng Ký Mới] ${fullName} - ${eventName || eventId}`, // Subject line
-      html: htmlContent, // html body
+      from: `"Website Giới Trẻ GP Bà Rịa" <${user}>`,
+      to: toEmail,
+      cc: ccEmail,
+      bcc: user,
+      subject: `[Đăng Ký Mới] ${fullName} - ${eventName || eventId}`,
+      html: htmlContent,
     });
 
-    console.log("Message sent: %s", info.messageId);
-    return NextResponse.json({ success: true, message: 'Email sent successfully', messageId: info.messageId });
+    log(`[5/5] ✅ Email sent! messageId: ${info.messageId}`);
+    return NextResponse.json({ success: true, message: 'Email sent successfully', messageId: info.messageId, logs });
 
   } catch (error: any) {
-    console.error('Lỗi khi gửi email:', error);
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    log(`❌ FATAL ERROR: ${error.message}`);
+    console.error('Full error:', error);
+    return NextResponse.json({ success: false, error: error.message, logs }, { status: 500 });
   }
 }
