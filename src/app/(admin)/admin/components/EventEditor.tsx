@@ -37,7 +37,7 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
         setPhone(articleToEdit.metadata.phone || '');
         setEmail(articleToEdit.metadata.email || '');
         setOrganizerNotes(articleToEdit.metadata.organizerNotes || '');
-        setEventType((articleToEdit.categoryId as 'su-kien' | 'lich-hoc') || 'su-kien');
+        setEventType((articleToEdit.metadata.formType as 'su-kien' | 'lich-hoc') || 'su-kien');
       }
     }
   }, [articleToEdit]);
@@ -52,11 +52,12 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
     try {
       const payload = {
         title: eventName,
-        categoryId: eventType,
+        categoryId: 'su-kien',
         author: organizer,
         content: '',
         status: 'published' as const,
         metadata: {
+          formType: eventType,
           linkedArticleId,
           organizer,
           contactName,

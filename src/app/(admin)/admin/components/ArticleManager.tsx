@@ -9,7 +9,7 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
-  const isEventOrCourse = categoryId === 'su-kien' || categoryId === 'lich-hoc';
+  const isEventOrCourse = categoryId === 'su-kien';
   const [activeTab, setActiveTab] = useState<'articles' | 'registrations'>('articles');
 
   useEffect(() => {

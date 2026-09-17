@@ -7,7 +7,6 @@ import { Article } from "../../utils/store";
 import ArticleManager from "./components/ArticleManager";
 import ArticleEditor from "./components/ArticleEditor";
 import EventEditor from "./components/EventEditor";
-import CourseEditor from "./components/CourseEditor";
 import AlbumEditor from "./components/AlbumEditor";
 import VideoEditor from "./components/VideoEditor";
 import DonationManager from "./components/DonationManager";
@@ -118,17 +117,6 @@ export default function AdminDashboard() {
             }}
           />
         );
-      case 'NEW_COURSE':
-        return (
-          <CourseEditor 
-            articleToEdit={articleToEdit || undefined}
-            onSave={() => setActiveMenu('MANAGE_CATEGORY')}
-            onPublish={() => {
-              setArticleToEdit(null);
-              setActiveMenu('MANAGE_CATEGORY');
-            }}
-          />
-        );
       case 'NEW_ALBUM':
         return (
           <AlbumEditor 
@@ -172,8 +160,6 @@ export default function AdminDashboard() {
                      setActiveMenu('NEW_BIEUMAU');
                    } else if (article.categoryId === 'hinh-anh') {
                      setActiveMenu('NEW_ALBUM');
-                   } else if (article.categoryId === 'lich-hoc') {
-                     setActiveMenu('NEW_COURSE');
                    } else if (article.categoryId === 'su-kien') {
                      setActiveMenu('NEW_EVENT');
                    } else if (article.categoryId === 'thanh-ca') {
@@ -190,8 +176,6 @@ export default function AdminDashboard() {
                      setActiveMenu('NEW_BIEUMAU');
                    } else if (activeCategory === 'hinh-anh') {
                      setActiveMenu('NEW_ALBUM');
-                   } else if (activeCategory === 'lich-hoc') {
-                     setActiveMenu('NEW_COURSE');
                    } else if (activeCategory === 'su-kien') {
                      setActiveMenu('NEW_EVENT');
                    } else if (activeCategory === 'thanh-ca') {

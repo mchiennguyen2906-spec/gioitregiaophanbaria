@@ -23,9 +23,9 @@ export default function EventRegistrationForm() {
   useEffect(() => {
     const fetchEvents = async () => {
       const allArticles = await getArticlesFromStore();
-      // Filter articles that are events or courses and have metadata
+      // Filter articles that are events and have metadata
       const validEvents = allArticles.filter(a => 
-        (a.categoryId === 'su-kien' || a.categoryId === 'lich-hoc' || a.categoryId === 'bieu-mau') && 
+        (a.categoryId === 'su-kien') && 
         a.metadata && a.metadata.organizer
       );
       
