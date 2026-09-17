@@ -225,6 +225,12 @@ export const updateArticle = async (id: string, updatedFields: Partial<Article>)
     compare('is_featured', oldData.is_featured, updatedFields.isFeatured, 'Nổi bật');
     compare('is_priority', oldData.is_priority, updatedFields.isPriority, 'Ưu tiên');
     compare('is_home_featured', oldData.is_home_featured, updatedFields.isHomeFeatured, 'Nổi bật Trang chủ');
+    compare('parish', oldData.parish, updatedFields.parish, 'Giáo xứ');
+    compare('date', oldData.date, updatedFields.date, 'Ngày giờ');
+    compare('thumbnail_url', oldData.thumbnail_url, updatedFields.thumbnailUrl, 'Ảnh đại diện');
+    compare('audio_url', oldData.audio_url, updatedFields.audioUrl, 'Audio');
+    compare('attachment_url', oldData.attachment_url, updatedFields.attachmentUrl, 'File đính kèm');
+    compare('attachment_name', oldData.attachment_name, updatedFields.attachmentName, 'Tên file đính kèm');
     
     // So sánh metadata có thể phức tạp, ta ghi nhận chung nếu có thay đổi
     if (updatedFields.metadata !== undefined && JSON.stringify(oldData.metadata) !== JSON.stringify(updatedFields.metadata)) {
