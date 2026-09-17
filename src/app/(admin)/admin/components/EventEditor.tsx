@@ -14,6 +14,7 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [organizerNotes, setOrganizerNotes] = useState('');
+  const [eventType, setEventType] = useState<'su-kien' | 'lich-hoc'>('su-kien');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -36,6 +37,7 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
         setPhone(articleToEdit.metadata.phone || '');
         setEmail(articleToEdit.metadata.email || '');
         setOrganizerNotes(articleToEdit.metadata.organizerNotes || '');
+        setEventType((articleToEdit.categoryId as 'su-kien' | 'lich-hoc') || 'su-kien');
       }
     }
   }, [articleToEdit]);
@@ -50,7 +52,7 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
     try {
       const payload = {
         title: eventName,
-        categoryId: 'su-kien',
+        categoryId: eventType,
         author: organizer,
         content: '',
         status: 'published' as const,
@@ -169,6 +171,24 @@ export default function EventEditor({ onSave, onPublish, articleToEdit }: { onSa
                 value={organizerNotes} 
                 onChange={e => setOrganizerNotes(e.target.value)} 
               />
+            </div>
+
+            {/* CHỌN LOẠI ĐĂNG KÝ */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#1e293b' }}>
+                Loại Form Đăng Ký <span style={{ color: 'red' }}>*</span>
+              </label>
+              <select
+                value={eventType}
+                onChange={(e) => setEventType(e.target.value as 'su-kien' | 'lich-hoc')}
+                style={{
+                  width: '100%', padding: '12px', border: '1px solid #cbd5e1',
+                  borderRadius: '6px', outline: 'none', background: '#f8fafc'
+                }}
+              >
+                <option value="su-kien">Sự kiện</option>
+                <option value="lich-hoc">Khóa học</option>
+              </select>
             </div>
             
             <div style={{ marginTop: '20px', background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
