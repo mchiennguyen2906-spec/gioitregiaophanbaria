@@ -134,7 +134,17 @@ export async function getDonationsServer() {
 
 export async function getArticleBySlugOrIdServer(slug: string): Promise<ServerArticle | null> {
   try {
-    const { data, error } = await supabaseServer.from('articles').select('*').or("id.eq.,title.ilike.%%").eq('status', 'published').limit(1);
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+    let query = supabaseServer.from('articles').select('*').eq('status', 'published');
+    
+    if (isUUID) {
+      query = query.eq('id', slug);
+    } else {
+      query = query.ilike('title', `%${slug}%`);
+    }
+
+    const { data, error } = await query.limit(1);
+    
     if (error || !data || data.length === 0) return null;
     const item = data[0];
     return {

@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     let title = body?.title;
     let finalContent = body?.content;
     let author = body?.author || 'GP Long Xuyên';
+    let thumbnailUrl = body?.thumbnailUrl || '';
 
     if (!title || !finalContent) {
       // Fallback to crawling if no payload provided
@@ -86,6 +87,11 @@ export async function POST(request: Request) {
       // 4. Extract Title and Content
       title = postDetail.title;
       let contentHtml = postDetail.content;
+      
+      // Also extract the thumbnail photo from the list page
+      if (latestArticle.photo) {
+          thumbnailUrl = latestArticle.photo.startsWith('http') ? latestArticle.photo : `https://hdgmvietnam.com${latestArticle.photo}`;
+      }
 
       const $content = cheerio.load(contentHtml || '');
       
@@ -125,6 +131,7 @@ export async function POST(request: Request) {
           title: title,
           content: finalContent,
           author: author,
+          thumbnail_url: thumbnailUrl,
           status: 'published'
         }
       ])
