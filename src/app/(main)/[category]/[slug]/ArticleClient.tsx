@@ -164,74 +164,102 @@ export default function ArticleClient({
         </div>
       ) : articleDetail ? (
         <div className="container" style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
-          {articleDetail.categoryId === 'guong-mat' ? (
-            // Giao diện riêng cho Gương Mặt Truyền Cảm Hứng
-            <div>
-              <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '20px' }}>
-                <img loading="lazy" src={articleDetail.thumbnailUrl} alt="Avatar" style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--color-brand-red)' }} />
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
+            {/* Cột trái: Bài viết (chiếm phần lớn) */}
+            <div style={{ flex: '1 1 0%', minWidth: 'min(100%, 600px)' }}>
+              {articleDetail.categoryId === 'guong-mat' ? (
+                // Giao diện riêng cho Gương Mặt Truyền Cảm Hứng
                 <div>
-                  <h1 style={{ color: 'var(--color-brand-cyan)', margin: '0 0 10px 0', fontSize: '2rem' }}>{articleDetail.title}</h1>
-                  <p style={{ color: '#475569', margin: '0 0 5px 0', fontSize: '1.1rem', fontWeight: 600 }}>🌟 Vị trí / Chức vụ: {articleDetail.author}</p>
-                  <p style={{ color: '#64748b', margin: 0, fontSize: '0.95rem' }}>⛪ Giáo xứ: {articleDetail.parish}</p>
-                </div>
-              </div>
-              <div style={{ padding: '20px', background: '#fef2f2', borderLeft: '4px solid var(--color-brand-red)', borderRadius: '0 8px 8px 0', marginBottom: '30px', fontSize: '1.2rem', fontStyle: 'italic', color: '#991b1b', lineHeight: 1.6 }}>
-                "{articleDetail.excerpt}"
-              </div>
-              <div dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
-            </div>
-          ) : (
-            // Giao diện bài viết thông thường
-            <div>
-              <h1 style={{ color: 'var(--color-brand-red)', marginBottom: '10px' }}>
-                {articleDetail.title}
-                {isArticleCompleted(articleDetail.id) && (
-                  <span style={{ background: '#22c55e', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '0.9rem', marginLeft: '12px', verticalAlign: 'middle', fontWeight: 'bold' }}>✓ Đã hoàn thành quyên góp</span>
-                )}
-              </h1>
-              <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
-                Đăng bởi: {articleDetail.author} {articleDetail.parish ? `(${articleDetail.parish})` : ''} | {new Date(articleDetail.date).toLocaleDateString('vi-VN')}
-              </p>
-              
-              {articleDetail.thumbnailUrl && (
-                <div style={{ marginBottom: '20px' }}>
-                  <img loading="lazy" src={articleDetail.thumbnailUrl} alt="Thumbnail" style={{ width: '100%', borderRadius: '8px', objectFit: 'cover' }} />
-                </div>
-              )}
-
-              {articleDetail.excerpt && (
-                <div style={{ 
-                  fontSize: '1.15rem', 
-                  fontStyle: 'italic', 
-                  color: '#0f766e',
-                  marginBottom: '25px', 
-                  lineHeight: 1.7,
-                  background: 'linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%)',
-                  padding: '20px 25px',
-                  borderRadius: '12px',
-                  borderLeft: '4px solid var(--color-brand-cyan)',
-                  boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
-                }}>
-                  {articleDetail.excerpt}
-                </div>
-              )}
-              
-              {articleDetail.audioUrl && (
-                <div style={{ marginBottom: '25px', padding: '15px', background: '#f1f5f9', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                    <span style={{ fontSize: '1.5rem', color: 'var(--color-brand-cyan)' }}>🎧</span>
-                    <span style={{ fontWeight: 'bold', color: '#334155', fontSize: '1.1rem' }}>Nghe Audio / Podcast</span>
+                  <div style={{ display: 'flex', gap: '20px', alignItems: 'center', marginBottom: '20px', borderBottom: '2px solid var(--border-color)', paddingBottom: '20px' }}>
+                    <img loading="lazy" src={articleDetail.thumbnailUrl} alt="Avatar" style={{ width: '120px', height: '120px', borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--color-brand-red)' }} />
+                    <div>
+                      <h1 style={{ color: 'var(--color-brand-cyan)', margin: '0 0 10px 0', fontSize: '2rem' }}>{articleDetail.title}</h1>
+                      <p style={{ color: '#475569', margin: '0 0 5px 0', fontSize: '1.1rem', fontWeight: 600 }}>🌟 Vị trí / Chức vụ: {articleDetail.author}</p>
+                      <p style={{ color: '#64748b', margin: 0, fontSize: '0.95rem' }}>⛪ Giáo xứ: {articleDetail.parish}</p>
+                    </div>
                   </div>
-                  <audio controls style={{ width: '100%', outline: 'none' }}>
-                    <source src={articleDetail.audioUrl} type="audio/mpeg" />
-                    Trình duyệt của bạn không hỗ trợ thẻ audio.
-                  </audio>
+                  <div style={{ padding: '20px', background: '#fef2f2', borderLeft: '4px solid var(--color-brand-red)', borderRadius: '0 8px 8px 0', marginBottom: '30px', fontSize: '1.2rem', fontStyle: 'italic', color: '#991b1b', lineHeight: 1.6 }}>
+                    "{articleDetail.excerpt}"
+                  </div>
+                  <div dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
+                </div>
+              ) : (
+                // Giao diện bài viết thông thường
+                <div>
+                  <h1 style={{ color: 'var(--color-brand-red)', marginBottom: '10px' }}>
+                    {articleDetail.title}
+                    {isArticleCompleted(articleDetail.id) && (
+                      <span style={{ background: '#22c55e', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '0.9rem', marginLeft: '12px', verticalAlign: 'middle', fontWeight: 'bold' }}>✓ Đã hoàn thành quyên góp</span>
+                    )}
+                  </h1>
+                  <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
+                    Đăng bởi: {articleDetail.author} {articleDetail.parish ? `(${articleDetail.parish})` : ''} | {new Date(articleDetail.date).toLocaleDateString('vi-VN')}
+                  </p>
+                  
+                  {articleDetail.thumbnailUrl && (
+                    <div style={{ marginBottom: '20px' }}>
+                      <img loading="lazy" src={articleDetail.thumbnailUrl} alt="Thumbnail" style={{ width: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+                    </div>
+                  )}
+
+                  {articleDetail.excerpt && (
+                    <div style={{ 
+                      fontSize: '1.15rem', 
+                      fontStyle: 'italic', 
+                      color: '#0f766e',
+                      marginBottom: '25px', 
+                      lineHeight: 1.7,
+                      background: 'linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%)',
+                      padding: '20px 25px',
+                      borderRadius: '12px',
+                      borderLeft: '4px solid var(--color-brand-cyan)',
+                      boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)'
+                    }}>
+                      {articleDetail.excerpt}
+                    </div>
+                  )}
+                  
+                  {articleDetail.audioUrl && (
+                    <div style={{ marginBottom: '25px', padding: '15px', background: '#f1f5f9', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
+                        <span style={{ fontSize: '1.5rem', color: 'var(--color-brand-cyan)' }}>🎧</span>
+                        <span style={{ fontWeight: 'bold', color: '#334155', fontSize: '1.1rem' }}>Nghe Audio / Podcast</span>
+                      </div>
+                      <audio controls style={{ width: '100%', outline: 'none' }}>
+                        <source src={articleDetail.audioUrl} type="audio/mpeg" />
+                        Trình duyệt của bạn không hỗ trợ thẻ audio.
+                      </audio>
+                    </div>
+                  )}
+
+                  <div dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
                 </div>
               )}
-
-              <div dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
             </div>
-          )}
+
+            {/* Cột phải: Danh sách tin mới (khoảng 25%) */}
+            <div style={{ width: '300px', flexGrow: 0, flexShrink: 0, maxWidth: '100%' }}>
+              <div style={{ position: 'sticky', top: '100px' }}>
+                <h3 style={{ color: 'var(--color-brand-cyan)', marginBottom: '15px', paddingBottom: '10px', borderBottom: '2px solid var(--color-brand-red)', fontSize: '1.2rem', textTransform: 'uppercase' }}>
+                  Tin Mới Nhất
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                  {subcategoryArticles.filter(a => a.id !== articleDetail.id).slice(0, 10).map(article => (
+                    <a key={article.id} href={`/${category}/${article.id}`} style={{ textDecoration: 'none', display: 'flex', gap: '12px', alignItems: 'flex-start', borderBottom: '1px dashed #e2e8f0', paddingBottom: '10px' }}>
+                      {article.thumbnailUrl ? (
+                         <img loading="lazy" src={article.thumbnailUrl} alt={article.title} style={{ width: '90px', height: '65px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }} />
+                      ) : (
+                         <div style={{ width: '90px', height: '65px', background: '#f1f5f9', borderRadius: '6px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8', fontSize: '0.8rem' }}>No image</div>
+                      )}
+                      <h4 style={{ margin: 0, fontSize: '0.9rem', color: '#1e293b', lineHeight: 1.4, fontWeight: 600 }}>
+                        {article.title}
+                      </h4>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       ) : (
         <>
