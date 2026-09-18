@@ -115,7 +115,7 @@ export async function POST(request: Request) {
     const { data: existing } = await supabase
       .from('articles')
       .select('id')
-      .eq('title', title)
+      .ilike('title', title)
       .limit(1);
 
     if (existing && existing.length > 0) {
