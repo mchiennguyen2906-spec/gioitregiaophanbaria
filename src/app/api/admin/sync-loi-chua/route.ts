@@ -25,7 +25,7 @@ export async function POST(request: Request) {
         'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
       }
     };
-    const listResponse = await fetch('https://giaophanlongxuyen.org/chuyen-muc/loi-chua', fetchOptions);
+    const listResponse = await fetch('https://giaophanlongxuyen.org/chuyen-muc/loi-chua-moi-ngay', fetchOptions);
     const listHtml = await listResponse.text();
     const $list = cheerio.load(listHtml);
     
