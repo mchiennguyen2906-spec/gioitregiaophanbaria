@@ -245,10 +245,9 @@ export default function ArticleClient({
                    <>
                      <a href={`/${category}/${featuredArticles[currentSlide].id}`}>
                        <img loading="lazy" src={featuredArticles[currentSlide].thumbnailUrl} className={styles.sliderImg} alt="Hero" style={{ transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }} />
-                       <div className={styles.sliderText} style={{ transition: 'all 0.4s ease-in-out', padding: '30px', background: 'linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent)', color: 'white' }}>
-                          <span style={{ background: 'var(--color-brand-red)', padding: '4px 10px', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold' }}>TIÊU ĐIỂM</span>
-                          <h3 style={{ fontSize: '1.6rem', marginTop: '10px', marginBottom: '8px', lineHeight: 1.3 }}>{featuredArticles[currentSlide].title}</h3>
-                          <p style={{ fontSize: '0.95rem', opacity: 0.9 }}>{featuredArticles[currentSlide].excerpt}</p>
+                       <div className={styles.sliderText} style={{ transition: 'all 0.4s ease-in-out', padding: '15px 20px', background: 'rgba(0, 0, 0, 0.65)', color: 'white' }}>
+                          <span style={{ background: 'var(--color-brand-red)', padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>TIÊU ĐIỂM</span>
+                          <h3 style={{ fontSize: 'clamp(1.1rem, 2vw, 1.5rem)', marginTop: '8px', marginBottom: '0', lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{featuredArticles[currentSlide].title}</h3>
                        </div>
                      </a>
                      {/* Progress Indicators */}

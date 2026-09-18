@@ -131,9 +131,8 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
               <>
                 <a href={`/${homeFeatured[currentSlide].categoryId}/${homeFeatured[currentSlide].id}`}>
                   <img fetchPriority="high" src={homeFeatured[currentSlide].thumbnailUrl} className={styles.sliderImg} alt="Youth Events" style={{transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'}} />
-                  <div className={styles.sliderText} style={{transition: 'all 0.4s ease-in-out', padding: '30px', background: 'linear-gradient(to top, rgba(15, 23, 42, 0.9), transparent)'}}>
-                    <h3 className="text-fluid-hero" style={{color: '#fff'}}>{homeFeatured[currentSlide].title}</h3>
-                    <p style={{fontSize: '1.05rem', color: '#f1f5f9', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', marginTop: '10px'}}>{homeFeatured[currentSlide].excerpt}</p>
+                  <div className={styles.sliderText} style={{transition: 'all 0.4s ease-in-out', padding: '15px 25px', background: 'rgba(0, 0, 0, 0.65)'}}>
+                    <h3 style={{color: '#fff', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', margin: 0, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>{homeFeatured[currentSlide].title}</h3>
                   </div>
                 </a>
                 
