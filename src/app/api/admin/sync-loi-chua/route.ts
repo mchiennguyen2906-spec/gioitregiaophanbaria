@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
     if (!latestLink) {
       console.error("HTML Snippet:", listHtml.substring(0, 500));
-      return NextResponse.json({ success: false, error: 'Không tìm thấy link bài viết Lời Chúa mới nhất.' });
+      return NextResponse.json({ success: false, error: 'Vercel Server trả về trang: ' + listHtml.substring(0, 300) });
     }
 
     // 3. Fetch the latest article
