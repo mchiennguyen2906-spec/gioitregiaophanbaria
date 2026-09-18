@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body>
-        {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
+        <GoogleAnalytics gaId="G-LHGSM1N1XF" />
         <header>
           {/* THANH LỜI CHÚA (BIBLE TICKER) Ở ĐỈNH TRANG */}
           <BibleTicker />
