@@ -1,12 +1,17 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseServerClient, verifyAdmin } from '../../utils/supabaseServer';
+import { verifyAdmin } from '../../utils/supabaseServer';
+import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
   try {
     const isAdmin = await verifyAdmin();
     if (!isAdmin) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     
-    const supabase = await createSupabaseServerClient();
+    // Use Service Role key to bypass RLS on storage since we already verified admin status
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
 
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;
@@ -37,7 +42,7 @@ export async function POST(request: Request) {
     const normalizedName = baseName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const safeName = normalizedName.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
     const filename = `${Date.now()}-${safeName}.${ext}`;
-    const { data: uploadData, error } = await supabase.storage
+    const { data: uploadData, error } = await supabaseAdmin.storage
       .from('public-files')
       .upload(filename, buffer, {
         contentType: file.type,
@@ -49,7 +54,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 });
     }
 
-    const { data: publicUrlData } = supabase.storage
+    const { data: publicUrlData } = supabaseAdmin.storage
       .from('public-files')
       .getPublicUrl(filename);
 
@@ -58,7 +63,7 @@ export async function POST(request: Request) {
       try {
         const oldFilename = oldFileUrl.split('/public-files/').pop();
         if (oldFilename) {
-          await supabase.storage.from('public-files').remove([oldFilename]);
+          await supabaseAdmin.storage.from('public-files').remove([oldFilename]);
         }
       } catch (e) {
         console.error('Failed to delete old file:', e);
