@@ -76,6 +76,10 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
   const kyNangData = getCategoryData(['huong-dao-sinh', 'leu-trai', 'quan-tro', 'lanh-dao']);
   const camNangData = getCategoryData(['tinh-yeu', 'bi-tich', 'thu-tuc', 'bieu-mau']);
   const tamLyData = getCategoryData(['tam-ly']);
+  
+  const brvtNews = getCategoryData(['tin-giao-phan-brvt'], 4);
+  const hoanVuNews = getCategoryData(['giao-hoi-hoan-vu'], 4);
+  const vnNews = getCategoryData(['giao-hoi-viet-nam'], 4);
 
   useEffect(() => {
     if (homeFeatured.length <= 1) return;
@@ -216,6 +220,128 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
 
       {/* TỔNG HỢP GIỜ LỄ CÁC GIÁO XỨ (4 CỘT) */}
       <ParishSchedule />
+
+      {/* DẢI TIN TỨC: GIÁO PHẬN, HOÀN VŨ, VIỆT NAM */}
+      <section style={{padding: '15px 0', borderBottom: '1px solid var(--border-color)', background: '#fff'}}>
+        <div className="container">
+          <div className={styles.mainLayout}>
+            {/* Col 1: Bản tin Giáo phận Bà Rịa */}
+            <div className={styles.categoryBlock}>
+              <div className="section-header">
+                <span style={{color: 'var(--color-brand-cyan)'}}>📰</span>
+                <h2 className="section-title">Bản tin Giáo phận</h2>
+              </div>
+              
+              {brvtNews.featured && (
+                <div className={styles.categoryTop}>
+                  <img loading="lazy" src={brvtNews.featured.thumbnailUrl || '/images/default.jpg'} className={styles.categoryMainImg} alt="Giáo phận Bà Rịa" />
+                  <a href={`/${brvtNews.featured.categoryId}/${brvtNews.featured.id}`} style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '5px'}}>
+                    {brvtNews.featured.title}
+                  </a>
+                </div>
+              )}
+              
+              <ul className={styles.categoryTitleList}>
+                {brvtNews.priority && (
+                  <li>
+                    <a href={`/${brvtNews.priority.categoryId}/${brvtNews.priority.id}`} style={{fontWeight: 'bold', color: 'var(--color-brand-cyan)'}}>
+                      [Ưu Tiên] {brvtNews.priority.title}
+                    </a>
+                  </li>
+                )}
+                {brvtNews.rest.map(article => (
+                  <li key={article.id}>
+                    <a href={`/${article.categoryId}/${article.id}`}>
+                      {article.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              
+              <div className={styles.viewMoreBox}>
+                <a href="/ban-tin/tin-giao-phan-brvt" className={styles.viewMoreBtn}>Xem thêm tin Giáo phận ➔</a>
+              </div>
+            </div>
+
+            {/* Col 2: Giáo hội Hoàn vũ */}
+            <div className={styles.categoryBlock}>
+              <div className="section-header">
+                <span style={{color: 'var(--color-brand-red)'}}>🌍</span>
+                <h2 className="section-title">Giáo hội Hoàn vũ</h2>
+              </div>
+              
+              {hoanVuNews.featured && (
+                <div className={styles.categoryTop}>
+                  <img loading="lazy" src={hoanVuNews.featured.thumbnailUrl || '/images/default.jpg'} className={styles.categoryMainImg} alt="Giáo hội Hoàn vũ" />
+                  <a href={`/${hoanVuNews.featured.categoryId}/${hoanVuNews.featured.id}`} style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '5px'}}>
+                    {hoanVuNews.featured.title}
+                  </a>
+                </div>
+              )}
+              
+              <ul className={styles.categoryTitleList}>
+                {hoanVuNews.priority && (
+                  <li>
+                    <a href={`/${hoanVuNews.priority.categoryId}/${hoanVuNews.priority.id}`} style={{fontWeight: 'bold', color: 'var(--color-brand-cyan)'}}>
+                      [Ưu Tiên] {hoanVuNews.priority.title}
+                    </a>
+                  </li>
+                )}
+                {hoanVuNews.rest.map(article => (
+                  <li key={article.id}>
+                    <a href={`/${article.categoryId}/${article.id}`}>
+                      {article.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              
+              <div className={styles.viewMoreBox}>
+                <a href="/ban-tin/giao-hoi-hoan-vu" className={styles.viewMoreBtn}>Xem thêm Hoàn vũ ➔</a>
+              </div>
+            </div>
+
+            {/* Col 3: Giáo hội Việt Nam */}
+            <div className={styles.categoryBlock}>
+              <div className="section-header">
+                <span style={{color: 'var(--color-brand-green)'}}>🇻🇳</span>
+                <h2 className="section-title">Giáo hội Việt Nam</h2>
+              </div>
+              
+              {vnNews.featured && (
+                <div className={styles.categoryTop}>
+                  <img loading="lazy" src={vnNews.featured.thumbnailUrl || '/images/default.jpg'} className={styles.categoryMainImg} alt="Giáo hội Việt Nam" />
+                  <a href={`/${vnNews.featured.categoryId}/${vnNews.featured.id}`} style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '5px'}}>
+                    {vnNews.featured.title}
+                  </a>
+                </div>
+              )}
+              
+              <ul className={styles.categoryTitleList}>
+                {vnNews.priority && (
+                  <li>
+                    <a href={`/${vnNews.priority.categoryId}/${vnNews.priority.id}`} style={{fontWeight: 'bold', color: 'var(--color-brand-cyan)'}}>
+                      [Ưu Tiên] {vnNews.priority.title}
+                    </a>
+                  </li>
+                )}
+                {vnNews.rest.map(article => (
+                  <li key={article.id}>
+                    <a href={`/${article.categoryId}/${article.id}`}>
+                      {article.title}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+              
+              <div className={styles.viewMoreBox}>
+                <a href="/ban-tin/giao-hoi-viet-nam" className={styles.viewMoreBtn}>Xem thêm Việt Nam ➔</a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
 
       {/* DẢI 1: SỨ VỤ, Q&A, GƯƠNG MẶT */}
       <section style={{padding: '15px 0', borderBottom: '1px solid var(--border-color)'}}>
