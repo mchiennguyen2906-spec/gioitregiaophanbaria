@@ -37,10 +37,11 @@ export const slugMap: Record<string, string> = {
   "thanh-ca": "Thánh ca Acoustic",
   "giao-hoi-hoan-vu": "Thời sự Giáo hội Hoàn vũ",
   "giao-hoi-viet-nam": "Thời sự Giáo hội Việt Nam",
+  "tin-giao-phan-brvt": "Bản tin Giáo phận Bà Rịa",
 };
 
 export const categoryHierarchy: Record<string, string[]> = {
-  "ban-tin": ["giao-phan", "giao-xu", "phong-trao", "lich-hoat-dong", "guong-mat", "giao-hoi-hoan-vu", "giao-hoi-viet-nam"],
+  "ban-tin": ["tin-giao-phan-brvt", "giao-phan", "giao-xu", "phong-trao", "lich-hoat-dong", "guong-mat", "giao-hoi-hoan-vu", "giao-hoi-viet-nam"],
   "kinh-thanh": ["phuc-am", "giao-ly", "loi-chua", "suy-niem"],
   "dao-tao": ["lich-hoc", "su-kien"],
   "ky-nang": ["huong-dao-sinh", "leu-trai", "quan-tro", "lanh-dao"],

@@ -88,6 +88,25 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
     }
   };
 
+  const handleSyncBRVT = async () => {
+    setIsSyncing(true);
+    const toastId = toast.loading('Đang đồng bộ từ Giáo phận Bà Rịa...');
+    try {
+      const res = await fetch('/api/admin/sync-brvt', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Đồng bộ hoàn tất! Cập nhật: ${data.results?.length || 0} mục.`, { id: toastId });
+        window.dispatchEvent(new Event('storage_update'));
+      } else {
+        toast.error(data.error || 'Đồng bộ thất bại!', { id: toastId });
+      }
+    } catch (e: any) {
+      toast.error('Lỗi kết nối khi đồng bộ!', { id: toastId });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   // Filter and Paginate
   const filteredArticles = articles.filter(a => 
     a.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
@@ -150,6 +169,20 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
               }}
             >
               {isSyncing ? '⏳ Đang đồng bộ...' : '🔄 Đồng bộ HĐGMVN'}
+            </button>
+          )}
+
+          {categoryId === 'tin-giao-phan-brvt' && (
+            <button 
+              onClick={handleSyncBRVT} 
+              disabled={isSyncing}
+              style={{
+                background: '#f59e0b', color: 'white', padding: '8px 15px', 
+                borderRadius: '6px', border: 'none', cursor: isSyncing ? 'not-allowed' : 'pointer', fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(245,158,11,0.3)', opacity: isSyncing ? 0.7 : 1
+              }}
+            >
+              {isSyncing ? '⏳ Đang đồng bộ...' : '🔄 Đồng bộ Giáo phận Bà Rịa'}
             </button>
           )}
 

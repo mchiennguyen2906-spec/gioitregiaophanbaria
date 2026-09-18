@@ -8,6 +8,10 @@
     {
       "path": "/api/admin/sync-hdgmvn",
       "schedule": "0 23,5,11 * * *"
+    },
+    {
+      "path": "/api/admin/sync-brvt",
+      "schedule": "0 23,5,11 * * *"
     }
   ]
 }
