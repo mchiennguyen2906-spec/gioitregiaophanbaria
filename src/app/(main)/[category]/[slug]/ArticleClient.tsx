@@ -228,11 +228,11 @@ export default function ArticleClient({
 
                   {articleDetail.thumbnailUrl && (!articleDetail.content || !articleDetail.content.includes('<img')) && (
                     <div style={{ marginBottom: '25px' }}>
-                      <img loading="lazy" src={articleDetail.thumbnailUrl} alt={articleDetail.title} style={{ width: '100%', borderRadius: '8px', objectFit: 'cover' }} />
+                      <img loading="lazy" src={articleDetail.thumbnailUrl} alt={articleDetail.title} style={{ width: '100%', aspectRatio: '16/9', borderRadius: '8px', objectFit: 'cover' }} />
                     </div>
                   )}
 
-                  <div dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
+                  <div className="article-content-wrapper" dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
                 </div>
               )}
             </div>
