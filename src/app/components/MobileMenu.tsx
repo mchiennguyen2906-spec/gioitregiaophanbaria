@@ -37,6 +37,9 @@ export default function MobileMenu() {
               <a href="#" onClick={(e) => toggleSub(e, 'ban-tin')}>BẢN TIN <span className="caret">{openSubmenu === 'ban-tin' ? '▴' : '▾'}</span></a>
               {openSubmenu === 'ban-tin' && (
                 <ul className="mobile-sub-list">
+                  <li><a href="/ban-tin/tin-giao-phan-brvt">Bản tin Giáo phận Bà Rịa</a></li>
+                  <li><a href="/ban-tin/giao-hoi-hoan-vu">Thời sự Giáo hội Hoàn vũ</a></li>
+                  <li><a href="/ban-tin/giao-hoi-viet-nam">Thời sự Giáo hội Việt Nam</a></li>
                   <li><a href="/ban-tin/giao-phan">Tin tức Giới trẻ Giáo phận</a></li>
                   <li><a href="/ban-tin/giao-xu">Tin tức Giới trẻ các Giáo xứ</a></li>
                   <li><a href="/ban-tin/phong-trao">Sinh hoạt các Phong trào</a></li>

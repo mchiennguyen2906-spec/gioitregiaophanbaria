@@ -73,6 +73,9 @@ export default function RootLayout({
                 <li className="nav-item">
                   <a href="#" className="nav-link">BẢN TIN ▾</a>
                   <div className="dropdown-menu">
+                    <a href="/ban-tin/tin-giao-phan-brvt" className="dropdown-item">Bản tin Giáo phận Bà Rịa</a>
+                    <a href="/ban-tin/giao-hoi-hoan-vu" className="dropdown-item">Thời sự Giáo hội Hoàn vũ</a>
+                    <a href="/ban-tin/giao-hoi-viet-nam" className="dropdown-item">Thời sự Giáo hội Việt Nam</a>
                     <a href="/ban-tin/giao-phan" className="dropdown-item">Tin tức Giới trẻ Giáo phận</a>
                     <a href="/ban-tin/giao-xu" className="dropdown-item">Tin tức Giới trẻ các Giáo xứ</a>
                     <a href="/ban-tin/phong-trao" className="dropdown-item">Sinh hoạt các Phong trào</a>
