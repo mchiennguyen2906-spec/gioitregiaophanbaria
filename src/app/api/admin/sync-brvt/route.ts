@@ -51,6 +51,7 @@ export async function POST(request: Request) {
         if (img && img.startsWith('data:image')) {
            img = $list(el).find('img').first().attr('data-lazy-src') || $list(el).find('img').first().attr('data-src') || '';
         }
+        if (img) img = img.replace(/-\d+x\d+(?=\.[a-zA-Z]+$)/, '');
         
         let date = $list(el).find('.entry-date').attr('datetime') || $list(el).find('.entry-date').text().trim() || Date.now();
         
