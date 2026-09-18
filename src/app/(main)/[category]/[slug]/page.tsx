@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
   const article = await getArticleBySlugOrIdServer(slug);
 
   if (article) {
-    const url = `https://gioitrebrvt.com/${category}/${article.id}`;
+    const url = `https://www.gioitregiaophanbaria.com/${category}/${article.id}`;
     return {
       title: `${article.title} - Giới Trẻ BRVT`,
       description: article.excerpt || `Đọc bài viết: ${article.title} tại website Giới trẻ Giáo phận Bà Rịa.`,
@@ -78,19 +78,19 @@ export default async function ArticlePage({ params }: { params: any }) {
         "@type": "ListItem",
         "position": 1,
         "name": "Trang chủ",
-        "item": "https://gioitrebrvt.com"
+        "item": "https://www.gioitregiaophanbaria.com"
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": getTitle(category, ""),
-        "item": `https://gioitrebrvt.com/${category}`
+        "item": `https://www.gioitregiaophanbaria.com/${category}`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": foundArticle.title,
-        "item": `https://gioitrebrvt.com/${category}/${foundArticle.id}`
+        "item": `https://www.gioitregiaophanbaria.com/${category}/${foundArticle.id}`
       }
     ]
   } : null;
