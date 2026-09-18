@@ -136,7 +136,7 @@ export async function getArticleBySlugOrIdServer(slug: string): Promise<ServerAr
   try {
     const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
     let query = supabaseServer.from('articles').select('*').eq('status', 'published');
-    
+
     if (isUUID) {
       query = query.eq('id', slug);
     } else {
@@ -144,7 +144,7 @@ export async function getArticleBySlugOrIdServer(slug: string): Promise<ServerAr
     }
 
     const { data, error } = await query.limit(1);
-    
+
     if (error || !data || data.length === 0) return null;
     const item = data[0];
     return {
