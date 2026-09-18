@@ -4,7 +4,7 @@ import styles from '../../../page.module.css';
 import LoiChuaWidget from '../../../components/LoiChuaWidget';
 import LoadingSpinner from '../../../components/LoadingSpinner';
 import { sanitize } from '../../../utils/sanitize';
-import { getTitle } from '../../../utils/categoryMap';
+import { getTitle, slugMap } from '../../../utils/categoryMap';
 import { getArticlesFromStore, getDonationsFromStore, Article, DonationProgram } from '../../../utils/store';
 import EventRegistrationForm from '../../../components/EventRegistrationForm';
 import QuestionFormPopup from '../../../components/QuestionFormPopup';
@@ -31,7 +31,13 @@ export default function ArticleClient({
   const category = resolvedParams?.category || '';
   const slug = resolvedParams?.slug || '';
 
-  const titleStr = getTitle(category, slug).toUpperCase();
+  // Xác định subcategory slug (nếu là bài viết thì lấy từ articleDetail.categoryId, nếu không thì chính là slug)
+  const subcategorySlug = articleDetail ? articleDetail.categoryId : slug;
+  
+  // Tên chuyên mục con (ví dụ: Lời Chúa Mỗi Ngày)
+  // Nếu không tìm thấy trong slugMap thì dùng hàm getTitle để lấy tên có sẵn
+  const subCategoryName = slugMap[subcategorySlug] || getTitle(category, subcategorySlug);
+
   const isEventRegistration = category === 'dao-tao' && slug === 'su-kien';
 
   useEffect(() => {
@@ -103,15 +109,15 @@ export default function ArticleClient({
       {/* Breadcrumb / Title */}
       <div className="container" style={{ padding: '20px 15px' }}>
         <h1 style={{ fontSize: '1.5rem', color: 'var(--color-brand-cyan)', margin: 0, textTransform: 'uppercase', fontWeight: 800 }}>
-          {titleStr}
+          {subCategoryName}
         </h1>
         <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '5px' }}>
           <a href="/" style={{color: '#64748b', textDecoration: 'none'}}>Trang chủ</a> 
           {' » '}
           {articleDetail ? (
-            <a href={`/${category}`} style={{color: '#64748b', textDecoration: 'none'}}>{titleStr}</a>
+            <a href={`/${category}/${subcategorySlug}`} style={{color: '#64748b', textDecoration: 'none'}}>{subCategoryName}</a>
           ) : (
-            <span>{titleStr}</span>
+            <span>{subCategoryName}</span>
           )}
         </p>
       </div>
