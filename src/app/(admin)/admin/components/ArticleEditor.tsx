@@ -399,32 +399,25 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
   };
 
   // Cấu hình Toolbar cho Quill
+  const formats = [
+    'header', 'font',
+    'bold', 'italic', 'underline', 'strike', 'blockquote',
+    'list', 'bullet', 'indent',
+    'link', 'image', 'video',
+    'color', 'background', 'align'
+  ];
+
   const modules = React.useMemo(() => ({
     toolbar: {
-      container: [
-        [{ 'header': [1, 2, 3, false] }, { 'font': [] }],
-        ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-        [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-        ['link', 'image', 'video'],
-        [{ 'color': [] }, { 'background': [] }, { 'align': [] }],
-        ['clean']
-      ],
+      container: '#custom-toolbar',
       handlers: {
         image: customImageHandler
       }
     },
     clipboard: {
-      matchVisual: false // Chống dính khoảng trắng thừa khi copy từ Word
+      matchVisual: false 
     }
   }), []);
-
-  const formats = [
-    'header', 'font',
-    'bold', 'italic', 'underline', 'strike', 'blockquote',
-    'list', 'indent',
-    'link', 'image', 'video',
-    'color', 'background', 'align'
-  ];
 
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto', paddingBottom: '50px' }}>
@@ -489,6 +482,43 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
             <div>
               <label style={labelStyle}>Nội dung bài viết *</label>
               <div style={{ background: '#fff', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1' }}>
+                <div id="custom-toolbar">
+                  <span className="ql-formats">
+                    <select className="ql-header" defaultValue="">
+                      <option value="1"></option>
+                      <option value="2"></option>
+                      <option value="3"></option>
+                      <option value=""></option>
+                    </select>
+                    <select className="ql-font" defaultValue=""></select>
+                  </span>
+                  <span className="ql-formats">
+                    <button className="ql-bold"></button>
+                    <button className="ql-italic"></button>
+                    <button className="ql-underline"></button>
+                    <button className="ql-strike"></button>
+                    <button className="ql-blockquote"></button>
+                  </span>
+                  <span className="ql-formats">
+                    <button className="ql-list" value="ordered"></button>
+                    <button className="ql-list" value="bullet"></button>
+                    <button className="ql-indent" value="-1"></button>
+                    <button className="ql-indent" value="+1"></button>
+                  </span>
+                  <span className="ql-formats">
+                    <button className="ql-link"></button>
+                    <button className="ql-image"></button>
+                    <button className="ql-video"></button>
+                  </span>
+                  <span className="ql-formats">
+                    <select className="ql-color"></select>
+                    <select className="ql-background"></select>
+                    <select className="ql-align"></select>
+                  </span>
+                  <span className="ql-formats">
+                    <button className="ql-clean"></button>
+                  </span>
+                </div>
                 <ReactQuill 
                   // @ts-expect-error
                   ref={quillRef}
