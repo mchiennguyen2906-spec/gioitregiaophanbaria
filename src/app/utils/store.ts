@@ -143,10 +143,15 @@ export const getArticlesFromStore = async (adminMode: boolean = false): Promise<
   return data.map(mapArticleFromDB);
 };
 
-// Trigger UI re-render
+// Trigger UI re-render and clear server cache
 export const notifyUpdate = () => {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new Event('storage_update'));
+    fetch('/api/revalidate', { 
+      method: 'POST', 
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}) 
+    }).catch(console.error);
   }
 };
 

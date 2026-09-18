@@ -9,6 +9,6 @@ export const sanitize = (html: string) => {
       'iframe': ['src', 'width', 'height', 'allow', 'allowfullscreen', 'frameborder'],
       'img': ['src', 'alt', 'width', 'height']
     },
-    allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
+    allowedIframeHostnames: ['www.youtube.com', 'youtube.com', 'youtu.be', 'player.vimeo.com']
   });
 };
