@@ -12,6 +12,7 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const isEventOrCourse = categoryId === 'su-kien';
   const [activeTab, setActiveTab] = useState<'articles' | 'registrations'>('articles');
+  const [isSyncing, setIsSyncing] = useState(false);
 
   useEffect(() => {
     // Load from Supabase and filter by categoryId
@@ -68,6 +69,25 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
     }
   };
 
+  const handleSyncHDGMVN = async () => {
+    setIsSyncing(true);
+    const toastId = toast.loading('Đang đồng bộ từ HĐGMVN...');
+    try {
+      const res = await fetch('/api/admin/sync-hdgmvn', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        toast.success(`Đồng bộ hoàn tất! Cập nhật: ${data.results?.length || 0} mục.`, { id: toastId });
+        window.dispatchEvent(new Event('storage_update'));
+      } else {
+        toast.error(data.error || 'Đồng bộ thất bại!', { id: toastId });
+      }
+    } catch (e: any) {
+      toast.error('Lỗi kết nối khi đồng bộ!', { id: toastId });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   // Filter and Paginate
   const filteredArticles = articles.filter(a => 
     a.title.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || 
@@ -118,6 +138,21 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
               📋 Câu hỏi ({questionsCount})
             </button>
           )}
+          
+          {(categoryId === 'giao-hoi-hoan-vu' || categoryId === 'giao-hoi-viet-nam') && (
+            <button 
+              onClick={handleSyncHDGMVN} 
+              disabled={isSyncing}
+              style={{
+                background: '#f59e0b', color: 'white', padding: '8px 15px', 
+                borderRadius: '6px', border: 'none', cursor: isSyncing ? 'not-allowed' : 'pointer', fontWeight: 'bold',
+                boxShadow: '0 2px 4px rgba(245,158,11,0.3)', opacity: isSyncing ? 0.7 : 1
+              }}
+            >
+              {isSyncing ? '⏳ Đang đồng bộ...' : '🔄 Đồng bộ HĐGMVN'}
+            </button>
+          )}
+
           {activeTab === 'articles' && (
             <button onClick={onCreateNew} style={{
               background: 'var(--color-brand-cyan)', color: 'white', padding: '8px 15px', 
