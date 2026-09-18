@@ -72,28 +72,10 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
     articleHook: a.excerpt,
     id: a.id
   }));
-  if (faceSlides.length === 0) {
-    faceSlides.push({
-      name: 'Đang cập nhật...',
-      role: '',
-      parish: '',
-      desc: '',
-      img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&auto=format&fit=crop',
-      articleTitle: '',
-      articleHook: '',
-      id: 'default'
-    });
-  }
-  
-  if (missionSlides.length === 0) {
-    missionSlides.push({
-      title: 'Đang cập nhật sự kiện...',
-      desc: '',
-      quote: '',
-      img: 'https://images.unsplash.com/photo-1593113630400-ea4288922497?q=80&w=800&auto=format&fit=crop',
-      id: 'default'
-    });
-  }
+  const giaoXuData = getCategoryData(['giao-xu', 'giao-phan', 'phong-trao', 'lich-hoat-dong']);
+  const kyNangData = getCategoryData(['huong-dao-sinh', 'leu-trai', 'quan-tro', 'lanh-dao']);
+  const camNangData = getCategoryData(['tinh-yeu', 'bi-tich', 'thu-tuc', 'bieu-mau']);
+  const tamLyData = getCategoryData(['tam-ly']);
 
   useEffect(() => {
     if (homeFeatured.length <= 1) return;
@@ -247,37 +229,45 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 <h2 className="section-title">Sứ Vụ & Tình Nguyện</h2>
               </div>
               <div className={styles.categoryTop}>
-                <div style={{position: 'relative', overflow: 'hidden', borderRadius: '8px', marginBottom: '15px'}}>
-                  <div style={{
-                    display: 'flex', 
-                    width: `${missionSlides.length * 100}%`,
-                    transform: `translateX(-${(100 / missionSlides.length) * currentMissionSlide}%)`,
-                    transition: 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)'
-                  }}>
-                    {missionSlides.map((slide, idx) => (
-                      <div key={idx} style={{width: `${100 / missionSlides.length}%`}}>
-                        <img loading="lazy" src={slide.img} alt="Tình nguyện" style={{width: '100%', aspectRatio: '16/10', objectFit: 'cover'}} />
-                        <div style={{marginTop: '15px'}}>
-                          <h3 style={{fontSize: '1.2rem', lineHeight: 1.3, color: 'var(--color-text-heading)', margin: '0 0 10px 0'}}>{slide.title}</h3>
-                          <p style={{fontSize: '0.95rem', color: '#64748b', lineHeight: 1.6, margin: 0}}>
-                            {slide.desc}
-                          </p>
-                          {slide.quote && (
-                            <div style={{ fontStyle: 'italic', background: '#f8fafc', padding: '10px', borderRadius: '4px', borderLeft: '4px solid var(--color-brand-green)', marginTop: '10px', fontSize: '0.9rem', color: '#475569' }}>
-                              {slide.quote}
+                {missionSlides.length > 0 ? (
+                  <>
+                    <div style={{position: 'relative', overflow: 'hidden', borderRadius: '8px', marginBottom: '15px'}}>
+                      <div style={{
+                        display: 'flex', 
+                        width: `${missionSlides.length * 100}%`,
+                        transform: `translateX(-${(100 / missionSlides.length) * currentMissionSlide}%)`,
+                        transition: 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)'
+                      }}>
+                        {missionSlides.map((slide, idx) => (
+                          <div key={idx} style={{width: `${100 / missionSlides.length}%`}}>
+                            <img loading="lazy" src={slide.img} alt="Tình nguyện" style={{width: '100%', aspectRatio: '16/10', objectFit: 'cover'}} />
+                            <div style={{marginTop: '15px'}}>
+                              <h3 style={{fontSize: '1.2rem', lineHeight: 1.3, color: 'var(--color-text-heading)', margin: '0 0 10px 0'}}>{slide.title}</h3>
+                              <p style={{fontSize: '0.95rem', color: '#64748b', lineHeight: 1.6, margin: 0}}>
+                                {slide.desc}
+                              </p>
+                              {slide.quote && (
+                                <div style={{ fontStyle: 'italic', background: '#f8fafc', padding: '10px', borderRadius: '4px', borderLeft: '4px solid var(--color-brand-green)', marginTop: '10px', fontSize: '0.9rem', color: '#475569' }}>
+                                  {slide.quote}
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
+                    
+                    <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
+                      <a href="#" style={{background: 'var(--color-brand-red)', color: 'white', padding: '8px 15px', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', borderRadius: '4px'}}>
+                        Đăng ký ngay ➔
+                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{padding: '40px 20px', background: '#f8fafc', borderRadius: '8px', textAlign: 'center', color: '#64748b', fontSize: '0.95rem'}}>
+                    Đang cập nhật sự kiện sứ vụ...
                   </div>
-                </div>
-                
-                <div style={{display: 'flex', gap: '10px', marginTop: '10px'}}>
-                  <a href="#" style={{background: 'var(--color-brand-red)', color: 'white', padding: '8px 15px', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', borderRadius: '4px'}}>
-                    Đăng ký ngay ➔
-                  </a>
-                </div>
+                )}
               </div>
             </div>
 
@@ -326,7 +316,7 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 <h2 className="section-title">Gương Mặt Truyền Cảm Hứng</h2>
               </div>
               <div className={styles.categoryTop} style={{display: 'grid', gridTemplateColumns: '1fr', gridTemplateRows: '1fr', alignItems: 'center', margin: '20px 0'}}>
-                {faceSlides.map((face, index) => (
+                {faceSlides.length > 0 ? faceSlides.map((face, index) => (
                   <div key={index} style={{
                     gridArea: '1 / 1 / 2 / 2',
                     opacity: currentFaceSlide === index ? 1 : 0,
@@ -336,7 +326,7 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                     textAlign: 'center'
                   }}>
                     <img loading="lazy" src={face.img} className={styles.categoryMainImg} alt={face.name} style={{aspectRatio: '1/1', borderRadius: '50%', width: '150px', margin: '0 auto 15px auto', display: 'block', objectFit: 'cover'}} />
-                    <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, display: 'block'}}>{face.name}</a>
+                    <a href={`/guong-mat/${face.id}`} style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, display: 'block'}}>{face.name}</a>
                     <p style={{fontSize: '0.85rem', color: '#64748b', fontWeight: '500', marginTop: '3px'}}>📍 {face.parish}</p>
                     <p style={{fontSize: '0.9rem', color: 'var(--color-brand-cyan)', fontWeight: 'bold', marginTop: '5px'}}>{face.role}</p>
                     <p className={styles.excerpt} style={{marginTop: '10px'}}>{face.desc}</p>
@@ -345,7 +335,9 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                       <p style={{fontSize: '0.85rem', color: '#64748b', fontStyle: 'italic', lineHeight: 1.5}}>&quot;{face.articleHook}&quot;</p>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div style={{padding: '40px 20px', textAlign: 'center', color: '#64748b'}}>Đang cập nhật gương mặt...</div>
+                )}
               </div>
               <div className={styles.viewMoreBox} style={{textAlign: 'center'}}>
                 <a href="/ban-tin/guong-mat" className={styles.viewMoreBtn}>Đọc đầy đủ bài viết ➔</a>
@@ -367,15 +359,24 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 <span style={{color: 'var(--color-brand-cyan)'}}>⛪</span>
                 <h2 className="section-title" style={{fontSize: '1.2rem'}}>Tin tức Giáo Xứ & Phong Trào</h2>
               </div>
-              <div className={styles.categoryTop} style={{marginBottom: '15px'}}>
-                <img loading="lazy" src="https://images.unsplash.com/photo-1437603568260-1950d3ca6eab?q=80&w=800&auto=format&fit=crop" className={styles.categoryMainImg} alt="Giáo Xứ" style={{aspectRatio: '16/9', borderRadius: '8px'}} />
-                <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.05rem', lineHeight: 1.4, marginTop: '10px', display: 'block'}}>Hình ảnh sinh hoạt Giới trẻ Xứ đoàn Kitô Vua</a>
-              </div>
-              <ul className={styles.categoryTitleList}>
-                <li><a href="#">Lịch tĩnh tâm Mùa Chay cụm Vũng Tàu</a></li>
-                <li><a href="#">Thiếu Nhi Thánh Thể: Sa mạc huấn luyện Huynh Trưởng</a></li>
-                <li><a href="#">Thành lập tân ban điều hành Giới trẻ Giáo hạt</a></li>
-              </ul>
+              {giaoXuData.featured ? (
+                <>
+                  <div className={styles.categoryTop} style={{marginBottom: '15px'}}>
+                    <img loading="lazy" src={giaoXuData.featured.thumbnailUrl || 'https://images.unsplash.com/photo-1437603568260-1950d3ca6eab?q=80&w=800&auto=format&fit=crop'} className={styles.categoryMainImg} alt="Giáo Xứ" style={{aspectRatio: '16/9', borderRadius: '8px'}} />
+                    <a href={`/${giaoXuData.featured.categoryId}/${giaoXuData.featured.id}`} style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.05rem', lineHeight: 1.4, marginTop: '10px', display: 'block'}}>{giaoXuData.featured.title}</a>
+                  </div>
+                  <ul className={styles.categoryTitleList}>
+                    {giaoXuData.priority && (
+                      <li><a href={`/${giaoXuData.priority.categoryId}/${giaoXuData.priority.id}`} style={{fontWeight: 'bold', color: 'var(--color-brand-cyan)'}}>[Ưu Tiên] {giaoXuData.priority.title}</a></li>
+                    )}
+                    {giaoXuData.rest.map(a => (
+                      <li key={a.id}><a href={`/${a.categoryId}/${a.id}`}>{a.title}</a></li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <div style={{padding: '20px', color: '#64748b', textAlign: 'center'}}>Đang cập nhật...</div>
+              )}
               <div className={styles.viewMoreBox} style={{marginTop: 'auto'}}>
                 <a href="/ban-tin/giao-xu" className={styles.viewMoreBtn}>Xem các bản tin khác ➔</a>
               </div>
@@ -387,15 +388,24 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 <span style={{color: 'var(--color-brand-green)'}}>⛺</span>
                 <h2 className="section-title" style={{fontSize: '1.2rem'}}>Kỹ Năng & Huấn Luyện</h2>
               </div>
-              <div className={styles.categoryTop} style={{marginBottom: '15px'}}>
-                <img loading="lazy" src="https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?q=80&w=800&auto=format&fit=crop" className={styles.categoryMainImg} alt="Camping" style={{aspectRatio: '16/9', borderRadius: '8px'}} />
-                <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.05rem', lineHeight: 1.4, marginTop: '10px', display: 'block'}}>Kỹ năng dựng lều chữ A và thắt nút dây cơ bản</a>
-              </div>
-              <ul className={styles.categoryTitleList}>
-                <li><a href="#">Tuyển tập 50 trò chơi vòng tròn (Có video hướng dẫn)</a></li>
-                <li><a href="#">Cách quản trò và giữ lửa cho đêm lửa trại</a></li>
-                <li><a href="#">Kỹ năng sơ cấp cứu cơ bản khi đi dã ngoại</a></li>
-              </ul>
+              {kyNangData.featured ? (
+                <>
+                  <div className={styles.categoryTop} style={{marginBottom: '15px'}}>
+                    <img loading="lazy" src={kyNangData.featured.thumbnailUrl || 'https://images.unsplash.com/photo-1523987355523-c7b5b0dd90a7?q=80&w=800&auto=format&fit=crop'} className={styles.categoryMainImg} alt="Kỹ Năng" style={{aspectRatio: '16/9', borderRadius: '8px'}} />
+                    <a href={`/${kyNangData.featured.categoryId}/${kyNangData.featured.id}`} style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.05rem', lineHeight: 1.4, marginTop: '10px', display: 'block'}}>{kyNangData.featured.title}</a>
+                  </div>
+                  <ul className={styles.categoryTitleList}>
+                    {kyNangData.priority && (
+                      <li><a href={`/${kyNangData.priority.categoryId}/${kyNangData.priority.id}`} style={{fontWeight: 'bold', color: 'var(--color-brand-green)'}}>[Ưu Tiên] {kyNangData.priority.title}</a></li>
+                    )}
+                    {kyNangData.rest.map(a => (
+                      <li key={a.id}><a href={`/${a.categoryId}/${a.id}`}>{a.title}</a></li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <div style={{padding: '20px', color: '#64748b', textAlign: 'center'}}>Đang cập nhật...</div>
+              )}
               <div className={styles.viewMoreBox} style={{marginTop: 'auto'}}>
                 <a href="/ky-nang" className={styles.viewMoreBtn} style={{color: 'var(--color-brand-green)'}}>Khám phá thêm ➔</a>
               </div>
@@ -407,15 +417,24 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 <span style={{color: 'var(--color-brand-red)'}}>💍</span>
                 <h2 className="section-title" style={{fontSize: '1.2rem'}}>Cẩm Nang Giới Trẻ</h2>
               </div>
-              <div className={styles.categoryTop} style={{marginBottom: '15px'}}>
-                <img loading="lazy" src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=800&auto=format&fit=crop" className={styles.categoryMainImg} alt="Cẩm nang" style={{aspectRatio: '16/9', borderRadius: '8px'}} />
-                <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.05rem', lineHeight: 1.4, marginTop: '10px', display: 'block'}}>Tình yêu Kitô giáo: Hiểu đúng về Bí tích Hôn phối</a>
-              </div>
-              <ul className={styles.categoryTitleList}>
-                <li><a href="#">Lịch học Giáo lý Hôn nhân & Dự tòng năm 2026</a></li>
-                <li><a href="#">Thủ tục xin chuẩn khác đạo: Những điều cần biết</a></li>
-                <li><a href="#">Tải biểu mẫu: Tờ khai Hôn phối, Đơn xin phép chuẩn</a></li>
-              </ul>
+              {camNangData.featured ? (
+                <>
+                  <div className={styles.categoryTop} style={{marginBottom: '15px'}}>
+                    <img loading="lazy" src={camNangData.featured.thumbnailUrl || 'https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=800&auto=format&fit=crop'} className={styles.categoryMainImg} alt="Cẩm Nang" style={{aspectRatio: '16/9', borderRadius: '8px'}} />
+                    <a href={`/${camNangData.featured.categoryId}/${camNangData.featured.id}`} style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.05rem', lineHeight: 1.4, marginTop: '10px', display: 'block'}}>{camNangData.featured.title}</a>
+                  </div>
+                  <ul className={styles.categoryTitleList}>
+                    {camNangData.priority && (
+                      <li><a href={`/${camNangData.priority.categoryId}/${camNangData.priority.id}`} style={{fontWeight: 'bold', color: 'var(--color-brand-red)'}}>[Ưu Tiên] {camNangData.priority.title}</a></li>
+                    )}
+                    {camNangData.rest.map(a => (
+                      <li key={a.id}><a href={`/${a.categoryId}/${a.id}`}>{a.title}</a></li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <div style={{padding: '20px', color: '#64748b', textAlign: 'center'}}>Đang cập nhật...</div>
+              )}
               <div className={styles.viewMoreBox} style={{marginTop: 'auto'}}>
                 <a href="/cam-nang" className={styles.viewMoreBtn} style={{color: 'var(--color-brand-red)'}}>Kho tài liệu & Biểu mẫu ➔</a>
               </div>
@@ -429,30 +448,43 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
               </div>
               
               <div className={styles.qnaHorizontalLayout}>
-                <div className={styles.qnaMain}>
-                  <img loading="lazy" src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop" className={styles.categoryMainImg} alt="Q&A" style={{aspectRatio: '16/9', borderRadius: '8px'}} />
-                  <a href="#" style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '15px', display: 'block'}}>Làm sao để giữ Đức Tin khi môi trường đại học quá khác biệt?</a>
-                  <p className={styles.excerpt} style={{marginTop: '10px', fontSize: '0.9rem'}}>
-                    &quot;Chào Cha, con mới lên Sài Gòn học đại học và cảm thấy rất chông chênh khi bạn bè xung quanh có lối sống hoàn toàn trái ngược với giáo lý. Con nên làm gì để hoà nhập mà không đánh mất bản sắc Công giáo của mình?...&quot;
-                  </p>
-                </div>
-                
-                <div className={styles.qnaList}>
-                  <ul className={styles.categoryTitleList}>
-                    <li><a href="#">Tình yêu khác Đạo: Tiến tới hôn nhân cần chuẩn bị những gì?</a></li>
-                    <li><a href="#">Trầm cảm và áp lực công việc: Lời khuyên từ góc nhìn Tâm lý - Tôn giáo</a></li>
-                    <li><a href="#">Phân định Ơn gọi: Làm sao biết Chúa đang gọi mình?</a></li>
-                    <li><a href="#">Xăm hình có bị cấm không? Hiểu đúng về cơ thể như Đền Thờ Chúa Thánh Thần</a></li>
-                  </ul>
-                  <div className={styles.viewMoreBox} style={{marginTop: 'auto', borderTop: 'none', textAlign: 'left', padding: '15px 15px 0 15px', display: 'flex', gap: '15px'}}>
-                    <button onClick={() => setShowQuestionPopup(true)} className={styles.viewMoreBtn} style={{color: '#0f766e', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem'}}>
-                      Gửi câu hỏi ẩn danh ➔
+                {tamLyData.featured ? (
+                  <>
+                    <div className={styles.qnaMain}>
+                      <img loading="lazy" src={tamLyData.featured.thumbnailUrl || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop'} className={styles.categoryMainImg} alt="Q&A" style={{aspectRatio: '16/9', borderRadius: '8px'}} />
+                      <a href={`/${tamLyData.featured.categoryId}/${tamLyData.featured.id}`} style={{fontWeight: '700', color: 'var(--color-text-main)', fontSize: '1.1rem', lineHeight: 1.4, marginTop: '15px', display: 'block'}}>{tamLyData.featured.title}</a>
+                      <p className={styles.excerpt} style={{marginTop: '10px', fontSize: '0.9rem'}}>
+                        {tamLyData.featured.excerpt}
+                      </p>
+                    </div>
+                    
+                    <div className={styles.qnaList}>
+                      <ul className={styles.categoryTitleList}>
+                        {tamLyData.priority && (
+                          <li><a href={`/${tamLyData.priority.categoryId}/${tamLyData.priority.id}`} style={{fontWeight: 'bold', color: 'var(--color-brand-cyan)'}}>[Ưu Tiên] {tamLyData.priority.title}</a></li>
+                        )}
+                        {tamLyData.rest.map(a => (
+                          <li key={a.id}><a href={`/${a.categoryId}/${a.id}`}>{a.title}</a></li>
+                        ))}
+                      </ul>
+                      <div className={styles.viewMoreBox} style={{marginTop: 'auto', borderTop: 'none', textAlign: 'left', padding: '15px 15px 0 15px', display: 'flex', gap: '15px'}}>
+                        <button onClick={() => setShowQuestionPopup(true)} className={styles.viewMoreBtn} style={{color: '#0f766e', background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem'}}>
+                          Gửi câu hỏi ẩn danh ➔
+                        </button>
+                        <a href="/media/tam-ly" className={styles.viewMoreBtn} style={{color: 'var(--color-brand-cyan)'}}>
+                          Xem tiếp các câu hỏi khác ➔
+                        </a>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{padding: '40px', color: '#64748b', textAlign: 'center', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+                    <p style={{marginBottom: '15px'}}>Góc Tâm Lý đang cập nhật dữ liệu.</p>
+                    <button onClick={() => setShowQuestionPopup(true)} className={styles.viewMoreBtn} style={{color: '#0f766e', background: '#f8fafc', padding: '8px 16px', borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold', fontSize: '1rem'}}>
+                      Gửi câu hỏi ẩn danh trước ➔
                     </button>
-                    <a href="/media/tam-ly" className={styles.viewMoreBtn} style={{color: 'var(--color-brand-cyan)'}}>
-                      Xem tiếp các câu hỏi khác ➔
-                    </a>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 
@@ -565,16 +597,9 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 {featuredVideo ? (
                   <div dangerouslySetInnerHTML={{ __html: featuredVideo.content }} style={{ flexGrow: 1, overflow: 'hidden' }} />
                 ) : (
-                  <>
-                    <div style={{position: 'relative', width: '100%', aspectRatio: '16/9', background: '#000', borderRadius: '8px', overflow: 'hidden', marginBottom: '15px'}}>
-                      <img loading="lazy" src="https://images.unsplash.com/photo-1516280440502-6298516fb8ce?q=80&w=800&auto=format&fit=crop" style={{width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7}} alt="Acoustic" />
-                      <div style={{position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                        <span style={{fontSize: '3rem', color: 'white', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.5))'}}>▶</span>
-                      </div>
-                    </div>
-                    <a href="#" style={{fontSize: '1rem', fontWeight: 'bold', color: 'var(--color-brand-cyan)', display: 'block'}}>Chúa Cất Tiếng Gọi Con - Acoustic Cover by Gx. Chánh Tòa</a>
-                    <p style={{fontSize: '0.85rem', color: '#64748b', marginTop: '5px'}}>Ca đoàn Giới trẻ Cecilia</p>
-                  </>
+                  <div style={{padding: '40px 20px', textAlign: 'center', color: '#64748b', background: '#f8fafc', borderRadius: '8px', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                    Đang cập nhật video Thánh Ca...
+                  </div>
                 )}
               </div>
             </div>
