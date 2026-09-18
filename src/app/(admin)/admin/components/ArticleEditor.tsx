@@ -141,6 +141,29 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
     }
   };
 
+  const handleSyncLoiChua = async () => {
+    const toastId = toast.loading('Đang cào dữ liệu từ trang Giáo phận Long Xuyên, vui lòng chờ...');
+    try {
+      const res = await fetch('/api/admin/sync-loi-chua', { method: 'POST' });
+      const result = await res.json();
+      if (result.success) {
+        toast.success(result.message || 'Đồng bộ thành công!', { id: toastId });
+        if (result.article) {
+          setTitle(result.article.title);
+          setContent(result.article.content);
+          setCategory('loi-chua');
+          toast.success('Dữ liệu đã được nạp vào form. Bấm "ĐĂNG BÀI MỚI" để xác nhận lưu.');
+        } else if (result.title) {
+          toast.success(`Bài "${result.title}" đã được đồng bộ từ trước.`, { id: toastId });
+        }
+      } else {
+        toast.error('Lỗi đồng bộ: ' + (result.error || 'Lỗi không xác định'), { id: toastId });
+      }
+    } catch (err: any) {
+      toast.error('Lỗi kết nối khi đồng bộ: ' + err.message, { id: toastId });
+    }
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -415,6 +438,16 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
             borderRadius: '6px', border: '1px solid #cbd5e1', cursor: 'pointer', fontWeight: 'bold'
           }}>Lưu & Xem Trước</button>
           
+          {(!articleToEdit || !articleToEdit.id) && (
+            <button onClick={handleSyncLoiChua} style={{
+              background: '#ef4444', color: 'white', padding: '10px 15px', 
+              borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+            }}>
+              📥 ĐỒNG BỘ LỜI CHÚA
+            </button>
+          )}
+
           <button onClick={handlePublish} style={{
             background: articleToEdit && articleToEdit.id ? '#f59e0b' : 'var(--color-brand-cyan)', color: 'white', padding: '10px 20px', 
             borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold',

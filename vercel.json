@@ -1,3 +1,9 @@
 {
-  "name": "gioitregiaophanbaria"
+  "name": "gioitregiaophanbaria",
+  "crons": [
+    {
+      "path": "/api/admin/sync-loi-chua",
+      "schedule": "0 23 * * *"
+    }
+  ]
 }
