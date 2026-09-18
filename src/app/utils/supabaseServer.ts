@@ -57,3 +57,29 @@ export async function verifyAdmin() {
 
   return false;
 }
+
+export async function verifyEditor() {
+  const supabase = await createSupabaseServerClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return false;
+  }
+
+  const { data: roleData, error: roleError } = await supabase
+    .from('user_roles')
+    .select('role, status')
+    .eq('user_id', user.id)
+    .single();
+
+  if (roleError || !roleData || roleData.status === 'locked') {
+    return false;
+  }
+
+  const allowedRoles = ['super_admin', 'admin', 'category_admin', 'editor'];
+  if (allowedRoles.includes(roleData.role)) {
+    return true;
+  }
+
+  return false;
+}

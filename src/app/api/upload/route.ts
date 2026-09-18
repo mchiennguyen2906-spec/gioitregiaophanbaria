@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { verifyAdmin } from '../../utils/supabaseServer';
+import { verifyEditor } from '../../utils/supabaseServer';
 import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: Request) {
   try {
-    const isAdmin = await verifyAdmin();
-    if (!isAdmin) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    const isEditor = await verifyEditor();
+    if (!isEditor) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     
     // Use Service Role key to bypass RLS on storage since we already verified admin status
     const supabaseAdmin = createClient(
