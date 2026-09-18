@@ -195,12 +195,6 @@ export default function ArticleClient({
                   <p style={{ color: '#64748b', fontSize: '0.9rem', marginBottom: '20px', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px' }}>
                     Đăng bởi: {articleDetail.author} {articleDetail.parish ? `(${articleDetail.parish})` : ''} | {new Date(articleDetail.date).toLocaleDateString('vi-VN')}
                   </p>
-                  
-                  {articleDetail.thumbnailUrl && (
-                    <div style={{ marginBottom: '20px' }}>
-                      <img loading="lazy" src={articleDetail.thumbnailUrl} alt="Thumbnail" style={{ width: '100%', borderRadius: '8px', objectFit: 'cover' }} />
-                    </div>
-                  )}
 
                   {articleDetail.excerpt && (
                     <div style={{ 

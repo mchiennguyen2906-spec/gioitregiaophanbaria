@@ -51,7 +51,9 @@ export default function CategoryClient({
   const unpinned = articles.filter(a => !a.isFeatured && !a.isPriority);
   
   const featuredArticles = [...pinnedFeatured];
-  while (featuredArticles.length < 5 && unpinned.length > 0) {
+  // Theo đúng logic của user: Chỉ lấy 1 bài mới nhất (unpinned) lên làm nổi bật, 
+  // sau khi có bài mới hơn thì bài cũ sẽ tự động bị đẩy xuống phần ưu tiên.
+  if (featuredArticles.length < 5 && unpinned.length > 0) {
     featuredArticles.push(unpinned.shift()!);
   }
 

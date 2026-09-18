@@ -46,6 +46,9 @@ export default async function ArticlePage({ params }: { params: any }) {
   if (!foundArticle) {
     // If not a specific article, maybe it's a subcategory
     subcategoryArticles = await getPublishedArticlesServer(200, slug);
+  } else {
+    // If it is an article, fetch the latest 11 articles from its category (to show 10 in sidebar excluding itself)
+    subcategoryArticles = await getPublishedArticlesServer(15, foundArticle.categoryId);
   }
 
   const allDonations = await getDonationsServer();

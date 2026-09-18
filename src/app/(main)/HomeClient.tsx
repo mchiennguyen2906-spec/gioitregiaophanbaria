@@ -30,9 +30,18 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
   const homeUnpinned = articles.filter(a => !a.isHomeFeatured && !a.isHomePriority);
 
   const homeFeatured = [...homeFeaturedPinned];
-  while (homeFeatured.length < 10 && homeUnpinned.length > 0) {
-    homeFeatured.push(homeUnpinned.shift()!);
+  
+  // Lấy 1 bài mới nhất từ mỗi chuyên mục kéo tự động
+  const autoCategories = ['tin-giao-phan-brvt', 'giao-hoi-hoan-vu', 'giao-hoi-viet-nam', 'loi-chua'];
+  for (const cat of autoCategories) {
+    const latestInCat = homeUnpinned.find(a => a.categoryId === cat);
+    if (latestInCat) {
+      homeFeatured.push(latestInCat);
+      // Xoá khỏi unpinned để không lặp lại ở các phần khác
+      homeUnpinned.splice(homeUnpinned.indexOf(latestInCat), 1);
+    }
   }
+  // Không điền thêm tùy tiện để đảm bảo đúng yêu cầu: chỉ 1 tin mới nhất mỗi đơn vị.
 
   const homePriority = [...homePriorityPinned];
   while (homePriority.length < 10 && homeUnpinned.length > 0) {
