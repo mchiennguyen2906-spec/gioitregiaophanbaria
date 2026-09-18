@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { getPublishedArticlesServer } from './utils/serverStore';
 import { categoryMap } from './utils/categoryMap';
 
-const URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://gioitre.giaophanbaria.org';
+const URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.gioitregiaophanbaria.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articles = await getPublishedArticlesServer(1000);
