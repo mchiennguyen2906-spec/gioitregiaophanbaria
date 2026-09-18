@@ -17,7 +17,15 @@ export async function POST(request: Request) {
     }
 
     // 2. Fetch the category page
-    const listResponse = await fetch('https://giaophanlongxuyen.org/chuyen-muc/loi-chua');
+    const fetchOptions = {
+      cache: 'no-store' as RequestCache,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7',
+      }
+    };
+    const listResponse = await fetch('https://giaophanlongxuyen.org/chuyen-muc/loi-chua', fetchOptions);
     const listHtml = await listResponse.text();
     const $list = cheerio.load(listHtml);
     
@@ -32,11 +40,12 @@ export async function POST(request: Request) {
     });
 
     if (!latestLink) {
+      console.error("HTML Snippet:", listHtml.substring(0, 500));
       return NextResponse.json({ success: false, error: 'Không tìm thấy link bài viết Lời Chúa mới nhất.' });
     }
 
     // 3. Fetch the latest article
-    const articleResponse = await fetch(latestLink);
+    const articleResponse = await fetch(latestLink, fetchOptions);
     const articleHtml = await articleResponse.text();
     const $article = cheerio.load(articleHtml);
 
