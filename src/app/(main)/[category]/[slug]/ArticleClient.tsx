@@ -103,11 +103,16 @@ export default function ArticleClient({
       {/* Breadcrumb / Title */}
       <div className="container" style={{ padding: '20px 15px' }}>
         <h1 style={{ fontSize: '1.5rem', color: 'var(--color-brand-cyan)', margin: 0, textTransform: 'uppercase', fontWeight: 800 }}>
-          {articleDetail ? articleDetail.title : titleStr}
+          {titleStr}
         </h1>
         <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '5px' }}>
           <a href="/" style={{color: '#64748b', textDecoration: 'none'}}>Trang chủ</a> 
-          {articleDetail ? ` » ${articleDetail.title}` : ` » ${titleStr}`}
+          {' » '}
+          {articleDetail ? (
+            <a href={`/${category}`} style={{color: '#64748b', textDecoration: 'none'}}>{titleStr}</a>
+          ) : (
+            <span>{titleStr}</span>
+          )}
         </p>
       </div>
 
