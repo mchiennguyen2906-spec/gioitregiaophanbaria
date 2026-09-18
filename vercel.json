@@ -7,11 +7,11 @@
     },
     {
       "path": "/api/admin/sync-hdgmvn",
-      "schedule": "0 23,5,11 * * *"
+      "schedule": "0 23 * * *"
     },
     {
       "path": "/api/admin/sync-brvt",
-      "schedule": "0 23,5,11 * * *"
+      "schedule": "0 23 * * *"
     }
   ]
 }
