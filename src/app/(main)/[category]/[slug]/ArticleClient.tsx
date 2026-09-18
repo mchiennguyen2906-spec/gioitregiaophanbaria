@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from '../../../page.module.css';
 import LoiChuaWidget from '../../../components/LoiChuaWidget';
-import LoadingSpinner from '../../../components/LoadingSpinner';
 import { sanitize } from '../../../utils/sanitize';
 import { getTitle, slugMap } from '../../../utils/categoryMap';
 import { getArticlesFromStore, getDonationsFromStore, Article, DonationProgram } from '../../../utils/store';

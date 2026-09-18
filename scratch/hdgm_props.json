@@ -1,0 +1,343 @@
+{
+  "categoryCode": "thoi-su-giao-hoi-viet-nam",
+  "focusNews": {
+    "value": [
+      {
+        "id": "5371b795-8a5c-4354-a4fc-a32f55fe79e5",
+        "title": "Hồng ân Thánh chức - Khánh thành Nhà hưu dưỡng linh mục: Nhịp sống Giáo hội Việt Nam số 91 (07/9/2026 - 14/9/2026)",
+        "photo": "https://images.hdgmvietnam.com/images/Vinh/ff58f31b-9289-4c1c-98f8-3b3e5473a3f3.jpg",
+        "link": "hong-an-thanh-chuc--khanh-thanh-nha-huu-duong-linh-muc-nhip-song-giao-hoi-viet-nam-so-91-0792026--1492026",
+        "catalogueId": "880d871f-b23a-45e8-ad55-71c69a94e704",
+        "categoryCode": "thoi-su-giao-hoi-viet-nam",
+        "tagCodes": null,
+        "metaDescription": "WHĐ (14/9/2026) – Chào mừng quý vị và các bạn đang đến với Chuyên mục: “Nhịp sống Giáo hội Việt Nam” của Kênh Truyền thông Hội đồng Giám mục Việt Nam. Trong buổi phát hôm nay, thứ Hai, ngày 14 tháng 9 năm 2026, Chuyên mục Nhịp sống Giáo hội Việt Nam - Số 91 kính gửi đến quý vị và các bạn những nội dung sau đây:",
+        "parableCode": " ",
+        "topLevel": 1,
+        "visit": 3135,
+        "status": "publish",
+        "hotNewsPhoto": "https://images.hdgmvietnam.com/images/Vinh/ff58f31b-9289-4c1c-98f8-3b3e5473a3f3.jpg",
+        "created": "2026-09-14T13:52:36.499156",
+        "publishDate": "2026-09-14T20:43:56",
+        "createdBy": "27d32ffb-437d-4c38-97ea-7e28c8fe31e6",
+        "modifiedBy": "27d32ffb-437d-4c38-97ea-7e28c8fe31e6",
+        "embedId": null,
+        "creatorName": "Phêrô Vinh",
+        "authorName": "Truyền thông HĐGMVN",
+        "categoryId": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+        "categories": [
+          {
+            "name": "Thời sự",
+            "id": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "parentId": null,
+            "code": "thoi-su",
+            "type": "categories",
+            "level": 0,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Hoàn vũ",
+            "id": "f9091cd0-4e10-465f-9e05-ff109903fd90",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-hoan-vu",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Việt Nam",
+            "id": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-viet-nam",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          }
+        ],
+        "catalogue": null,
+        "mediaFileEmbedId": null,
+        "tags": [
+          {
+            "id": "5a4bb2c5-c9cd-4e70-997e-867475033478",
+            "name": "Nhịp sống Giáo hội Việt Nam",
+            "noMark": "nhip-song-giao-hoi-viet-nam"
+          }
+        ],
+        "type": "NEWS"
+      },
+      {
+        "id": "b5fd008c-0f6f-4f2e-97f7-108c0b9aff87",
+        "title": "Ủy ban Thánh nhạc - Thư mời tham dự Hội thảo Thánh nhạc lần thứ 57 ngày 13/10/2026",
+        "photo": "https://images.hdgmvietnam.com/images/Vinh/7f7f45a3-2ccc-427d-8f34-269027f58d3a.jpg",
+        "link": "uy-ban-thanh-nhac--thu-moi-tham-du-hoi-thao-thanh-nhac-lan-thu-57-ngay-13102026",
+        "catalogueId": null,
+        "categoryCode": "thoi-su-giao-hoi-viet-nam",
+        "tagCodes": null,
+        "metaDescription": "WHĐ (14/9/2026) – Hội thảo Thánh nhạc lần thứ 57 với chủ đề: “Tính đối đáp trong Thánh ca Phụng vụ” sẽ được Ủy ban Thánh nhạc trực thuộc Hội đồng Giám mục Việt Nam tổ chức tại Trung tâm Mục vụ Tổng Giáo phận Sài Gòn vào ngày 13/10/2026. Sau đây là nguyên văn Thư mời:",
+        "parableCode": " ",
+        "topLevel": 1,
+        "visit": 2714,
+        "status": "publish",
+        "hotNewsPhoto": "https://images.hdgmvietnam.com/images/Vinh/7f7f45a3-2ccc-427d-8f34-269027f58d3a.jpg",
+        "created": "2026-09-14T04:07:07.178775",
+        "publishDate": "2026-09-14T10:52:06",
+        "createdBy": "27d32ffb-437d-4c38-97ea-7e28c8fe31e6",
+        "modifiedBy": "27d32ffb-437d-4c38-97ea-7e28c8fe31e6",
+        "embedId": null,
+        "creatorName": "Phêrô Vinh",
+        "authorName": "Lm. Rôcô Nguyễn Duy",
+        "categoryId": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+        "categories": [
+          {
+            "name": "Thời sự",
+            "id": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "parentId": null,
+            "code": "thoi-su",
+            "type": "categories",
+            "level": 0,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Hoàn vũ",
+            "id": "f9091cd0-4e10-465f-9e05-ff109903fd90",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-hoan-vu",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Việt Nam",
+            "id": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-viet-nam",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          }
+        ],
+        "catalogue": null,
+        "mediaFileEmbedId": null,
+        "tags": [
+          {
+            "id": "b542ee1d-27cc-4afe-9db5-ba88eb2a3f0a",
+            "name": "Ủy ban Thánh nhạc",
+            "noMark": "uy-ban-thanh-nhac"
+          },
+          {
+            "id": "ce8b7421-f065-48db-87b2-9fd8b9fbf80f",
+            "name": "Hội thảo Thánh nhạc",
+            "noMark": "hoi-thao-thanh-nhac"
+          }
+        ],
+        "type": "NEWS"
+      },
+      {
+        "id": "33f9664f-ee10-4e37-a6be-28d6841e6983",
+        "title": "Khánh thành Nhà hưu dưỡng linh mục Giáo phận Phan Thiết - Mái ấm của tình hiệp hành và lòng biết ơn",
+        "photo": "https://images.hdgmvietnam.com/images/Vinh/34f11281-5b18-4b9b-8258-078dd80d9782.webp",
+        "link": "khanh-thanh-nha-huu-duong-linh-muc-giao-phan-phan-thiet--mai-am-cua-tinh-hiep-hanh-va-long-biet-on",
+        "catalogueId": null,
+        "categoryCode": "thoi-su-giao-hoi-viet-nam",
+        "tagCodes": null,
+        "metaDescription": "WGPPT (08/9/2026) – Quần thể công trình trên khuôn viên 1,6 ha, được trang bị đồng bộ cơ sở vật chất và y tế, tạo không gian an dưỡng và nâng đỡ đời sống thiêng liêng cho các linh mục cao niên.",
+        "parableCode": " ",
+        "topLevel": 0,
+        "visit": 5543,
+        "status": "publish",
+        "hotNewsPhoto": null,
+        "created": "2026-09-09T04:21:00.291316",
+        "publishDate": "2026-09-09T11:06:46",
+        "createdBy": "27d32ffb-437d-4c38-97ea-7e28c8fe31e6",
+        "modifiedBy": "27d32ffb-437d-4c38-97ea-7e28c8fe31e6",
+        "embedId": null,
+        "creatorName": "Phêrô Vinh",
+        "authorName": "Truyền thông GP Phan Thiết",
+        "categoryId": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+        "categories": [
+          {
+            "name": "Thời sự",
+            "id": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "parentId": null,
+            "code": "thoi-su",
+            "type": "categories",
+            "level": 0,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Hoàn vũ",
+            "id": "f9091cd0-4e10-465f-9e05-ff109903fd90",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-hoan-vu",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Việt Nam",
+            "id": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-viet-nam",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          }
+        ],
+        "catalogue": null,
+        "mediaFileEmbedId": null,
+        "tags": [
+          {
+            "id": "1da18fcc-13cd-4ef5-8794-0597391384dd",
+            "name": "Giáo phận Phan Thiết",
+            "noMark": "giao-phan-phan-thiet"
+          }
+        ],
+        "type": "NEWS"
+      },
+      {
+        "id": "e830aed1-d5c2-45d4-878d-244ed83d7030",
+        "title": "Công trình Nhà hưu dưỡng linh mục Giáo phận Phan Thiết - Từ ước mơ đến hiện thực",
+        "photo": "https://images.hdgmvietnam.com/images/Vinh/da747c93-cf4d-42fe-8810-a65b86417b09.jpg",
+        "link": "cong-trinh-nha-huu-duong-linh-muc-giao-phan-phan-thiet--tu-uoc-mo-den-hien-thuc",
+        "catalogueId": null,
+        "categoryCode": "thoi-su-giao-hoi-viet-nam",
+        "tagCodes": null,
+        "metaDescription": "WGPPT (07/9/2026) - Sau đây là video giới thiệu công trình Nhà hưu dưỡng linh mục Giáo phận Phan Thiết được khánh thành vào ngày 08/9/2026.",
+        "parableCode": " ",
+        "topLevel": 1,
+        "visit": 6217,
+        "status": "publish",
+        "hotNewsPhoto": "https://images.hdgmvietnam.com/images/Vinh/da747c93-cf4d-42fe-8810-a65b86417b09.jpg",
+        "created": "2026-09-08T01:59:57.866153",
+        "publishDate": "2026-09-08T08:47:16",
+        "createdBy": "27d32ffb-437d-4c38-97ea-7e28c8fe31e6",
+        "modifiedBy": "1d78c2d3-27c7-455c-a521-5eb9be8b2f44",
+        "embedId": null,
+        "creatorName": "Phêrô Vinh",
+        "authorName": "Truyền thông GP Phan Thiết",
+        "categoryId": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+        "categories": [
+          {
+            "name": "Thời sự",
+            "id": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "parentId": null,
+            "code": "thoi-su",
+            "type": "categories",
+            "level": 0,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Hoàn vũ",
+            "id": "f9091cd0-4e10-465f-9e05-ff109903fd90",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-hoan-vu",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Việt Nam",
+            "id": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-viet-nam",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          }
+        ],
+        "catalogue": null,
+        "mediaFileEmbedId": null,
+        "tags": [
+          {
+            "id": "1da18fcc-13cd-4ef5-8794-0597391384dd",
+            "name": "Giáo phận Phan Thiết",
+            "noMark": "giao-phan-phan-thiet"
+          }
+        ],
+        "type": "NEWS"
+      },
+      {
+        "id": "ce257104-0296-4a8d-9051-daa35a70825a",
+        "title": "\nMùa Thụ tạo - Khai giảng - Mục vụ: Nhịp sống Giáo hội Việt Nam số 90 (01/9/2026 - 07/9/2026)",
+        "photo": "https://images.hdgmvietnam.com/images/Vinh/4652349d-bfe5-477e-bd9f-469da83670c5.jpg",
+        "link": "mua-thu-tao--khai-giang--muc-vu-nhip-song-giao-hoi-viet-nam-so-90-0192026--0792026",
+        "catalogueId": "880d871f-b23a-45e8-ad55-71c69a94e704",
+        "categoryCode": "thoi-su-giao-hoi-viet-nam",
+        "tagCodes": null,
+        "metaDescription": "WHĐ (07/9/2026) – Chào mừng quý vị và các bạn đang đến với Chuyên mục: “Nhịp sống Giáo hội Việt Nam” của Kênh Truyền thông Hội đồng Giám mục Việt Nam. Trong buổi phát hôm nay, thứ Hai, ngày 07 tháng 9 năm 2026, Chuyên mục Nhịp sống Giáo hội Việt Nam - Số 90 kính gửi đến quý vị và các bạn những nội dung sau đây:",
+        "parableCode": " ",
+        "topLevel": 1,
+        "visit": 5885,
+        "status": "publish",
+        "hotNewsPhoto": "https://images.hdgmvietnam.com/images/Vinh/4652349d-bfe5-477e-bd9f-469da83670c5.jpg",
+        "created": "2026-09-07T14:17:45.958174",
+        "publishDate": "2026-09-07T21:09:31",
+        "createdBy": "27d32ffb-437d-4c38-97ea-7e28c8fe31e6",
+        "modifiedBy": "27d32ffb-437d-4c38-97ea-7e28c8fe31e6",
+        "embedId": null,
+        "creatorName": "Phêrô Vinh",
+        "authorName": "Truyền thông HĐGMVN",
+        "categoryId": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+        "categories": [
+          {
+            "name": "Thời sự",
+            "id": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "parentId": null,
+            "code": "thoi-su",
+            "type": "categories",
+            "level": 0,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Hoàn vũ",
+            "id": "f9091cd0-4e10-465f-9e05-ff109903fd90",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-hoan-vu",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          },
+          {
+            "name": "Thời sự Giáo hội Việt Nam",
+            "id": "11b1a98e-d452-4bb2-9afa-1263f6d6580c",
+            "parentId": "ca32b271-90bf-4285-bb41-8fd1304413c6",
+            "code": "thoi-su-giao-hoi-viet-nam",
+            "type": "categories",
+            "level": 1,
+            "link": "",
+            "photoUrl": null
+          }
+        ],
+        "catalogue": null,
+        "mediaFileEmbedId": null,
+        "tags": [
+          {
+            "id": "5a4bb2c5-c9cd-4e70-997e-867475033478",
+            "name": "Nhịp sống Giáo hội Việt Nam",
+            "noMark": "nhip-song-giao-hoi-viet-nam"
+          }
+        ],
+        "type": "NEWS"
+      }
+    ],
+    "pageData": {
+      "pageSize": 5,
+      "pageCount": 631,
+      "currentPage": 1
+    },
+    "total": 3152
+  }
+}

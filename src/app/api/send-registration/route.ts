@@ -24,7 +24,7 @@ export async function POST(request: Request) {
 
     const result = registrationSchema.safeParse(data);
     if (!result.success) {
-      return NextResponse.json({ success: false, error: result.error.errors[0].message, logs }, { status: 400 });
+      return NextResponse.json({ success: false, error: (result.error as any).errors[0].message, logs }, { status: 400 });
     }
 
     const { orgId, eventId, eventName, fullName, phone, email, parish, address, organizerEmail } = result.data;

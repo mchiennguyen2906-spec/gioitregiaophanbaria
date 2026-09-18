@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       const listHtml = await listResponse.text();
       const $list = cheerio.load(listHtml);
       
-      const articles = [];
+      const articles: any[] = [];
       $list('.mpw-post, article, .type-post').each((i, el) => {
         const title = $list(el).find('h3 a, h4 a, h2 a, .entry-title a').first().text().trim();
         const link = $list(el).find('h3 a, h4 a, h2 a, .entry-title a').first().attr('href');
