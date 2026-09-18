@@ -517,6 +517,19 @@ export const deleteParishFromStore = async (id: string) => {
 export const getTodayMassesFromStore = async (dateStr?: string): Promise<TodayMass[]> => {
   if (typeof window === 'undefined') return [];
   const targetDate = dateStr || new Date().toISOString().split('T')[0];
+  
+  // Tự động đồng bộ 1 lần duy nhất khi sang ngày mới
+  const lastSyncDate = await getSettingFromStore('last_mass_sync_date', '');
+  if (lastSyncDate !== targetDate) {
+    try {
+      await syncTodayMasses(targetDate);
+      // Lưu lại log ngầm (không thông báo ồn ào)
+      await supabase.from('settings').upsert({ id: 'last_mass_sync_date', value: targetDate });
+    } catch (e) {
+      console.error('Lỗi khi tự động đồng bộ giờ lễ:', e);
+    }
+  }
+
   const { data, error } = await supabase.from('today_masses').select('*').eq('mass_date', targetDate).order('created_at', { ascending: false });
   if (error || !data) return [];
   return data;
