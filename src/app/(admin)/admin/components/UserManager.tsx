@@ -260,18 +260,18 @@ export default function UserManager() {
         <div style={{ overflowX: 'auto', width: '100%' }}><table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '10px', background: 'white', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <thead>
             <tr style={{ background: '#f1f5f9', borderBottom: '2px solid #cbd5e1' }}>
-              <th style={thStyle}>Email</th>
-              <th style={thStyle}>Quyền hạn (Role)</th>
-              <th style={thStyle}>Chuyên mục truy cập</th>
-              <th style={thStyle}>Trạng thái</th>
-              <th style={thStyle}>Ngày tạo</th>
-              <th style={thStyle}>Thao tác</th>
+              <th style={{...thStyle, width: '20%'}}>Email</th>
+              <th style={{...thStyle, width: '13%'}}>Quyền hạn (Role)</th>
+              <th style={{...thStyle, width: '40%'}}>Chuyên mục truy cập</th>
+              <th style={{...thStyle, width: '10%'}}>Trạng thái</th>
+              <th style={{...thStyle, width: '7%'}}>Ngày tạo</th>
+              <th style={{...thStyle, width: '10%'}}>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {users.map(user => (
               <tr key={user.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                <td style={tdStyle}><strong>{user.email}</strong></td>
+                <td style={{...tdStyle, wordBreak: 'break-all'}}><strong>{user.email}</strong></td>
                 <td style={tdStyle}>
                   <span style={{ 
                     padding: '4px 8px', borderRadius: '4px', fontSize: '0.85rem', fontWeight: 'bold',
