@@ -7,6 +7,7 @@ import BibleTicker from "../components/BibleTicker";
 import MainFooter from "../components/MainFooter";
 import Image from "next/image";
 import BackToTop from "../components/BackToTop";
+import { GoogleAnalytics } from '@next/third-parties/google';
 
 export const metadata: Metadata = {
   title: "Giới Trẻ Giáo Phận Bà Rịa",
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="vi">
       <body>
+        {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
         <header>
           {/* THANH LỜI CHÚA (BIBLE TICKER) Ở ĐỈNH TRANG */}
           <BibleTicker />
