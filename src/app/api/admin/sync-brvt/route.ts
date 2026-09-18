@@ -85,6 +85,12 @@ export async function POST(request: Request) {
         const articleHtml = await articleResponse.text();
         const $article = cheerio.load(articleHtml);
         
+        // Use high-res image from open graph if available
+        const ogImage = $article('meta[property="og:image"]').attr('content');
+        if (ogImage && ogImage.startsWith('http')) {
+           article.img = ogImage;
+        }
+        
         let contentHtml = $article('.entry-content').html();
         if (!contentHtml) {
            contentHtml = $article('.post-content').html();

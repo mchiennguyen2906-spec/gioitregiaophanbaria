@@ -111,8 +111,13 @@ export async function POST(request: Request) {
           
           let finalContent = $content('body').html() || '';
           
+          // Try to get high-res from OG image first
+          const ogImage = $article('meta[property="og:image"]').attr('content');
           let thumbnailUrl = '';
-          if (article.photo) {
+          
+          if (ogImage && ogImage.startsWith('http')) {
+              thumbnailUrl = ogImage;
+          } else if (article.photo) {
               thumbnailUrl = article.photo.startsWith('http') ? article.photo : `https://hdgmvietnam.com${article.photo}`;
           }
 

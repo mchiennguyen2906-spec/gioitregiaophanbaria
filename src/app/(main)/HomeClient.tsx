@@ -132,7 +132,7 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 <a href={`/${homeFeatured[currentSlide].categoryId}/${homeFeatured[currentSlide].id}`}>
                   <img fetchPriority="high" src={homeFeatured[currentSlide].thumbnailUrl} className={styles.sliderImg} alt="Youth Events" style={{transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'}} />
                   <div className={styles.sliderText} style={{transition: 'all 0.4s ease-in-out', padding: '15px 25px', background: 'rgba(0, 0, 0, 0.65)'}}>
-                    <h3 style={{color: '#fff', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', margin: 0, lineHeight: 1.3, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>{homeFeatured[currentSlide].title}</h3>
+                    <h3 style={{color: '#fff', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', margin: 0, lineHeight: 1.3}}>{homeFeatured[currentSlide].title}</h3>
                   </div>
                 </a>
                 

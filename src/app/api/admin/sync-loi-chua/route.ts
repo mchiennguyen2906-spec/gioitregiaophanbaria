@@ -93,8 +93,11 @@ export async function POST(request: Request) {
       title = postDetail.title;
       let contentHtml = postDetail.content;
       
-      // Also extract the thumbnail photo from the list page
-      if (latestArticle.photo) {
+      // Try to get high-res from OG image first
+      const ogImage = $article('meta[property="og:image"]').attr('content');
+      if (ogImage && ogImage.startsWith('http')) {
+          thumbnailUrl = ogImage;
+      } else if (latestArticle.photo) {
           thumbnailUrl = latestArticle.photo.startsWith('http') ? latestArticle.photo : `https://hdgmvietnam.com${latestArticle.photo}`;
       }
 
