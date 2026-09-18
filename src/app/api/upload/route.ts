@@ -31,7 +31,12 @@ export async function POST(request: Request) {
     const buffer = Buffer.from(bytes);
 
     // Save to Supabase Storage
-    const filename = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`;
+    // Sanitize filename for Supabase Storage (remove unicode, spaces, special chars)
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
+    const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+    const normalizedName = baseName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const safeName = normalizedName.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+    const filename = `${Date.now()}-${safeName}.${ext}`;
     const { data: uploadData, error } = await supabase.storage
       .from('public-files')
       .upload(filename, buffer, {
