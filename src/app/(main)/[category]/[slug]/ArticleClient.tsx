@@ -45,8 +45,19 @@ export default function ArticleClient({
     return donations.some(d => d.isCompleted && d.linkedArticleId === articleId);
   };
 
-  const featuredArticles = subcategoryArticles.filter(a => a.isFeatured).slice(0, 6);
-  const priorityArticles = subcategoryArticles.filter(a => a.isPriority).slice(0, 6);
+  const pinnedFeatured = subcategoryArticles.filter(a => a.isFeatured);
+  const pinnedPriority = subcategoryArticles.filter(a => a.isPriority && !a.isFeatured);
+  const unpinned = subcategoryArticles.filter(a => !a.isFeatured && !a.isPriority);
+  
+  const featuredArticles = [...pinnedFeatured];
+  while (featuredArticles.length < 5 && unpinned.length > 0) {
+    featuredArticles.push(unpinned.shift()!);
+  }
+
+  const priorityArticles = [...pinnedPriority];
+  while (priorityArticles.length < 5 && unpinned.length > 0) {
+    priorityArticles.push(unpinned.shift()!);
+  }
 
   useEffect(() => {
     if (isEventRegistration || articleDetail || featuredArticles.length <= 1) return;

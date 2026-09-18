@@ -46,8 +46,19 @@ export default function CategoryClient({
     return donations.some(d => d.isCompleted && d.linkedArticleId === articleId);
   };
 
-  const featuredArticles = articles.filter(a => a.isFeatured).slice(0, 6);
-  const priorityArticles = articles.filter(a => a.isPriority).slice(0, 6);
+  const pinnedFeatured = articles.filter(a => a.isFeatured);
+  const pinnedPriority = articles.filter(a => a.isPriority && !a.isFeatured);
+  const unpinned = articles.filter(a => !a.isFeatured && !a.isPriority);
+  
+  const featuredArticles = [...pinnedFeatured];
+  while (featuredArticles.length < 5 && unpinned.length > 0) {
+    featuredArticles.push(unpinned.shift()!);
+  }
+
+  const priorityArticles = [...pinnedPriority];
+  while (priorityArticles.length < 5 && unpinned.length > 0) {
+    priorityArticles.push(unpinned.shift()!);
+  }
 
   useEffect(() => {
     if (featuredArticles.length <= 1) return;

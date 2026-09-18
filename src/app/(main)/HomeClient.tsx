@@ -25,8 +25,19 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
     return () => window.removeEventListener('storage_update', syncArticles);
   }, []);
 
-  const homeFeatured = articles.filter(a => a.isHomeFeatured).slice(0, 10);
-  const homePriority = articles.filter(a => a.isHomePriority).slice(0, 10);
+  const homeFeaturedPinned = articles.filter(a => a.isHomeFeatured);
+  const homePriorityPinned = articles.filter(a => a.isHomePriority && !a.isHomeFeatured);
+  const homeUnpinned = articles.filter(a => !a.isHomeFeatured && !a.isHomePriority);
+
+  const homeFeatured = [...homeFeaturedPinned];
+  while (homeFeatured.length < 10 && homeUnpinned.length > 0) {
+    homeFeatured.push(homeUnpinned.shift()!);
+  }
+
+  const homePriority = [...homePriorityPinned];
+  while (homePriority.length < 10 && homeUnpinned.length > 0) {
+    homePriority.push(homeUnpinned.shift()!);
+  }
 
   const getCategoryData = (catIds: string[], limit = 4) => {
     const catArticles = articles.filter(a => catIds.includes(a.categoryId));
