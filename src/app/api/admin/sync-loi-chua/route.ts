@@ -14,6 +14,11 @@ export async function OPTIONS(request: Request) {
   });
 }
 
+export async function GET(request: Request) {
+  return POST(request);
+}
+
+
 export async function POST(request: Request) {
   try {
     // 1. Check if direct payload is provided (from Bookmarklet)
