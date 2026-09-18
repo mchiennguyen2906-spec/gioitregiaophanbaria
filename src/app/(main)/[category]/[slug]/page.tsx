@@ -37,6 +37,7 @@ export async function generateMetadata({ params }: { params: any }): Promise<Met
 
 export default async function ArticlePage({ params }: { params: any }) {
   const resolvedParams = params instanceof Promise ? await params : params;
+  const category = resolvedParams?.category || '';
   const slug = resolvedParams?.slug || '';
 
   const foundArticle = await getArticleBySlugOrIdServer(slug);

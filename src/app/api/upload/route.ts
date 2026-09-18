@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '../../utils/supabaseClient';
-import { verifyAdmin } from '../../utils/supabaseServer';
+import { createSupabaseServerClient, verifyAdmin } from '../../utils/supabaseServer';
 
 export async function POST(request: Request) {
   try {
     const isAdmin = await verifyAdmin();
     if (!isAdmin) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    
+    const supabase = await createSupabaseServerClient();
 
     const data = await request.formData();
     const file: File | null = data.get('file') as unknown as File;

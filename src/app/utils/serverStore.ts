@@ -49,7 +49,7 @@ export async function getPublishedArticlesServer(limit = 200, categoryId?: strin
       .limit(limit);
 
     if (categoryId) {
-      query = query.eq('categoryId', categoryId);
+      query = query.eq('category_id', categoryId);
     }
 
     const { data, error } = await query;
