@@ -1,6 +1,6 @@
 import sanitizeHtml from 'sanitize-html';
 
-const html = '<p>Test</p><iframe class="ql-video" src="https://youtube.com/embed/123"></iframe><iframe class="ql-video" src="https://www.youtube.com/embed/456"></iframe><iframe class="ql-video" src="https://youtu.be/123"></iframe>';
+const html = '<p>Test</p><img src="https://example.com/img.jpg" alt="test" width="100" height="100" class="my-img" style="color:red" srcset="https://example.com/img.jpg 1x" sizes="100vw" loading="lazy" />';
 
 const sanitized = sanitizeHtml(html, {
   allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img', 'iframe' ]),

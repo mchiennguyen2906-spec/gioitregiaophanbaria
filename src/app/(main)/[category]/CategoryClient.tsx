@@ -178,7 +178,7 @@ export default function CategoryClient({
           gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
           gap: '20px'
         }}>
-          {articles.length > 0 ? articles.map((article) => (
+          {unpinned.length > 0 ? unpinned.map((article) => (
             <a key={article.id} href={`/${category}/${article.id}`} style={{
               background: '#fff',
               borderRadius: '8px',
