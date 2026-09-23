@@ -174,7 +174,7 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 <h2 className="section-title" style={{fontSize: '0.95rem', textTransform: 'uppercase', color: 'var(--color-brand-cyan)', fontWeight: 'bold'}}>Bản Tin Mới Nhất</h2>
                 <span style={{fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal'}}>Tin mới nhất</span>
               </div>
-              <div className="news-list" style={{display: 'flex', flexDirection: 'column', gap: '14px', paddingRight: '5px', flex: 1}}>
+              <div className="news-list" style={{display: 'flex', flexDirection: 'column', gap: '10px', paddingRight: '5px', flex: 1}}>
                 
                 {homeLatestNews.length > 0 ? homeLatestNews.map((article, idx) => {
                   const date = new Date(article.date);
@@ -185,19 +185,19 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                   const bgColor = bgColors[idx % bgColors.length];
 
                   return (
-                    <a key={article.id} href={`/${article.categoryId}/${article.id}`} className={styles.newsItemSmall} style={{display: 'flex', gap: '12px', alignItems: 'center', textDecoration: 'none'}}>
-                      <div style={{minWidth: '48px', height: '48px', background: bgColor, color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '6px', fontWeight: 'bold', flexShrink: 0}}>
-                        <span style={{fontSize: '1rem', lineHeight: '1'}}>{day}</span>
+                    <a key={article.id} href={`/${article.categoryId}/${article.id}`} className={styles.newsItemSmall} style={{display: 'flex', gap: '10px', alignItems: 'center', textDecoration: 'none'}}>
+                      <div style={{minWidth: '44px', height: '44px', background: bgColor, color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '6px', fontWeight: 'bold', flexShrink: 0}}>
+                        <span style={{fontSize: '0.95rem', lineHeight: '1'}}>{day}</span>
                         <span style={{fontSize: '0.65rem'}}>T{month}</span>
                       </div>
                       <div style={{flex: 1, minWidth: 0}}>
-                        <h4 style={{fontSize: '0.88rem', marginBottom: '3px', color: 'var(--color-text-main)', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>{article.title}</h4>
-                        <p style={{fontSize: '0.75rem', color: '#64748b', margin: 0}}>📍 {article.author || 'Ban Truyền Thông'} {article.parish ? `- ${article.parish}` : ''}</p>
+                        <h4 style={{fontSize: '0.85rem', marginBottom: '3px', color: 'var(--color-text-main)', lineHeight: '1.3', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>{article.title}</h4>
+                        <p style={{fontSize: '0.7rem', color: '#64748b', margin: 0}}>📍 {article.author || 'Ban Truyền Thông'} {article.parish ? `- ${article.parish}` : ''}</p>
                       </div>
                     </a>
                   );
                 }) : (
-                  <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '0.9rem' }}>
+                  <div style={{ padding: '20px', textAlign: 'center', color: '#64748b', fontSize: '0.85rem' }}>
                     Đang tải bản tin...
                   </div>
                 )}

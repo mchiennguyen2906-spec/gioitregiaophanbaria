@@ -314,17 +314,17 @@ export default function ArticleClient({
                 <div className="section-header" style={{ borderBottom: '1px solid var(--border-color)', padding: '0 0 10px 0', marginBottom: '15px' }}>
                   <h2 className="section-title" style={{ fontSize: '1.1rem', color: 'var(--color-brand-cyan)' }}>Ưu Tiên</h2>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {priorityArticles.length > 0 ? priorityArticles.map((article) => (
-                    <a key={article.id} href={`/${category}/${article.id}`} style={{ display: 'flex', gap: '12px', alignItems: 'center', textDecoration: 'none' }}>
-                      <img loading="lazy" src={article.thumbnailUrl} style={{ width: '80px', height: '65px', objectFit: 'cover', borderRadius: '6px' }} alt="Thumb" />
+                    <a key={article.id} href={`/${category}/${article.id}`} style={{ display: 'flex', gap: '10px', alignItems: 'center', textDecoration: 'none' }}>
+                      <img loading="lazy" src={article.thumbnailUrl} style={{ width: '70px', height: '52px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }} alt="Thumb" />
                       <div>
-                        <h4 style={{ fontSize: '0.9rem', marginBottom: '5px', color: 'var(--color-text-main)', lineHeight: '1.4', fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{article.title}</h4>
-                        <p style={{ fontSize: '0.75rem', color: '#64748b' }}>📅 {new Date(article.date).toLocaleDateString('vi-VN')}</p>
+                        <h4 style={{ fontSize: '0.85rem', marginBottom: '3px', color: 'var(--color-text-main)', lineHeight: '1.3', fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{article.title}</h4>
+                        <p style={{ fontSize: '0.7rem', color: '#64748b', margin: 0 }}>📅 {new Date(article.date).toLocaleDateString('vi-VN')}</p>
                       </div>
                     </a>
                   )) : (
-                    <div style={{ color: '#64748b', fontSize: '0.9rem' }}>Chưa có tin ưu tiên.</div>
+                    <div style={{ color: '#64748b', fontSize: '0.85rem' }}>Chưa có tin ưu tiên.</div>
                   )}
                 </div>
               </div>
