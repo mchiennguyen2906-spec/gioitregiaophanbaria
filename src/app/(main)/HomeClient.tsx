@@ -31,10 +31,10 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
     ? homeFeaturedPinned.slice(0, 5) 
     : articles.slice(0, Math.min(5, articles.length)));
 
-  // 2. Danh Sách 20 Bài Mới Nhất Trang Chủ: Sắp xếp theo ngày mới nhất (bao gồm bài cào và bài đăng)
+  // 2. Danh Sách 4 Bài Mới Nhất Trang Chủ: Sắp xếp theo ngày mới nhất (bao gồm bài cào và bài đăng)
   const homeLatestNews = [...articles]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 20);
+    .slice(0, 4);
 
   const getCategoryData = (catIds: string[], limit = 4) => {
     const catArticles = articles.filter(a => catIds.includes(a.categoryId));
@@ -172,9 +172,9 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
               <div className="section-header" style={{borderBottom: '1px solid var(--color-brand-cyan)', padding: '0 0 10px 0', marginBottom: '15px', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                 <h2 className="section-title" style={{fontSize: '0.95rem', textTransform: 'uppercase', color: 'var(--color-brand-cyan)', fontWeight: 'bold'}}>Bản Tin Mới Nhất</h2>
-                <span style={{fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal'}}>20 tin mới nhất</span>
+                <span style={{fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal'}}>Tin mới nhất</span>
               </div>
-              <div className="news-list" style={{display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: '420px', paddingRight: '5px', flex: 1}}>
+              <div className="news-list" style={{display: 'flex', flexDirection: 'column', gap: '14px', paddingRight: '5px', flex: 1}}>
                 
                 {homeLatestNews.length > 0 ? homeLatestNews.map((article, idx) => {
                   const date = new Date(article.date);
