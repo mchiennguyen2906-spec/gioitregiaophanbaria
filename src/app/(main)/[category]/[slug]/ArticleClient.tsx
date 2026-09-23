@@ -50,19 +50,24 @@ export default function ArticleClient({
     return donations.some(d => d.isCompleted && d.linkedArticleId === articleId);
   };
 
+  // Phân tầng bài viết tự động theo chu trình luân chuyển:
+  // 1. Tiêu Điểm: Tối đa 3 bài mới nhất (hoặc bài ghim isFeatured)
   const pinnedFeatured = subcategoryArticles.filter(a => a.isFeatured);
-  const pinnedPriority = subcategoryArticles.filter(a => a.isPriority && !a.isFeatured);
-  const unpinned = subcategoryArticles.filter(a => !a.isFeatured && !a.isPriority);
-  
-  const featuredArticles = [...pinnedFeatured];
-  while (featuredArticles.length < 5 && unpinned.length > 0) {
-    featuredArticles.push(unpinned.shift()!);
-  }
+  const featuredArticles: Article[] = pinnedFeatured.length > 0 
+    ? pinnedFeatured.slice(0, 3) 
+    : subcategoryArticles.slice(0, Math.min(3, subcategoryArticles.length));
 
-  const priorityArticles = [...pinnedPriority];
-  while (priorityArticles.length < 5 && unpinned.length > 0) {
-    priorityArticles.push(unpinned.shift()!);
-  }
+  const featuredIds = new Set(featuredArticles.map(a => a.id));
+  const poolAfterFeatured = subcategoryArticles.filter(a => !featuredIds.has(a.id));
+
+  // 2. Ưu Tiên: Tối đa 5 bài tiếp theo (bài ghim isPriority hoặc bài mới liền kề)
+  const pinnedPriority = poolAfterFeatured.filter(a => a.isPriority);
+  const remainingForPriority = poolAfterFeatured.filter(a => !a.isPriority);
+  const priorityArticles = [...pinnedPriority, ...remainingForPriority].slice(0, 5);
+  const priorityIds = new Set(priorityArticles.map(a => a.id));
+
+  // 3. Danh Sách Bài Viết: Toàn bộ bài còn lại hiển thị ở lưới 4 cột
+  const listArticles = poolAfterFeatured.filter(a => !priorityIds.has(a.id));
 
   useEffect(() => {
     if (isEventRegistration || articleDetail || featuredArticles.length <= 1) return;
@@ -273,10 +278,10 @@ export default function ArticleClient({
                    <>
                      <a href={`/${category}/${featuredArticles[currentSlide].id}`}>
                        <img loading="lazy" src={featuredArticles[currentSlide].thumbnailUrl} className={styles.sliderImg} alt="Hero" style={{ transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)' }} />
-                       <div className={styles.sliderText} style={{ transition: 'all 0.4s ease-in-out', padding: '15px 20px', background: 'rgba(0, 0, 0, 0.65)', color: 'white' }}>
-                          <span style={{ background: 'var(--color-brand-red)', padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>TIÊU ĐIỂM</span>
-                          <h3 style={{ fontSize: 'clamp(1.1rem, 2vw, 1.5rem)', marginTop: '8px', marginBottom: '0', lineHeight: 1.3 }}>{featuredArticles[currentSlide].title}</h3>
-                       </div>
+                        <div className={styles.sliderText} style={{ transition: 'all 0.4s ease-in-out', padding: '15px 20px', background: 'rgba(0, 0, 0, 0.65)', color: 'white' }}>
+                           <span style={{ background: 'var(--color-brand-red)', color: '#ffffff', padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold' }}>TIÊU ĐIỂM</span>
+                           <h3 style={{ fontSize: 'clamp(1.1rem, 2vw, 1.5rem)', marginTop: '8px', marginBottom: '0', lineHeight: 1.3, color: '#ffffff', textShadow: '0 2px 6px rgba(0,0,0,0.85)' }}>{featuredArticles[currentSlide].title}</h3>
+                        </div>
                      </a>
                      {/* Progress Indicators */}
                      {featuredArticles.length > 1 && (
@@ -343,7 +348,7 @@ export default function ArticleClient({
               gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
               gap: '20px'
             }}>
-              {subcategoryArticles.length > 0 ? subcategoryArticles.map((article) => (
+              {listArticles.length > 0 ? listArticles.map((article) => (
                 <a key={article.id} href={`/${category}/${article.id}`} style={{
                   background: '#fff',
                   borderRadius: '8px',

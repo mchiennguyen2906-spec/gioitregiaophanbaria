@@ -25,28 +25,16 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
     return () => window.removeEventListener('storage_update', syncArticles);
   }, []);
 
+  // 1. Hero Slider Trang Chủ: Lấy tối đa 5 bài nổi bật
   const homeFeaturedPinned = articles.filter(a => a.isHomeFeatured);
-  const homePriorityPinned = articles.filter(a => a.isHomePriority && !a.isHomeFeatured);
-  const homeUnpinned = articles.filter(a => !a.isHomeFeatured && !a.isHomePriority);
+  const homeFeatured = (homeFeaturedPinned.length > 0 
+    ? homeFeaturedPinned.slice(0, 5) 
+    : articles.slice(0, Math.min(5, articles.length)));
 
-  const homeFeatured = [...homeFeaturedPinned];
-  
-  // Lấy 1 bài mới nhất từ mỗi chuyên mục kéo tự động
-  const autoCategories = ['tin-giao-phan-brvt', 'giao-hoi-hoan-vu', 'giao-hoi-viet-nam', 'loi-chua'];
-  for (const cat of autoCategories) {
-    const latestInCat = homeUnpinned.find(a => a.categoryId === cat);
-    if (latestInCat) {
-      homeFeatured.push(latestInCat);
-      // Xoá khỏi unpinned để không lặp lại ở các phần khác
-      homeUnpinned.splice(homeUnpinned.indexOf(latestInCat), 1);
-    }
-  }
-  // Không điền thêm tùy tiện để đảm bảo đúng yêu cầu: chỉ 1 tin mới nhất mỗi đơn vị.
-
-  const homePriority = [...homePriorityPinned];
-  while (homePriority.length < 10 && homeUnpinned.length > 0) {
-    homePriority.push(homeUnpinned.shift()!);
-  }
+  // 2. Danh Sách 20 Bài Mới Nhất Trang Chủ: Sắp xếp theo ngày mới nhất (bao gồm bài cào và bài đăng)
+  const homeLatestNews = [...articles]
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 20);
 
   const getCategoryData = (catIds: string[], limit = 4) => {
     const catArticles = articles.filter(a => catIds.includes(a.categoryId));
@@ -141,7 +129,7 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 <a href={`/${homeFeatured[currentSlide].categoryId}/${homeFeatured[currentSlide].id}`}>
                   <img fetchPriority="high" src={homeFeatured[currentSlide].thumbnailUrl} className={styles.sliderImg} alt="Youth Events" style={{transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'}} />
                   <div className={styles.sliderText} style={{transition: 'all 0.4s ease-in-out', padding: '15px 25px', background: 'rgba(0, 0, 0, 0.65)'}}>
-                    <h3 style={{color: '#fff', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', margin: 0, lineHeight: 1.3}}>{homeFeatured[currentSlide].title}</h3>
+                    <h3 style={{color: '#ffffff', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', margin: 0, lineHeight: 1.3, textShadow: '0 2px 6px rgba(0,0,0,0.85)'}}>{homeFeatured[currentSlide].title}</h3>
                   </div>
                 </a>
                 
@@ -179,15 +167,16 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
             )}
           </div>
 
-          {/* Col 2: Bản Tin Giáo Phận (1fr) */}
+          {/* Col 2: Bản Tin Mới Nhất (Tối Đa 20 Bài) */}
           <div className={styles.heroNewsBox} style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ display: 'flex', flexDirection: 'column', flex: 1, height: '100%' }}>
-              <div className="section-header" style={{borderBottom: '1px solid var(--color-brand-cyan)', padding: '0 0 10px 0', marginBottom: '20px', flexShrink: 0}}>
-                <h2 className="section-title" style={{fontSize: '0.95rem', textTransform: 'uppercase', color: 'var(--color-brand-cyan)', fontWeight: 'bold'}}>Bản Tin Giới Trẻ Giáo Phận</h2>
+              <div className="section-header" style={{borderBottom: '1px solid var(--color-brand-cyan)', padding: '0 0 10px 0', marginBottom: '15px', flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                <h2 className="section-title" style={{fontSize: '0.95rem', textTransform: 'uppercase', color: 'var(--color-brand-cyan)', fontWeight: 'bold'}}>Bản Tin Mới Nhất</h2>
+                <span style={{fontSize: '0.75rem', color: '#64748b', fontWeight: 'normal'}}>20 tin mới nhất</span>
               </div>
-              <div className="news-list" style={{display: 'flex', flexDirection: 'column', gap: '16px', overflowY: 'auto', paddingRight: '5px', flex: 1}}>
+              <div className="news-list" style={{display: 'flex', flexDirection: 'column', gap: '14px', overflowY: 'auto', maxHeight: '420px', paddingRight: '5px', flex: 1}}>
                 
-                {homePriority.length > 0 ? homePriority.map((article, idx) => {
+                {homeLatestNews.length > 0 ? homeLatestNews.map((article, idx) => {
                   const date = new Date(article.date);
                   const day = date.getDate().toString().padStart(2, '0');
                   const month = (date.getMonth() + 1).toString();
@@ -196,14 +185,14 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                   const bgColor = bgColors[idx % bgColors.length];
 
                   return (
-                    <a key={article.id} href={`/${article.categoryId}/${article.id}`} className={styles.newsItemSmall} style={{display: 'flex', gap: '12px', alignItems: 'center'}}>
-                      <div style={{minWidth: '52px', height: '52px', background: bgColor, color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '6px', fontWeight: 'bold'}}>
-                        <span style={{fontSize: '1.05rem'}}>{day}</span>
-                        <span style={{fontSize: '0.7rem'}}>THG {month}</span>
+                    <a key={article.id} href={`/${article.categoryId}/${article.id}`} className={styles.newsItemSmall} style={{display: 'flex', gap: '12px', alignItems: 'center', textDecoration: 'none'}}>
+                      <div style={{minWidth: '48px', height: '48px', background: bgColor, color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', borderRadius: '6px', fontWeight: 'bold', flexShrink: 0}}>
+                        <span style={{fontSize: '1rem', lineHeight: '1'}}>{day}</span>
+                        <span style={{fontSize: '0.65rem'}}>T{month}</span>
                       </div>
-                      <div>
-                        <h4 style={{fontSize: '0.95rem', marginBottom: '3px', color: 'var(--color-text-main)', lineHeight: '1.4', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>{article.title}</h4>
-                        <p style={{fontSize: '0.8rem', color: '#64748b'}}>📍 {article.author} {article.parish ? `- ${article.parish}` : ''}</p>
+                      <div style={{flex: 1, minWidth: 0}}>
+                        <h4 style={{fontSize: '0.88rem', marginBottom: '3px', color: 'var(--color-text-main)', lineHeight: '1.35', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'}}>{article.title}</h4>
+                        <p style={{fontSize: '0.75rem', color: '#64748b', margin: 0}}>📍 {article.author || 'Ban Truyền Thông'} {article.parish ? `- ${article.parish}` : ''}</p>
                       </div>
                     </a>
                   );

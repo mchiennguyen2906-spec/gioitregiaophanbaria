@@ -132,8 +132,10 @@ export async function POST(request: Request) {
                 author: 'HĐGMVN',
                 thumbnail_url: thumbnailUrl,
                 status: 'published',
-                is_featured: true,
-                is_home_featured: true,
+                is_featured: false,
+                is_priority: false,
+                is_home_featured: false,
+                is_home_priority: false,
                 created_at: new Date(article.publishDate || Date.now()).toISOString()
               }
             ])

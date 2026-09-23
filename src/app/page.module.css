@@ -29,6 +29,17 @@
   bottom: 0; left: 0; right: 0;
   padding: 15px;
   background: rgba(0,0,0,0.7);
+  color: #ffffff !important;
+}
+
+.sliderText h1,
+.sliderText h2,
+.sliderText h3,
+.sliderText h4,
+.sliderText a,
+.sliderText p {
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
 }
 
 .heroNewsBox {

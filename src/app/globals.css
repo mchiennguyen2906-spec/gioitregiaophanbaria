@@ -35,6 +35,21 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
 }
 
+/* Đảm bảo chữ trong slider / tiêu điểm luôn màu trắng sáng rõ trên nền tối */
+.sliderText,
+.sliderText h1,
+.sliderText h2,
+.sliderText h3,
+.sliderText h4,
+.sliderText h5,
+.sliderText h6,
+.sliderText p,
+.sliderText span,
+.sliderText a {
+  color: #ffffff !important;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+}
+
 .footer-logo h3 {
   font-size: 1.2rem;
   font-family: var(--font-serif);
