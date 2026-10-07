@@ -73,7 +73,7 @@ export default function RootLayout({
                 </li>
                 
                 <li className="nav-item">
-                  <a href="#" className="nav-link">BẢN TIN ▾</a>
+                  <a href="/ban-tin" className="nav-link">BẢN TIN ▾</a>
                   <div className="dropdown-menu">
                     <a href="/ban-tin/tin-giao-phan-brvt" className="dropdown-item">Bản tin Giáo phận Bà Rịa</a>
                     <a href="/ban-tin/giao-hoi-hoan-vu" className="dropdown-item">Thời sự Giáo hội Hoàn vũ</a>
@@ -86,7 +86,7 @@ export default function RootLayout({
                   </div>
                 </li>
                 <li className="nav-item">
-                  <a href="#" className="nav-link">KINH THÁNH & GIÁO LÝ ▾</a>
+                  <a href="/kinh-thanh" className="nav-link">KINH THÁNH & GIÁO LÝ ▾</a>
                   <div className="dropdown-menu">
                     <a href="/kinh-thanh/phuc-am" className="dropdown-item">Học hỏi Phúc Âm</a>
                     <a href="/kinh-thanh/giao-ly" className="dropdown-item">Giáo lý Hội Thánh</a>
@@ -96,7 +96,7 @@ export default function RootLayout({
                 </li>
 
                 <li className="nav-item">
-                  <a href="#" className="nav-link">ĐÀO TẠO & ĐĂNG KÝ ▾</a>
+                  <a href="/dao-tao" className="nav-link">ĐÀO TẠO & ĐĂNG KÝ ▾</a>
                   <div className="dropdown-menu">
                     <a href="/dao-tao/lich-hoc" className="dropdown-item">Lịch học Khai giảng</a>
                     <a href="/dao-tao/su-kien" className="dropdown-item">Đăng ký Khóa học - Sự kiện</a>
@@ -104,7 +104,7 @@ export default function RootLayout({
                 </li>
 
                 <li className="nav-item">
-                  <a href="#" className="nav-link">KỸ NĂNG & HUẤN LUYỆN ▾</a>
+                  <a href="/ky-nang" className="nav-link">KỸ NĂNG & HUẤN LUYỆN ▾</a>
                   <div className="dropdown-menu">
                     <a href="/ky-nang/huong-dao-sinh" className="dropdown-item">Hoạt động Hướng Đạo Sinh</a>
                     <a href="/ky-nang/leu-trai" className="dropdown-item">Kỹ năng Lều trại & Nút dây</a>
@@ -114,7 +114,7 @@ export default function RootLayout({
                 </li>
 
                 <li className="nav-item">
-                  <a href="#" className="nav-link">CẨM NANG GIỚI TRẺ ▾</a>
+                  <a href="/cam-nang" className="nav-link">CẨM NANG GIỚI TRẺ ▾</a>
                   <div className="dropdown-menu">
                     <a href="/cam-nang/tinh-yeu" className="dropdown-item">Kiến thức Tình yêu & Hôn nhân</a>
                     <a href="/cam-nang/bi-tich" className="dropdown-item">Hướng dẫn Lãnh nhận Bí tích</a>
@@ -124,7 +124,7 @@ export default function RootLayout({
                 </li>
 
                 <li className="nav-item">
-                  <a href="#" className="nav-link" style={{color: 'var(--color-brand-red)', fontWeight: 'bold'}}>SỰ KIỆN & THIỆN NGUYỆN ▾</a>
+                  <a href="/su-kien" className="nav-link" style={{color: 'var(--color-brand-red)', fontWeight: 'bold'}}>SỰ KIỆN & THIỆN NGUYỆN ▾</a>
                   <div className="dropdown-menu">
                     <a href="/su-kien/dai-hoi" className="dropdown-item">Đại hội & Hội trại Giới trẻ</a>
                     <a href="/su-kien/mua-he-xanh" className="dropdown-item">Mùa Hè Xanh & Caritas</a>
@@ -134,7 +134,7 @@ export default function RootLayout({
                 </li>
 
                 <li className="nav-item">
-                  <a href="#" className="nav-link">MEDIA & TÂM LÝ ▾</a>
+                  <a href="/media" className="nav-link">MEDIA & TÂM LÝ ▾</a>
                   <div className="dropdown-menu">
                     <a href="/media/tam-ly" className="dropdown-item">Góc Tâm lý & Khủng hoảng</a>
                     <a href="/media/podcast" className="dropdown-item">Podcast Trò chuyện</a>

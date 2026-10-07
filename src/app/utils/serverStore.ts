@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { categoryHierarchy } from './categoryMap';
 
 // We can use the service role key or anon key depending on the need.
 // For public pages (Home, Category), we only need anon key and we only fetch 'published' articles.
@@ -49,7 +50,12 @@ export async function getPublishedArticlesServer(limit = 200, categoryId?: strin
       .limit(limit);
 
     if (categoryId) {
-      query = query.eq('category_id', categoryId);
+      const subSlugs = categoryHierarchy[categoryId];
+      if (subSlugs && subSlugs.length > 0) {
+        query = query.in('category_id', [categoryId, ...subSlugs]);
+      } else {
+        query = query.eq('category_id', categoryId);
+      }
     }
 
     const { data, error } = await query;

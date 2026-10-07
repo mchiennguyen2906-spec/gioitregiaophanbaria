@@ -124,29 +124,46 @@ export default function AlbumEditor({ onSave, onPublish, articleToEdit }: { onSa
                 useWebWorker: true,
               };
 
-              const newImages = [];
-              const loadingToast = toast.loading('Đang xử lý và nén ảnh...');
+              const newImages: Array<{ id: number; url: string; caption: string; isThumbnail: boolean }> = [];
+              const loadingToast = toast.loading('Đang xử lý, nén và tải ảnh lên máy chủ...');
               
               for (let i = 0; i < files.length; i++) {
                 try {
                   const file = files[i];
                   const compressedFile = await imageCompression(file, options);
-                  const tempUrl = URL.createObjectURL(compressedFile);
-                  newImages.push({
-                    id: Date.now() + i,
-                    url: tempUrl,
-                    caption: '',
-                    isThumbnail: images.length === 0 && i === 0 
+                  
+                  const formData = new FormData();
+                  const safeFileName = (file.name.replace(/\.[^/.]+$/, "") || `album-img-${Date.now()}`) + ".webp";
+                  formData.append('file', compressedFile, safeFileName);
+
+                  const res = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
                   });
-                } catch (error) {
-                  console.error("Lỗi nén ảnh:", error);
+                  const uploadResult = await res.json();
+
+                  if (uploadResult.success && uploadResult.url) {
+                    newImages.push({
+                      id: Date.now() + i,
+                      url: uploadResult.url,
+                      caption: '',
+                      isThumbnail: images.length === 0 && newImages.length === 0 
+                    });
+                  } else {
+                    toast.error(`Không thể tải ảnh "${file.name}": ` + (uploadResult.error || 'Lỗi không xác định'));
+                  }
+                } catch (error: any) {
+                  console.error("Lỗi nén hoặc tải ảnh:", error);
+                  toast.error(`Lỗi ảnh ${files[i]?.name}: ${error.message}`);
                 }
               }
               
-              setImages([...images, ...newImages]);
+              setImages(prev => [...prev, ...newImages]);
               e.target.value = '';
               toast.dismiss(loadingToast);
-              toast.success(`Đã thêm ${newImages.length} ảnh!`);
+              if (newImages.length > 0) {
+                toast.success(`Đã tải lên thành công ${newImages.length} ảnh!`);
+              }
             }}
           />
           <label htmlFor="album-upload" style={{ display: 'inline-block', padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', marginTop: '10px' }}>

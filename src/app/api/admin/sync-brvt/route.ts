@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseServerClient, verifyAdmin } from '@/app/utils/supabaseServer';
+import { verifyAdmin } from '@/app/utils/supabaseServer';
+import { createClient } from '@supabase/supabase-js';
 import * as cheerio from 'cheerio';
 
 export async function OPTIONS(request: Request) {
@@ -23,23 +24,24 @@ export async function POST(request: Request) {
     const authHeader = request.headers.get('authorization');
     const isCron = authHeader === `Bearer ${process.env.CRON_SECRET}` || authHeader === `Bearer GIOITRE_BRVT_CRON_SECRET_888`;
     
-    let isAdmin = false;
     if (!isCron) {
-      isAdmin = await verifyAdmin();
+      const isAdmin = await verifyAdmin();
       if (!isAdmin) {
         return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401, headers: { 'Access-Control-Allow-Origin': '*' } });
       }
     }
 
-    const supabase = await createSupabaseServerClient();
-    const results = [];
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spoqkzsrcphgzvmxwadd.supabase.co';
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const results: any[] = [];
 
     // 2. Scrape source
     const sourceUrl = 'https://www.giaophanbaria.org/category/tin-giao-phan';
     const categoryId = 'tin-giao-phan-brvt';
 
     try {
-      const listResponse = await fetch(sourceUrl, { cache: 'no-store' });
+      const listResponse = await fetch(sourceUrl, { headers: { 'User-Agent': 'Mozilla/5.0' }, cache: 'no-store' });
       const listHtml = await listResponse.text();
       const $list = cheerio.load(listHtml);
       
@@ -53,15 +55,15 @@ export async function POST(request: Request) {
         }
         if (img) img = img.replace(/-\d+x\d+(?=\.[a-zA-Z]+$)/, '');
         
-        let date = $list(el).find('.entry-date').attr('datetime') || $list(el).find('.entry-date').text().trim() || Date.now();
+        let date = $list(el).find('.entry-date').attr('datetime') || $list(el).find('.entry-date').text().trim() || new Date().toISOString();
         
         if (title && link && link !== 'https://www.giaophanbaria.org/' && !articles.find(a => a.link === link)) {
           articles.push({ title, link, img, date });
         }
       });
 
-      // Take top 5 to avoid timeouts
-      const topNews = articles.slice(0, 5);
+      // Take top 10 articles
+      const topNews = articles.slice(0, 10);
       
       for (const article of topNews) {
         const articleSlug = article.link;
@@ -69,10 +71,13 @@ export async function POST(request: Request) {
         
         if (!articleSlug || !title) continue;
 
+        // Skip liturgical Gospel readings that belong to loi-chua
+        if (title.includes('Thường Niên') && title.includes('Tuần')) continue;
+
         // Check if article exists
         const { data: existing } = await supabase
           .from('articles')
-          .select('id')
+          .select('id, date')
           .ilike('title', title)
           .limit(1);
 
@@ -82,7 +87,7 @@ export async function POST(request: Request) {
         }
 
         // Fetch content
-        const articleResponse = await fetch(articleSlug, { cache: 'no-store' });
+        const articleResponse = await fetch(articleSlug, { headers: { 'User-Agent': 'Mozilla/5.0' }, cache: 'no-store' });
         const articleHtml = await articleResponse.text();
         const $article = cheerio.load(articleHtml);
         
@@ -92,19 +97,13 @@ export async function POST(request: Request) {
            article.img = ogImage;
         }
         
-        let contentHtml = $article('.entry-content').html();
-        if (!contentHtml) {
-           contentHtml = $article('.post-content').html();
-        }
-
+        let contentHtml = $article('.entry-content').html() || $article('.post-content').html();
         if (!contentHtml) {
           results.push({ title, status: 'skipped (no content found)' });
           continue;
         }
 
-        const $content = cheerio.load(contentHtml || '');
-        
-        // Remove unwanted scripts, iframe, forms inside the content (e.g. newsletter subscribe forms)
+        const $content = cheerio.load(contentHtml);
         $content('script, iframe, form, .forminator-custom-form').remove();
 
         // Fix relative images to absolute ones
@@ -119,14 +118,21 @@ export async function POST(request: Request) {
             }
         });
         
-        // Append Credit
         $content('body').append('<br><p style="text-align: right;"><em><span style="color:#808080">Nguồn: Giáo phận Bà Rịa (giaophanbaria.org)</span></em></p>');
         
         let finalContent = $content('body').html() || '';
+        const textOnly = $content.text().replace(/\s+/g, ' ').trim();
+        const excerpt = textOnly.slice(0, 160) + '...';
         
         let thumbnailUrl = article.img || '';
         if (thumbnailUrl && thumbnailUrl.startsWith('/')) {
             thumbnailUrl = `https://www.giaophanbaria.org${thumbnailUrl}`;
+        }
+
+        let dateIso = new Date().toISOString();
+        if (article.date) {
+          const d = new Date(article.date);
+          if (!isNaN(d.getTime())) dateIso = d.toISOString();
         }
 
         // Save to Supabase
@@ -136,15 +142,16 @@ export async function POST(request: Request) {
             {
               category_id: categoryId,
               title: title,
+              excerpt: excerpt,
               content: finalContent,
               author: 'Giáo phận Bà Rịa',
               thumbnail_url: thumbnailUrl,
+              date: dateIso,
               status: 'published',
               is_featured: false,
               is_priority: false,
               is_home_featured: false,
-              is_home_priority: false,
-              created_at: new Date().toISOString() // Or parse article.date if it's ISO
+              is_home_priority: false
             }
           ])
           .select();

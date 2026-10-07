@@ -46,7 +46,7 @@ export const categoryHierarchy: Record<string, string[]> = {
   "dao-tao": ["lich-hoc", "su-kien"],
   "ky-nang": ["huong-dao-sinh", "leu-trai", "quan-tro", "lanh-dao"],
   "cam-nang": ["tinh-yeu", "bi-tich", "thu-tuc", "bieu-mau"],
-  "su-kien": ["dai-hoi", "mua-he-xanh", "tinh-tam"],
+  "su-kien": ["dai-hoi", "mua-he-xanh", "tinh-tam", "hinh-anh"],
   "media": ["hinh-anh", "tam-ly", "podcast", "thanh-ca"]
 };
 
@@ -57,4 +57,11 @@ export function getTitle(category: string, slug?: string) {
     return `${catName} / ${slugName}`;
   }
   return catName;
+}
+
+export function getParentCategory(subSlug: string): string {
+  for (const [parent, children] of Object.entries(categoryHierarchy)) {
+    if (children.includes(subSlug)) return parent;
+  }
+  return '';
 }

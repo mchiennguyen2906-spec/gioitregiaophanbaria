@@ -51,7 +51,7 @@ export default function CategoryClient({
   const pinnedFeatured = articles.filter(a => a.isFeatured);
   const featuredArticles: Article[] = pinnedFeatured.length > 0 
     ? pinnedFeatured.slice(0, 3) 
-    : articles.slice(0, Math.min(3, articles.length));
+    : articles.slice(0, Math.min(articles.length > 8 ? 3 : 1, articles.length));
 
   const featuredIds = new Set(featuredArticles.map(a => a.id));
   const poolAfterFeatured = articles.filter(a => !featuredIds.has(a.id));
@@ -59,11 +59,13 @@ export default function CategoryClient({
   // 2. Ưu Tiên: Tối đa 4 bài tiếp theo (bài ghim isPriority hoặc bài mới liền kề)
   const pinnedPriority = poolAfterFeatured.filter(a => a.isPriority);
   const remainingForPriority = poolAfterFeatured.filter(a => !a.isPriority);
-  const priorityArticles = [...pinnedPriority, ...remainingForPriority].slice(0, 4);
+  const maxPriority = articles.length > 8 ? 4 : 2;
+  const priorityArticles = [...pinnedPriority, ...remainingForPriority].slice(0, maxPriority);
   const priorityIds = new Set(priorityArticles.map(a => a.id));
 
   // 3. Danh Sách Bài Viết: Toàn bộ bài còn lại hiển thị ở lưới 4 cột
-  const listArticles = poolAfterFeatured.filter(a => !priorityIds.has(a.id));
+  const remainingList = poolAfterFeatured.filter(a => !priorityIds.has(a.id));
+  const listArticles = remainingList.length > 0 ? remainingList : articles;
 
   useEffect(() => {
     if (featuredArticles.length <= 1) return;

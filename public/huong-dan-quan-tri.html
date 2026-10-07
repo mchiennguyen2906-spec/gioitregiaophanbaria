@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cẩm Nang Hướng Dẫn Quản Trị & Đăng Bài - Giới Trẻ Giáo Phận Bà Rịa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #991b1b;
+      --primary-light: #fee2e2;
+      --primary-dark: #7f1d1d;
+      --secondary: #0f766e;
+      --secondary-light: #ccfbf1;
+      --accent: #d97706;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --bg-page: #f1f5f9;
+      --bg-card: #ffffff;
+      --border-color: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.7;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* HEADER BANNER */
+    .top-header {
+      background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 50%, #b91c1c 100%);
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom: 4px solid var(--accent);
+      box-shadow: var(--shadow-md);
+    }
+
+    .badge-catholic {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .top-header h1 {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 800;
+      margin-bottom: 10px;
+      line-height: 1.3;
+      letter-spacing: -0.5px;
+    }
+
+    .top-header p {
+      font-size: 1.05rem;
+      opacity: 0.92;
+      max-width: 780px;
+      margin: 0 auto;
+      font-weight: 400;
+    }
+
+    /* CONTAINER LAYOUT */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 30px 20px 60px;
+    }
+
+    /* QUICK ACTIONS BAR */
+    .action-bar {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background: white;
+      color: var(--text-main);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-outline:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    /* MAIN CARD */
+    .card {
+      background: var(--bg-card);
+      border-radius: 14px;
+      padding: 35px 40px;
+      box-shadow: var(--shadow-md);
+      margin-bottom: 30px;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    @media (max-width: 768px) {
+      .card {
+        padding: 22px 18px;
+        border-radius: 10px;
+      }
+    }
+
+    /* TABLE OF CONTENTS */
+    .toc-card {
+      background: #fafaf9;
+      border: 1px solid #e7e5e4;
+      border-left: 5px solid var(--accent);
+      border-radius: 10px;
+      padding: 25px 30px;
+      margin-bottom: 35px;
+    }
+
+    .toc-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #78350f;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 8px 24px;
+      list-style: none;
+    }
+
+    .toc-grid a {
+      color: #1e293b;
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0;
+      transition: color 0.15s ease;
+    }
+
+    .toc-grid a:hover {
+      color: var(--primary);
+      text-decoration: underline;
+    }
+
+    /* SECTION STYLING */
+    .section-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--primary);
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--primary-light);
+      margin-top: 35px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sub-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 22px 0 10px 0;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: #334155;
+    }
+
+    /* STEP BOXES */
+    .step-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin: 15px 0 20px;
+      position: relative;
+    }
+
+    .step-number {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 0.78rem;
+      padding: 2px 10px;
+      border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    .step-box h4 {
+      font-size: 1.05rem;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    /* HIGHLIGHT BOXES */
+    .callout {
+      border-radius: 10px;
+      padding: 18px 22px;
+      margin: 20px 0;
+      border-left: 4px solid;
+    }
+
+    .callout-live {
+      background: #fef2f2;
+      border-color: #ef4444;
+      color: #991b1b;
+    }
+
+    .callout-tip {
+      background: #f0fdf4;
+      border-color: #22c55e;
+      color: #166534;
+    }
+
+    .callout-info {
+      background: #f0f9ff;
+      border-color: #0284c7;
+      color: #075985;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* PULSING BADGE */
+    @keyframes livePulse {
+      0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+      50% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+      100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .badge-live-pulse {
+      background: #ef4444;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 800;
+      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      animation: livePulse 1.6s infinite ease-in-out;
+    }
+
+    /* TABLES */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 0.92rem;
+    }
+
+    .data-table th {
+      background: #f8fafc;
+      color: #334155;
+      font-weight: 700;
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 2px solid #cbd5e1;
+    }
+
+    .data-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+      color: #334155;
+    }
+
+    .data-table tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* LISTS */
+    ul, ol {
+      margin-left: 24px;
+      margin-bottom: 16px;
+      color: #334155;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+
+    /* CODE & KEYS */
+    kbd, code {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.88rem;
+      font-family: Consolas, monospace;
+      color: #b91c1c;
+      font-weight: 600;
+    }
+
+    /* FOOTER */
+    .page-footer {
+      text-align: center;
+      padding: 30px 20px;
+      color: #64748b;
+      font-size: 0.88rem;
+      border-top: 1px solid var(--border-color);
+      margin-top: 40px;
+    }
+
+    /* PRINT OPTIMIZATION (Chuẩn file in / xuất PDF) */
+    @media print {
+      body {
+        background: white;
+        font-size: 12pt;
+      }
+      .top-header {
+        background: #991b1b !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .action-bar, .toc-card {
+        display: none !important;
+      }
+      .card {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+      }
+      .section-title {
+        page-break-after: avoid;
+      }
+      .step-box, .callout {
+        page-break-inside: avoid;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER BANNER -->
+  <header class="top-header">
+    <div class="badge-catholic">BAN TRUYỀN THÔNG GIỚI TRẺ GIÁO PHẬN BÀ RỊA</div>
+    <h1>CẨM NANG HƯỚNG DẪN QUẢN TRỊ & ĐĂNG BÀI</h1>
+    <p>Tài liệu hướng dẫn trực quan dành cho Quý Cha Linh Hướng, Quý Ban Biên Tập & Quản Trị Viên Cổng Thông Tin Điện Tử Giới Trẻ Bà Rịa</p>
+  </header>
+
+  <div class="container">
+
+    <!-- ACTION BUTTONS -->
+    <div class="action-bar">
+      <button class="btn btn-outline" onclick="window.print()">🖨️ In ra giấy / Lưu PDF</button>
+      <a href="/admin" class="btn btn-primary" target="_blank">➔ Truy Cập Trang Quản Trị (/admin)</a>
+    </div>
+
+    <!-- MAIN CONTENT CARD -->
+    <main class="card">
+
+      <!-- MỤC LỤC -->
+      <nav class="toc-card">
+        <div class="toc-title">📑 MỤC LỤC HƯỚNG DẪN NHANH</div>
+        <ul class="toc-grid">
+          <li><a href="#muc-1">1. Đăng nhập & Phân quyền</a></li>
+          <li><a href="#muc-2">2. Tổng quan giao diện Admin</a></li>
+          <li><a href="#muc-3">3. Quy trình đăng bài viết chuẩn</a></li>
+          <li><a href="#muc-4">4. Phát Livestream YouTube & Chat trực tiếp</a></li>
+          <li><a href="#muc-5">5. Đăng Album ảnh hoạt động</a></li>
+          <li><a href="#muc-6">6. Đăng Biểu mẫu, Văn bản (PDF/Word)</a></li>
+          <li><a href="#muc-7">7. Đăng Audio / Podcast suy niệm</a></li>
+          <li><a href="#muc-8">8. Đăng Gương mặt truyền cảm hứng</a></li>
+          <li><a href="#muc-9">9. Quản lý Giờ Lễ các Giáo xứ</a></li>
+          <li><a href="#muc-10">10. Quản lý Đơn đăng ký sự kiện</a></li>
+          <li><a href="#muc-11">11. Quản lý Quyên góp Bác ái</a></li>
+          <li><a href="#muc-12">12. Đồng bộ tự động Lời Chúa</a></li>
+          <li><a href="#muc-13">13. Quy chuẩn ảnh & lưu ý tránh lỗi</a></li>
+        </ul>
+      </nav>
+
+      <!-- PHẦN 1 -->
+      <section id="muc-1">
+        <h2 class="section-title">1. ĐĂNG NHẬP & PHÂN QUYỀN HỆ THỐNG</h2>
+        <p>Hệ thống quản trị được bảo mật bằng công nghệ xác thực đa tầng. Để bắt đầu làm việc, Quý Cha và các Bạn quản trị thao tác như sau:</p>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 1</span>
+          <h4>Truy cập vào trang quản trị</h4>
+          <p>Mở trình duyệt (Chrome, Safari, Edge) trên điện thoại hoặc máy tính và truy cập địa chỉ:</p>
+          <p><code style="font-size: 1rem; color: #b91c1c; font-weight: bold;">https://tên-miền-website/admin</code> (hoặc <code>http://localhost:3000/admin</code> khi thử nghiệm nội bộ).</p>
+        </div>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 2</span>
+          <h4>Nhập tài khoản đăng nhập</h4>
+          <p>Điền <strong>Email</strong> và <strong>Mật khẩu</strong> đã được Ban Quản Trị Kỹ Thuật cấp riêng cho từng vị.</p>
+        </div>
+
+        <div class="callout callout-info">
+          <div class="callout-title">ℹ️ Phân quyền tài khoản trong hệ thống:</div>
+          <ul style="margin-bottom: 0;">
+            <li><strong>Quản trị viên cấp cao (Super Admin)</strong>: Toàn quyền truy cập tất cả 26 chuyên mục, quản lý tài khoản thành viên, cấu hình lịch lễ và hệ thống.</li>
+            <li><strong>Biên tập viên (Editor)</strong>: Toàn quyền viết bài, chỉnh sửa, tải ảnh và xuất bản bài viết trong các chuyên mục được phân công phụ trách.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- PHẦN 2 -->
+      <section id="muc-2">
+        <h2 class="section-title">2. TỔNG QUAN GIAO DIỆN BẢNG ĐIỀU KHIỂN</h2>
+        <p>Bảng điều khiển Admin được thiết kế trực quan theo tiêu chuẩn hiện đại gồm 2 khu vực chính:</p>
+        <ul>
+          <li><strong>Cột bên trái (Thanh điều hướng)</strong>: Chứa 26 chuyên mục con (thuộc 7 khối mục lớn: <em>Bản Tin, Kinh Thánh & Giáo Lý, Đào Tạo & Đăng Ký, Kỹ Năng, Cẩm Nang, Sự Kiện, Media</em>) cùng các công cụ quản trị tiện ích (Giờ Lễ, Quyên Góp, Đơn Đăng Ký, Đồng Bộ Lời Chúa).</li>
+          <li><strong>Vùng làm việc bên phải</strong>: Nơi hiển thị danh sách bài viết đã đăng, nút tạo bài mới và biểu mẫu soạn thảo.</li>
+        </ul>
+      </section>
+
+      <!-- PHẦN 3 -->
+      <section id="muc-3">
+        <h2 class="section-title">3. QUY TRÌNH ĐĂNG BÀI VIẾT CHUẨN (5 BƯỚC)</h2>
+        <p>Áp dụng cho mọi bài viết tin tức Giáo phận, hoạt động giới trẻ các giáo xứ, bài học hỏi Giáo lý hay Suy niệm Lời Chúa:</p>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 1: CHỌN CHUYÊN MỤC</span>
+          <h4>Vào đúng chuyên mục cần đăng bài</h4>
+          <p>Tại thanh menu bên trái, nhấp chọn chuyên mục (Ví dụ: <em>Tin tức Giới trẻ Giáo phận</em>). Sau đó nhấn nút màu xanh <strong><code>+ Viết bài mới</code></strong> ở góc phải trên.</p>
+        </div>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 2: TIÊU ĐỀ & TÓM TẮT</span>
+          <h4>Điền thông tin định danh bài viết</h4>
+          <ul>
+            <li><strong>Tiêu đề bài viết</strong>: Viết hoa chữ cái đầu câu, súc tích, phản ánh đúng nội dung (Ví dụ: <em>Khai Mạc Giải Bóng Đá Giới Trẻ ACTI CUP 2026</em>).</li>
+            <li><strong>Tác giả / Ban ngành</strong>: Điền tên tác giả hoặc đơn vị đưa tin (Ví dụ: <em>Ban Truyền Thông Giới Trẻ</em>, <em>BTT Giáo xứ Long Tâm</em>).</li>
+            <li><strong>Giáo xứ liên quan</strong>: Chọn hoặc điền tên Giáo xứ (để bạn đọc dễ lọc tin theo giáo xứ).</li>
+            <li><strong>Đoạn tóm tắt (Sa-pô)</strong>: Viết 2 - 3 câu ngắn gọn nêu bật nội dung cốt lõi. Đoạn này sẽ hiển thị trang trọng trong khung màu nhã nhặn ngay dưới tiêu đề bài viết.</li>
+          </ul>
+        </div>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 3: ẢNH ĐẠI DIỆN (THUMBNAIL)</span>
+          <h4>Chọn ảnh bìa đại diện đẹp mắt</h4>
+          <p>Bấm nút <strong><code>Chọn tệp ảnh</code></strong> để tải ảnh từ máy tính/điện thoại lên. Ảnh nên có tỉ lệ ngang <strong>16:9</strong> (Kích thước lý tưởng: <code>1200 x 675</code> px).</p>
+        </div>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 4: SOẠN THẢO NỘI DUNG</span>
+          <h4>Sử dụng thanh công cụ soạn thảo phong phú</h4>
+          <ul>
+            <li>Định dạng chữ: <strong>In đậm</strong>, <em>In nghiêng</em>, Gạch chân, Căn lề hai bên.</li>
+            <li>Chèn hình ảnh vào thân bài: Bấm biểu tượng <strong>🖼️ (Hình ảnh)</strong> để chèn ảnh minh họa vào giữa các đoạn văn.</li>
+            <li>Chèn video: Bấm biểu tượng <strong>🎬 (Video)</strong> để dán link YouTube minh họa trong bài viết.</li>
+          </ul>
+        </div>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 5: XUẤT BẢN</span>
+          <h4>Chọn lưu nháp hoặc xuất bản ngay</h4>
+          <p>Bấm nút <strong><code>Lưu & Xuất Bản</code></strong> để bài viết xuất hiện ngay trên website. Nếu chưa muốn đăng ngay, Quý vị có thể chọn <strong><code>Lưu bản nháp</code></strong> để chỉnh sửa thêm.</p>
+        </div>
+      </section>
+
+      <!-- PHẦN 4 -->
+      <section id="muc-4">
+        <h2 class="section-title">4. HƯỚNG DẪN PHÁT LIVESTREAM YOUTUBE & BÌNH LUẬN TRỰC TIẾP</h2>
+        <div class="callout callout-live">
+          <div class="callout-title">🔴 ĐẶC BIỆT DÀNH CHO: Giải Bóng Đá ACTI CUP, Thánh Lễ Trực Tuyến & Đại Hội Giới Trẻ</div>
+          <p style="margin-bottom: 0;">Tính năng Livestream được tích hợp <strong>ngay trong bài viết thông thường</strong>, không cần tạo mục riêng, vừa có video HD vừa có khung chat trực tiếp cho bạn trẻ cổ vũ.</p>
+        </div>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 1</span>
+          <h4>Lấy đường dẫn luồng phát sóng từ YouTube</h4>
+          <p>Khi Ban Truyền Thông phát sóng trực tiếp trên kênh YouTube, sao chép đường link phát sóng. Hệ thống hỗ trợ 100% mọi dạng link:</p>
+          <ul>
+            <li><code>https://www.youtube.com/watch?v=...</code></li>
+            <li><code>https://youtu.be/...</code></li>
+            <li><code>https://www.youtube.com/live/...</code></li>
+          </ul>
+        </div>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 2</span>
+          <h4>Cấu hình khung Livestream trong bài viết</h4>
+          <p>Trong giao diện tạo bài viết, cuộn xuống khung <strong>"🔴 Video / Livestream YouTube"</strong>:</p>
+          <ol>
+            <li>Dán link YouTube vào ô <strong>Đường dẫn Video YouTube</strong>.</li>
+            <li>Tích chọn vào ô: <strong><code>[x] Đang phát Trực tiếp</code></strong>.
+              <br><small style="color: #64748b;">➔ <em>Tác dụng: Tự động kích hoạt dải băng đỏ nhấp nháy <strong><span class="badge-live-pulse">🔴 TRỰC TIẾP</span></strong> trên toàn bộ Trang Chủ website để bạn đọc bấm vào xem ngay lập tức.</em></small>
+            </li>
+            <li>Tích chọn vào ô: <strong><code>[x] Kèm Khung Bình Luận Trực Tiếp</code></strong>.
+              <br><small style="color: #64748b;">➔ <em>Tác dụng: Tự động mở khung Chat YouTube Live song song bên cạnh video để người xem cổ vũ trực tiếp.</em></small>
+            </li>
+          </ol>
+        </div>
+
+        <div class="step-box">
+          <span class="step-number">BƯỚC 3</span>
+          <h4>Xuất bản và thưởng thức giao diện trực tuyến</h4>
+          <ul>
+            <li><strong>Trên Máy tính (Desktop/Laptop)</strong>: Màn hình video HD bên trái, khung bình luận trực tiếp bên phải (Side-by-side).</li>
+            <li><strong>Trên Điện thoại & iPad</strong>: Video tỉ lệ 16:9 phía trên, khung bình luận xếp gọn gàng ngay bên dưới.</li>
+            <li><strong>Nút hỗ trợ iPhone/Safari</strong>: Tại góc trên khung chat có nút màu xanh <code>Mở chat riêng ↗</code> giúp người xem trên Safari không bị chặn đăng nhập tài khoản Google.</li>
+          </ul>
+        </div>
+
+        <div class="step-box" style="border: 2px solid var(--accent); background: #fffbeb;">
+          <span class="step-number" style="background: var(--accent);">BƯỚC 4: KHI SỰ KIỆN KẾT THÚC (QUAN TRỌNG)</span>
+          <h4 style="color: #92400e;">Chuyển bài viết thành Video Phát Lại</h4>
+          <p>Khi trận bóng hoặc sự kiện kết thúc:</p>
+          <ol>
+            <li>Vào lại bài viết trong Admin.</li>
+            <li><strong>BỎ TÍCH</strong> ô <code>[ ] Đang phát Trực tiếp</code>.</li>
+            <li>Bấm <strong>Lưu & Xuất bản</strong>.</li>
+          </ol>
+          <p style="margin-top: 8px; color: #166534; font-weight: 600;">➔ Dải băng đỏ trên Trang chủ sẽ tự động biến mất, và bài viết tự động chuyển nhãn thành "🎬 VIDEO PHÁT LẠI", lưu trữ video vĩnh viễn cho bạn đọc xem lại.</p>
+        </div>
+      </section>
+
+      <!-- PHẦN 5 -->
+      <section id="muc-5">
+        <h2 class="section-title">5. ĐĂNG ALBUM HÌNH ẢNH HOẠT ĐỘNG</h2>
+        <p>Áp dụng khi đăng tải loạt hình ảnh Trại hè, Hội thao, Lễ Ra mắt Ban điều hành:</p>
+        <ol>
+          <li>Chọn chuyên mục <strong>Hình ảnh Giới trẻ Giáo phận</strong> (<code>hinh-anh</code>) ➔ Bấm <strong>Viết bài mới</strong>.</li>
+          <li>Hệ thống tự động kích hoạt <strong>Trình soạn thảo Album ảnh</strong>.</li>
+          <li>Quý vị có thể tải lên <strong>nhiều hình ảnh cùng lúc</strong> (kéo thả ảnh hàng loạt từ máy tính).</li>
+          <li>Ảnh đại diện của Album sẽ tự động được hiển thị trên dải băng chuyền ảnh nghệ thuật ngoài Trang chủ.</li>
+        </ol>
+      </section>
+
+      <!-- PHẦN 6 -->
+      <section id="muc-6">
+        <h2 class="section-title">6. ĐĂNG BIỂU MẪU, VĂN BẢN & FILE TẢI VỀ</h2>
+        <p>Áp dụng cho chuyên mục <strong>Tải biểu mẫu & Văn bản</strong> (<code>bieu-mau</code>) nhằm cung cấp các mẫu đơn học Giáo lý, giấy giới thiệu Hôn phối, mẫu đăng ký phong trào:</p>
+        <ul>
+          <li>Điền Tên văn bản và Mô tả mục đích sử dụng.</li>
+          <li>Bấm nút tải lên tệp đính kèm: Hỗ trợ file <strong>PDF, Word (.docx), Excel (.xlsx)</strong>.</li>
+          <li>Ngoài website, bạn trẻ sẽ thấy bảng danh mục rõ ràng và chỉ cần bấm nút <code>📥 Tải về</code> để tải tài liệu về máy.</li>
+        </ul>
+      </section>
+
+      <!-- PHẦN 7 -->
+      <section id="muc-7">
+        <h2 class="section-title">7. ĐĂNG BÀI VIẾT CÓ AUDIO / PODCAST SUY NIỆM</h2>
+        <p>Áp dụng cho các bài Phúc Âm có giọng đọc truyền cảm, bài giảng audio hoặc bài hát Thánh Ca:</p>
+        <ul>
+          <li>Trong biểu mẫu viết bài, điền link file MP3 vào ô <strong>"Đường dẫn Audio / Podcast (MP3)"</strong>.</li>
+          <li>Hệ thống sẽ tự động hiển thị <strong>Trình phát âm thanh hiện đại</strong> với thanh tua thời gian và biểu tượng tai nghe sinh động ngoài trang web.</li>
+        </ul>
+      </section>
+
+      <!-- PHẦN 8 -->
+      <section id="muc-8">
+        <h2 class="section-title">8. ĐĂNG MỤC "GƯƠNG MẶT TRUYỀN CẢM HỨNG"</h2>
+        <p>Chuyên mục vinh danh các gương mặt bạn trẻ tiêu biểu, năng nổ dấn thân trong Giáo phận:</p>
+        <ul>
+          <li>Vào chuyên mục <strong>Gương mặt truyền cảm hứng</strong> ➔ Bấm <strong>Viết bài mới</strong>.</li>
+          <li>Điền: <em>Họ tên, Chức vụ/Vị trí, Giáo xứ, Câu châm ngôn tâm đắc</em> và tải lên <em>Ảnh chân dung</em>.</li>
+          <li>Hệ thống sẽ hiển thị bài viết với bố cục trang trọng, ảnh chân dung tròn và khung danh ngôn đặc biệt.</li>
+        </ul>
+      </section>
+
+      <!-- PHẦN 9 -->
+      <section id="muc-9">
+        <h2 class="section-title">9. QUẢN LÝ GIỜ LỄ CÁC GIÁO XỨ TRONG GIÁO PHẬN</h2>
+        <p>Giúp cộng đoàn và bạn trẻ du lịch/công tác tại Bà Rịa - Vũng Tàu tra cứu giờ lễ tức thì:</p>
+        <ol>
+          <li>Tại menu trái, chọn <strong>Quản lý Giờ Lễ</strong>.</li>
+          <li>Bấm <strong>+ Thêm Lịch Lễ Giáo Xứ</strong> (hoặc bấm Sửa tại giáo xứ có sẵn).</li>
+          <li>Nhập: Tên Giáo xứ, Giáo hạt, Giờ lễ Ngày thường, Giờ lễ Chúa Nhật và Địa chỉ.</li>
+          <li><strong>Ghim lên đầu</strong>: Tích chọn để ưu tiên xuất hiện đầu tiên trên thanh chạy giờ lễ trang chủ.</li>
+        </ol>
+      </section>
+
+      <!-- PHẦN 10 -->
+      <section id="muc-10">
+        <h2 class="section-title">10. QUẢN LÝ TIẾP NHẬN ĐƠN ĐĂNG KÝ SỰ KIỆN</h2>
+        <p>Khi đăng bài trong mục <strong>Đăng ký Khóa học - Sự kiện</strong> (<code>su-kien</code>), bài viết sẽ tự động có form đăng ký online:</p>
+        <ul>
+          <li>Bạn trẻ điền thông tin trực tiếp trên điện thoại (Họ tên, Năm sinh, Giáo xứ, Điện thoại, Email).</li>
+          <li>Dữ liệu sẽ đổ về mục <strong>Quản lý Đăng Ký</strong> trong Admin.</li>
+          <li>Ban Tổ Chức chỉ cần bấm nút <strong>Xuất Excel</strong> để in danh sách điểm danh cho sự kiện.</li>
+        </ul>
+      </section>
+
+      <!-- PHẦN 11 -->
+      <section id="muc-11">
+        <h2 class="section-title">11. QUẢN LÝ QUYÊN GÓP BÁC ÁI</h2>
+        <p>Áp dụng cho các chiến dịch Bác ái Caritas, Mùa Hè Xanh, Giúp đỡ bệnh nhân nghèo:</p>
+        <ul>
+          <li>Vào mục <strong>Quản lý Quyên Góp</strong> ➔ Tạo dự án mới.</li>
+          <li>Nhập: Tên chương trình, Số tiền mục tiêu, Số tài khoản nhận ủng hộ của Ban Bác Ái.</li>
+          <li>Website sẽ tự động tính toán thanh tiến độ % quyên góp trực quan và minh bạch.</li>
+        </ul>
+      </section>
+
+      <!-- PHẦN 12 -->
+      <section id="muc-12">
+        <h2 class="section-title">12. CƠ CHẾ ĐỒNG BỘ LỜI CHÚA MỖI NGÀY</h2>
+        <div class="callout callout-tip">
+          <div class="callout-title">✝ Hoàn toàn tự động - Không cần nhập liệu thủ công mỗi ngày</div>
+          <p>Trang web đã được kết nối với cơ sở dữ liệu phụng vụ của Ủy Ban Phụng Tự - Hội Đồng Giám Mục Việt Nam (HĐGMVN). Mỗi ngày, hệ thống sẽ tự động cập nhật đúng bài đọc 1, đáp ca và Phúc Âm theo lịch Công giáo.</p>
+          <p style="margin-bottom: 0;">Nếu cần kích hoạt cập nhật ngay lập tức, Quý vị chỉ cần vào mục <strong>Quản lý Lời Chúa</strong> trong Admin và bấm nút <strong>"Đồng Bộ Ngay"</strong>.</p>
+        </div>
+      </section>
+
+      <!-- PHẦN 13 -->
+      <section id="muc-13">
+        <h2 class="section-title">13. CÁC QUY CHUẨN ĐỊNH DẠNG & LƯU Ý QUAN TRỌNG</h2>
+        
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Hạng mục</th>
+              <th style="width: 35%;">Khuyến nghị chuẩn</th>
+              <th style="width: 40%;">Lý do / Tránh lỗi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Tỉ lệ ảnh Thumbnail</strong></td>
+              <td>Tỉ lệ ngang <strong>16:9</strong> (Kích thước: <code>1200x675</code> px hoặc <code>800x450</code> px)</td>
+              <td>Tránh dùng ảnh chụp dọc làm ảnh đại diện vì sẽ bị cắt xén mất đầu/chân dung khi lên web.</td>
+            </tr>
+            <tr>
+              <td><strong>Dung lượng ảnh</strong></td>
+              <td>Dưới <strong>1 MB</strong> mỗi tấm</td>
+              <td>Nên nén ảnh qua các trang miễn phí (như TinyPNG) trước khi tải lên để bạn trẻ dùng 4G tải web cực nhanh.</td>
+            </tr>
+            <tr>
+              <td><strong>Sao chép từ Word</strong></td>
+              <td>Dán văn bản dạng Text thô rồi mới định dạng lại trên web</td>
+              <td>Tránh dán trực tiếp phông chữ lạ từ Word để không gây lỗi vỡ dòng trên điện thoại.</td>
+            </tr>
+            <tr>
+              <td><strong>Kiểm tra hiển thị</strong></td>
+              <td>Mở thử bài viết trên điện thoại di động sau khi xuất bản</td>
+              <td>Đảm bảo câu chữ, hình ảnh và video hiển thị trơn tru, vừa mắt nhất.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="page-footer">
+      <p><strong>CỔNG THÔNG TIN ĐIỆN TỬ GIỚI TRẺ GIÁO PHẬN BÀ RỊA</strong></p>
+      <p style="margin-top: 5px;">Mọi thắc mắc kỹ thuật hoặc hỗ trợ tài khoản quản trị, xin liên hệ Ban Quản Trị Hệ Thống.</p>
+    </footer>
+
+  </div>
+
+</body>
+</html>

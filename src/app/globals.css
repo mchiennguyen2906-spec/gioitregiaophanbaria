@@ -726,13 +726,201 @@ ul { list-style: none; }
 }
 
 
-/* ARTICLE CONTENT IMAGES */
+/* ARTICLE CONTENT STYLING (Both Frontend & Admin Preview) */
+.article-content,
+.article-content-wrapper {
+  max-width: 100%;
+  overflow-wrap: break-word !important;
+  word-wrap: break-word !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+}
+
+.article-content *,
+.article-content-wrapper * {
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.article-content p,
+.article-content-wrapper p {
+  margin-bottom: 1.2em;
+  line-height: 1.8;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.article-content ul,
+.article-content ol,
+.article-content-wrapper ul,
+.article-content-wrapper ol {
+  padding-left: 24px;
+  margin-bottom: 1.2em;
+  list-style: inherit;
+}
+
+.article-content li,
+.article-content-wrapper li {
+  margin-bottom: 0.5em;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.article-content img,
 .article-content-wrapper img {
   max-width: 100% !important;
   height: auto !important;
   border-radius: 8px;
 }
 
-.article-content-wrapper iframe, .article-content-wrapper video {
+.article-content iframe,
+.article-content video,
+.article-content-wrapper iframe,
+.article-content-wrapper video {
   max-width: 100% !important;
 }
+
+/* LIVESTREAM & LIVE BADGE STYLES */
+@keyframes livePulseAnim {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  50% { transform: scale(1.04); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.badge-live-pulse {
+  background: #ef4444;
+  color: #ffffff !important;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  animation: livePulseAnim 1.6s infinite ease-in-out;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.article-main-card {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+}
+
+.livestream-box {
+  margin-bottom: 30px;
+  background: #090d16;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+  color: white;
+}
+
+.livestream-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.livestream-video-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.livestream-chat-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 380px;
+  background: #1e293b;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #334155;
+}
+
+.livestream-chat-header {
+  padding: 8px 12px;
+  background: #0f172a;
+  border-bottom: 1px solid #334155;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.livestream-chat-btn {
+  font-size: 0.78rem;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.livestream-chat-btn:hover {
+  background: rgba(56, 189, 248, 0.25);
+  color: #ffffff;
+}
+
+/* TABLET NAVIGATION BREAKPOINT (iPad Portrait 768px - 1024px) */
+@media (max-width: 1024px) {
+  .main-nav {
+    display: none !important;
+  }
+  .mobile-menu-wrapper {
+    display: block !important;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+    z-index: 99999;
+  }
+}
+
+/* RESPONSIVE LAYOUT FOR LIVESTREAM CONTAINER */
+@media (max-width: 992px) {
+  .livestream-container {
+    grid-template-columns: 1fr !important;
+  }
+  .livestream-chat-panel {
+    height: 380px !important;
+    min-height: 380px !important;
+  }
+}
+
+/* MOBILE PHONE POLISH (< 768px) */
+@media (max-width: 768px) {
+  .article-main-card {
+    padding: 16px 12px !important;
+    border-radius: 8px !important;
+  }
+  .livestream-box {
+    padding: 10px !important;
+    border-radius: 8px !important;
+    margin-bottom: 20px !important;
+  }
+  .livestream-topbar {
+    margin-bottom: 8px;
+  }
+  .channel-name-mobile-hide {
+    display: none !important;
+  }
+}
+

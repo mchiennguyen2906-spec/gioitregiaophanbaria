@@ -1,8 +1,11 @@
 import sanitizeHtml from 'sanitize-html';
 
 export const sanitize = (html: string) => {
-  let preprocessedHtml = html;
-
+  if (!html) return '';
+  let preprocessedHtml = html
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\u00A0/g, ' ')
+    .replace(/white-space\s*:\s*nowrap/gi, 'white-space: normal');
 
   return sanitizeHtml(preprocessedHtml, {
     allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img', 'iframe', 'figure', 'figcaption', 'picture', 'source' ]),

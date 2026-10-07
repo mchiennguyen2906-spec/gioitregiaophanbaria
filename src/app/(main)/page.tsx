@@ -8,10 +8,10 @@ export const revalidate = 60;
 export default async function HomePage() {
   const serverArticles = await getPublishedArticlesServer(200);
   
-  // Filter by date for scheduled publishing
-  const now = new Date();
+  // Allow published articles including liturgical readings published for tomorrow
+  const cutoff = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const validArticles = serverArticles
-    .filter(a => !a.date || new Date(a.date) <= now)
+    .filter(a => !a.date || new Date(a.date) <= cutoff)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // Cast ServerArticle to Article (they are compatible in this context)

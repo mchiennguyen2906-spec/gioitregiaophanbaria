@@ -253,6 +253,52 @@ export default function AdminDashboard() {
         <div style={{ padding: '20px', borderBottom: '1px solid #334155', textAlign: 'center' }}>
           <h2 style={{ margin: 0, color: 'var(--color-brand-cyan)', fontSize: '1.2rem' }}>ADMIN BRVT</h2>
           <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem', opacity: 0.7 }}>Quản trị hệ thống</p>
+          <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <a 
+              href="/huong-dan-quan-tri.html" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                background: 'linear-gradient(135deg, #b91c1c 0%, #991b1b 100%)',
+                color: '#ffffff',
+                padding: '6px 12px',
+                borderRadius: '6px',
+                fontSize: '0.78rem',
+                fontWeight: 'bold',
+                textDecoration: 'none',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.3)'
+              }}
+              title="Mở cẩm nang hướng dẫn sử dụng và đăng bài chi tiết"
+            >
+              📖 Cẩm Nang Hướng Dẫn
+            </a>
+            <a 
+              href="/HUONG_DAN_QUAN_TRI_WEBSITE_GIOITRE_BRVT.pdf" 
+              target="_blank" 
+              download
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+                background: 'rgba(255,255,255,0.08)',
+                color: '#cbd5e1',
+                border: '1px solid #475569',
+                padding: '5px 12px',
+                borderRadius: '6px',
+                fontSize: '0.72rem',
+                fontWeight: '500',
+                textDecoration: 'none'
+              }}
+              title="Tải file PDF cẩm nang để in hoặc gửi Zalo"
+            >
+              📥 Tải File PDF (1 MB)
+            </a>
+          </div>
         </div>
 
         <div style={{ padding: '15px 0', display: 'flex', flexDirection: 'column', gap: '5px' }}>

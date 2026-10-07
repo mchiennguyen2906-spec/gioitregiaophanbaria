@@ -25,6 +25,9 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
     return () => window.removeEventListener('storage_update', syncArticles);
   }, []);
 
+  // Tìm bài viết đang phát trực tiếp nếu có
+  const liveArticle = articles.find(a => a.metadata?.isLive);
+
   // 1. Hero Slider Trang Chủ: Lấy tối đa 5 bài nổi bật
   const homeFeaturedPinned = articles.filter(a => a.isHomeFeatured);
   const homeFeatured = (homeFeaturedPinned.length > 0 
@@ -119,6 +122,47 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
       {showQuestionPopup && <QuestionFormPopup onClose={() => setShowQuestionPopup(false)} />}
       
       <div className="container">
+        {/* THANH THÔNG BÁO ĐANG PHÁT TRỰC TIẾP (TỰ ĐỘNG HIỆN KHI BẬT LIVE) */}
+        {liveArticle && (
+          <div style={{
+            background: 'linear-gradient(90deg, #991b1b 0%, #dc2626 50%, #b91c1c 100%)',
+            borderRadius: '10px',
+            padding: '12px 20px',
+            marginTop: '25px',
+            marginBottom: '-15px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            color: 'white',
+            boxShadow: '0 4px 15px rgba(220, 38, 38, 0.35)',
+            flexWrap: 'wrap',
+            gap: '10px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
+              <span className="badge-live-pulse" style={{ background: '#ffffff', color: '#dc2626' }}>🔴 TRỰC TIẾP</span>
+              <span style={{ fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+                {liveArticle.title}
+              </span>
+            </div>
+            <a 
+              href={`/${liveArticle.categoryId}/${liveArticle.id}`}
+              style={{
+                background: 'white',
+                color: '#dc2626',
+                fontWeight: 'bold',
+                padding: '7px 18px',
+                borderRadius: '20px',
+                textDecoration: 'none',
+                fontSize: '0.85rem',
+                whiteSpace: 'nowrap',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
+              }}
+            >
+              Vào Xem & Bình Luận Ngay ➔
+            </a>
+          </div>
+        )}
+
         {/* HERO SECTION - 2 Column Asymmetrical */}
         <section className={styles.heroGrid} style={{marginTop: '40px'}}>
         
@@ -129,7 +173,12 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
                 <a href={`/${homeFeatured[currentSlide].categoryId}/${homeFeatured[currentSlide].id}`}>
                   <img fetchPriority="high" src={homeFeatured[currentSlide].thumbnailUrl} className={styles.sliderImg} alt="Youth Events" style={{transition: 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)'}} />
                   <div className={styles.sliderText} style={{transition: 'all 0.4s ease-in-out', padding: '15px 25px', background: 'rgba(0, 0, 0, 0.65)'}}>
-                    <h3 style={{color: '#ffffff', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', margin: 0, lineHeight: 1.3, textShadow: '0 2px 6px rgba(0,0,0,0.85)'}}>{homeFeatured[currentSlide].title}</h3>
+                    <h3 style={{color: '#ffffff', fontSize: 'clamp(1.2rem, 2.5vw, 1.8rem)', margin: 0, lineHeight: 1.3, textShadow: '0 2px 6px rgba(0,0,0,0.85)'}}>
+                      {homeFeatured[currentSlide].metadata?.isLive && (
+                        <span className="badge-live-pulse" style={{ marginRight: '8px', fontSize: '0.8rem' }}>🔴 TRỰC TIẾP</span>
+                      )}
+                      {homeFeatured[currentSlide].title}
+                    </h3>
                   </div>
                 </a>
                 

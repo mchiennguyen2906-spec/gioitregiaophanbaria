@@ -3,10 +3,17 @@ import React, { useState, useEffect } from 'react';
 import styles from '../../../page.module.css';
 import LoiChuaWidget from '../../../components/LoiChuaWidget';
 import { sanitize } from '../../../utils/sanitize';
-import { getTitle, slugMap } from '../../../utils/categoryMap';
+import { getTitle, slugMap, categoryMap, getParentCategory } from '../../../utils/categoryMap';
 import { getArticlesFromStore, getDonationsFromStore, Article, DonationProgram } from '../../../utils/store';
 import EventRegistrationForm from '../../../components/EventRegistrationForm';
 import QuestionFormPopup from '../../../components/QuestionFormPopup';
+
+function extractYouTubeId(url?: string): string | null {
+  if (!url) return null;
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|live\/)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : null;
+}
 
 export default function ArticleClient({ 
   params, 
@@ -24,6 +31,13 @@ export default function ArticleClient({
   const [articleDetail, setArticleDetail] = useState<Article | null>(initialArticleDetail);
   const [subcategoryArticles, setSubcategoryArticles] = useState<Article[]>(initialSubcategoryArticles);
   const [donations, setDonations] = useState<DonationProgram[]>(initialDonations);
+  const [embedDomain, setEmbedDomain] = useState('www.gioitregiaophanbaria.com');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setEmbedDomain(window.location.hostname);
+    }
+  }, []);
 
   // Xử lý params cho Next.js 15+ (nếu params là Promise)
   const resolvedParams = params instanceof Promise ? React.use(params) : params;
@@ -32,10 +46,11 @@ export default function ArticleClient({
 
   // Xác định subcategory slug (nếu là bài viết thì lấy từ articleDetail.categoryId, nếu không thì chính là slug)
   const subcategorySlug = articleDetail ? articleDetail.categoryId : slug;
+  const parentCategory = getParentCategory(subcategorySlug) || (category !== subcategorySlug ? category : '');
+  const subcategoryUrl = parentCategory ? `/${parentCategory}/${subcategorySlug}` : `/${subcategorySlug}`;
   
   // Tên chuyên mục con (ví dụ: Lời Chúa Mỗi Ngày)
-  // Nếu không tìm thấy trong slugMap thì dùng hàm getTitle để lấy tên có sẵn
-  const subCategoryName = slugMap[subcategorySlug] || getTitle(category, subcategorySlug);
+  const subCategoryName = slugMap[subcategorySlug] || getTitle(parentCategory || category, subcategorySlug);
 
   const isEventRegistration = category === 'dao-tao' && slug === 'su-kien';
 
@@ -51,11 +66,11 @@ export default function ArticleClient({
   };
 
   // Phân tầng bài viết tự động theo chu trình luân chuyển:
-  // 1. Tiêu Điểm: Tối đa 3 bài mới nhất (hoặc bài ghim isFeatured)
+  // 1. Tiêu Điểm: Tối đa 3 bài mới nhất (hoặc bài ghim isFeatured). Nếu ít bài, chỉ lấy 1 bài làm nổi bật.
   const pinnedFeatured = subcategoryArticles.filter(a => a.isFeatured);
   const featuredArticles: Article[] = pinnedFeatured.length > 0 
     ? pinnedFeatured.slice(0, 3) 
-    : subcategoryArticles.slice(0, Math.min(3, subcategoryArticles.length));
+    : subcategoryArticles.slice(0, Math.min(subcategoryArticles.length > 8 ? 3 : 1, subcategoryArticles.length));
 
   const featuredIds = new Set(featuredArticles.map(a => a.id));
   const poolAfterFeatured = subcategoryArticles.filter(a => !featuredIds.has(a.id));
@@ -63,11 +78,14 @@ export default function ArticleClient({
   // 2. Ưu Tiên: Tối đa 4 bài tiếp theo (bài ghim isPriority hoặc bài mới liền kề)
   const pinnedPriority = poolAfterFeatured.filter(a => a.isPriority);
   const remainingForPriority = poolAfterFeatured.filter(a => !a.isPriority);
-  const priorityArticles = [...pinnedPriority, ...remainingForPriority].slice(0, 4);
+  const maxPriority = subcategoryArticles.length > 8 ? 4 : 2;
+  const priorityArticles = [...pinnedPriority, ...remainingForPriority].slice(0, maxPriority);
   const priorityIds = new Set(priorityArticles.map(a => a.id));
 
   // 3. Danh Sách Bài Viết: Toàn bộ bài còn lại hiển thị ở lưới 4 cột
-  const listArticles = poolAfterFeatured.filter(a => !priorityIds.has(a.id));
+  // Nếu số bài còn lại rỗng nhưng chuyên mục có bài, hiển thị toàn bộ bài viết để danh sách không bao giờ bị rỗng
+  const remainingList = poolAfterFeatured.filter(a => !priorityIds.has(a.id));
+  const listArticles = remainingList.length > 0 ? remainingList : subcategoryArticles;
 
   useEffect(() => {
     if (isEventRegistration || articleDetail || featuredArticles.length <= 1) return;
@@ -117,9 +135,15 @@ export default function ArticleClient({
         </h1>
         <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: '5px' }}>
           <a href="/" style={{color: '#64748b', textDecoration: 'none'}}>Trang chủ</a> 
+          {parentCategory && categoryMap[parentCategory] && (
+            <>
+              {' » '}
+              <a href={`/${parentCategory}`} style={{color: '#64748b', textDecoration: 'none'}}>{categoryMap[parentCategory]}</a>
+            </>
+          )}
           {' » '}
           {articleDetail ? (
-            <a href={`/${category}/${subcategorySlug}`} style={{color: '#64748b', textDecoration: 'none'}}>{subCategoryName}</a>
+            <a href={subcategoryUrl} style={{color: '#64748b', textDecoration: 'none'}}>{subCategoryName}</a>
           ) : (
             <span>{subCategoryName}</span>
           )}
@@ -168,10 +192,10 @@ export default function ArticleClient({
           </table>
         </div>
       ) : articleDetail ? (
-        <div className="container" style={{ background: 'white', padding: '30px', borderRadius: '12px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+        <div className="container article-main-card">
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px' }}>
             {/* Cột trái: Bài viết (chiếm phần lớn) */}
-            <div style={{ flex: '1 1 0%', minWidth: 'min(100%, 600px)' }}>
+            <div style={{ flex: '1 1 0%', minWidth: 'min(100%, 600px)', maxWidth: '100%' }}>
               {articleDetail.categoryId === 'guong-mat' ? (
                 // Giao diện riêng cho Gương Mặt Truyền Cảm Hứng
                 <div>
@@ -186,12 +210,15 @@ export default function ArticleClient({
                   <div style={{ padding: '20px', background: '#fef2f2', borderLeft: '4px solid var(--color-brand-red)', borderRadius: '0 8px 8px 0', marginBottom: '30px', fontSize: '1.2rem', fontStyle: 'italic', color: '#991b1b', lineHeight: 1.6 }}>
                     "{articleDetail.excerpt}"
                   </div>
-                  <div dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
+                  <div className="article-content-wrapper" dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflowWrap: 'break-word', wordBreak: 'break-word' }} />
                 </div>
               ) : (
                 // Giao diện bài viết thông thường
                 <div>
                   <h1 style={{ color: 'var(--color-brand-red)', marginBottom: '10px' }}>
+                    {articleDetail.metadata?.isLive && (
+                      <span className="badge-live-pulse" style={{ marginRight: '10px', fontSize: '0.85rem' }}>🔴 TRỰC TIẾP</span>
+                    )}
                     {articleDetail.title}
                     {isArticleCompleted(articleDetail.id) && (
                       <span style={{ background: '#22c55e', color: 'white', padding: '4px 10px', borderRadius: '4px', fontSize: '0.9rem', marginLeft: '12px', verticalAlign: 'middle', fontWeight: 'bold' }}>✓ Đã hoàn thành quyên góp</span>
@@ -231,13 +258,93 @@ export default function ArticleClient({
                     </div>
                   )}
 
-                  {articleDetail.thumbnailUrl && (!articleDetail.content || !articleDetail.content.includes('<img')) && (
+                  {/* LIVESTREAM / VIDEO & LIVE CHAT SECTION */}
+                  {(() => {
+                    const videoId = extractYouTubeId(articleDetail.metadata?.videoUrl);
+                    if (!videoId) return null;
+                    const isLive = Boolean(articleDetail.metadata?.isLive);
+                    const showChat = articleDetail.metadata?.showLiveChat !== false;
+
+                    return (
+                      <div className="livestream-box">
+                        {/* Top bar */}
+                        <div className="livestream-topbar">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            {isLive ? (
+                              <span className="badge-live-pulse">🔴 ĐANG PHÁT TRỰC TIẾP</span>
+                            ) : (
+                              <span style={{ background: '#334155', color: '#e2e8f0', padding: '3px 8px', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>🎬 VIDEO PHÁT LẠI</span>
+                            )}
+                            <span className="channel-name-mobile-hide" style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Kênh YouTube Giáo Phận Bà Rịa</span>
+                          </div>
+                          <a 
+                            href={`https://www.youtube.com/watch?v=${videoId}`} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="livestream-chat-btn"
+                            title="Mở video trực tiếp trong ứng dụng YouTube"
+                          >
+                            Mở trên YouTube ↗
+                          </a>
+                        </div>
+
+                        {/* Video + Live Chat container */}
+                        <div 
+                          className="livestream-container"
+                          style={{ 
+                            display: 'grid', 
+                            gridTemplateColumns: showChat ? 'minmax(0, 1fr) 340px' : '1fr', 
+                            gap: '14px', 
+                            alignItems: 'stretch' 
+                          }}
+                        >
+                          {/* Video Embed */}
+                          <div className="livestream-video-wrapper">
+                            <iframe
+                              src={`https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&playsinline=1`}
+                              title={articleDetail.title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                              allowFullScreen
+                              style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                            />
+                          </div>
+
+                          {/* Live Chat Panel */}
+                          {showChat && (
+                            <div className="livestream-chat-panel">
+                              <div className="livestream-chat-header">
+                                <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#f8fafc' }}>💬 Bình Luận Trực Tiếp</span>
+                                <a 
+                                  href={`https://www.youtube.com/live_chat?v=${videoId}`}
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="livestream-chat-btn"
+                                  title="Mở chat trong cửa sổ riêng nếu bị chặn cookie"
+                                >
+                                  Mở chat riêng ↗
+                                </a>
+                              </div>
+                              <div style={{ flex: 1, position: 'relative', minHeight: '300px' }}>
+                                <iframe
+                                  src={`https://www.youtube.com/live_chat?v=${videoId}&embed_domain=${embedDomain}`}
+                                  title="YouTube Live Chat"
+                                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {articleDetail.thumbnailUrl && (!articleDetail.content || !articleDetail.content.includes('<img')) && (!extractYouTubeId(articleDetail.metadata?.videoUrl)) && (
                     <div style={{ marginBottom: '25px' }}>
                       <img loading="lazy" src={articleDetail.thumbnailUrl} alt={articleDetail.title} style={{ width: '100%', aspectRatio: '16/9', borderRadius: '8px', objectFit: 'cover' }} />
                     </div>
                   )}
 
-                  <div className="article-content-wrapper" dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflow: 'hidden' }} />
+                  <div className="article-content-wrapper" dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflowWrap: 'break-word', wordBreak: 'break-word' }} />
                 </div>
               )}
             </div>
@@ -329,9 +436,70 @@ export default function ArticleClient({
                 </div>
               </div>
 
-              {/* Col 3: Lời Chúa */}
+              {/* Col 3: Lời Chúa hoặc Chuyên mục liên quan */}
               <div className={styles.heroNewsBox}>
-                <LoiChuaWidget />
+                {slug === 'loi-chua' ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                    <div className="section-header" style={{ borderBottom: '1px solid #c53030', padding: '0 0 10px 0', marginBottom: '15px' }}>
+                      <h2 className="section-title" style={{ fontSize: '0.95rem', textTransform: 'uppercase', color: '#c53030', fontWeight: 'bold', margin: 0 }}>
+                        ✝ SUY NIỆM & GIÁO LÝ
+                      </h2>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', flex: 1 }}>
+                      <a href="/kinh-thanh/suy-niem" style={{
+                        background: 'linear-gradient(135deg, #fee2e2 0%, #ffedd5 100%)',
+                        border: '1px solid #fecaca',
+                        padding: '15px',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px'
+                      }}>
+                        <span style={{ fontSize: '1.8rem' }}>📖</span>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#dc2626', fontSize: '0.95rem' }}>Suy Niệm Tin Mừng</div>
+                          <div style={{ fontSize: '0.8rem', color: '#7c2d12' }}>Các bài giảng & suy tư Chúa Nhật</div>
+                        </div>
+                      </a>
+                      <a href="/kinh-thanh/giao-ly" style={{
+                        background: 'linear-gradient(135deg, #e0f2fe 0%, #e0e7ff 100%)',
+                        border: '1px solid #bae6fd',
+                        padding: '15px',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px'
+                      }}>
+                        <span style={{ fontSize: '1.8rem' }}>⛪</span>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#0284c7', fontSize: '0.95rem' }}>Giáo Lý Hội Thánh</div>
+                          <div style={{ fontSize: '0.8rem', color: '#0369a1' }}>Học hỏi & Đào sâu Đức Tin</div>
+                        </div>
+                      </a>
+                      <a href="/kinh-thanh/phuc-am" style={{
+                        background: 'linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%)',
+                        border: '1px solid #bbf7d0',
+                        padding: '15px',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginTop: 'auto'
+                      }}>
+                        <span style={{ fontSize: '1.8rem' }}>📜</span>
+                        <div>
+                          <div style={{ fontWeight: 700, color: '#16a34a', fontSize: '0.95rem' }}>Học Hỏi Phúc Âm</div>
+                          <div style={{ fontSize: '0.8rem', color: '#15803d' }}>Tìm hiểu 4 sách Phúc Âm</div>
+                        </div>
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <LoiChuaWidget />
+                )}
               </div>
             </section>
           </div>

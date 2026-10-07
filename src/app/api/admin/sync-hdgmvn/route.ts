@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createSupabaseServerClient, verifyAdmin } from '@/app/utils/supabaseServer';
+import { verifyAdmin } from '@/app/utils/supabaseServer';
+import { createClient } from '@supabase/supabase-js';
 import * as cheerio from 'cheerio';
 
 export async function OPTIONS(request: Request) {
@@ -42,13 +43,15 @@ export async function POST(request: Request) {
       }
     }
 
-    const supabase = await createSupabaseServerClient();
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://spoqkzsrcphgzvmxwadd.supabase.co';
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const results = [];
 
     // 2. Scrape each source
     for (const source of SOURCES) {
       try {
-        const listResponse = await fetch(source.url, { cache: 'no-store' });
+        const listResponse = await fetch(source.url, { headers: { 'User-Agent': 'Mozilla/5.0' }, cache: 'no-store' });
         const listHtml = await listResponse.text();
         const $list = cheerio.load(listHtml);
         
@@ -61,8 +64,8 @@ export async function POST(request: Request) {
         const nextData = JSON.parse(nextDataStr);
         const focusNews = nextData.props?.pageProps?.focusNews?.value || [];
         
-        // Take top 5 to avoid timeouts
-        const topNews = focusNews.slice(0, 5);
+        // Take top 8 to avoid timeouts while getting fresh news
+        const topNews = focusNews.slice(0, 8);
         
         for (const article of topNews) {
           const articleSlug = article.link;
@@ -83,7 +86,7 @@ export async function POST(request: Request) {
           }
 
           // Fetch content
-          const articleResponse = await fetch(`https://hdgmvietnam.com/chi-tiet/${articleSlug}`, { cache: 'no-store' });
+          const articleResponse = await fetch(`https://hdgmvietnam.com/chi-tiet/${articleSlug}`, { headers: { 'User-Agent': 'Mozilla/5.0' }, cache: 'no-store' });
           const articleHtml = await articleResponse.text();
           const $article = cheerio.load(articleHtml);
           
@@ -110,6 +113,8 @@ export async function POST(request: Request) {
           $content('body').append('<br><p style="text-align: right;"><em><span style="color:#808080">Nguồn: Hội đồng Giám mục Việt Nam (hdgmvietnam.com)</span></em></p>');
           
           let finalContent = $content('body').html() || '';
+          const textOnly = $content.text().replace(/\s+/g, ' ').trim();
+          const excerpt = textOnly.slice(0, 160) + '...';
           
           // Try to get high-res from OG image first
           const ogImage = $article('meta[property="og:image"]').attr('content');
@@ -121,6 +126,12 @@ export async function POST(request: Request) {
               thumbnailUrl = article.photo.startsWith('http') ? article.photo : `https://hdgmvietnam.com${article.photo}`;
           }
 
+          let dateIso = new Date().toISOString();
+          if (article.publishDate) {
+            const d = new Date(article.publishDate);
+            if (!isNaN(d.getTime())) dateIso = d.toISOString();
+          }
+
           // Save to Supabase
           const { data: inserted, error: insertError } = await supabase
             .from('articles')
@@ -128,15 +139,17 @@ export async function POST(request: Request) {
               {
                 category_id: source.categoryId,
                 title: title,
+                excerpt: excerpt,
                 content: finalContent,
                 author: 'HĐGMVN',
                 thumbnail_url: thumbnailUrl,
                 status: 'published',
+                date: dateIso,
                 is_featured: false,
                 is_priority: false,
                 is_home_featured: false,
                 is_home_priority: false,
-                created_at: new Date(article.publishDate || Date.now()).toISOString()
+                created_at: dateIso
               }
             ])
             .select();

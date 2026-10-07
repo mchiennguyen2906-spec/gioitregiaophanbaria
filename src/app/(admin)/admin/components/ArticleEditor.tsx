@@ -34,6 +34,9 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
   const [isHomeFeatured, setIsHomeFeatured] = useState(false);
   const [isHomePriority, setIsHomePriority] = useState(false);
   const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [isLive, setIsLive] = useState(false);
+  const [showLiveChat, setShowLiveChat] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   
@@ -81,6 +84,9 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       setThumbnailUrl(articleToEdit.thumbnailUrl || '');
       setAttachmentUrl(articleToEdit.attachmentUrl || '');
       setAttachmentName(articleToEdit.attachmentName || '');
+      setVideoUrl(articleToEdit.metadata?.videoUrl || '');
+      setIsLive(Boolean(articleToEdit.metadata?.isLive));
+      setShowLiveChat(articleToEdit.metadata?.showLiveChat !== false);
     } else {
       setTitle('');
       setExcerpt('');
@@ -97,6 +103,9 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       setThumbnailUrl('');
       setAttachmentUrl('');
       setAttachmentName('');
+      setVideoUrl('');
+      setIsLive(false);
+      setShowLiveChat(true);
     }
   }, [articleToEdit]);
   
@@ -106,23 +115,37 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
       return;
     }
     
+    let finalThumbnail = thumbnailUrl;
+    if (!finalThumbnail && videoUrl) {
+      const match = videoUrl.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|live\/)([^#&?]*).*/);
+      if (match && match[2] && match[2].length === 11) {
+        finalThumbnail = `https://img.youtube.com/vi/${match[2]}/hqdefault.jpg`;
+      }
+    }
+
     const articleData = {
       categoryId: category,
       title,
       excerpt,
       author,
       parish,
-      content,
+      content: sanitize(content),
       audioUrl,
       attachmentUrl,
       attachmentName,
       date: publishDate ? new Date(publishDate).toISOString() : new Date().toISOString(),
-      thumbnailUrl,
+      thumbnailUrl: finalThumbnail,
       status: 'published' as const,
       isFeatured,
       isPriority,
       isHomeFeatured,
-      isHomePriority
+      isHomePriority,
+      metadata: {
+        ...(articleToEdit?.metadata || {}),
+        videoUrl: videoUrl.trim() || undefined,
+        isLive,
+        showLiveChat
+      }
     };
 
     try {
@@ -587,6 +610,49 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
             </div>
           </div>
 
+          {/* Box Livestream / Video YouTube */}
+          <div style={{ background: '#f8fafc', padding: '20px', borderRadius: '12px', border: '1px solid #cbd5e1', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#1e293b', borderBottom: '1px solid #e2e8f0', paddingBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: '#ef4444' }}>🔴</span> Video / Livestream YouTube
+            </h3>
+            
+            <div style={{ marginBottom: '15px' }}>
+              <label style={labelStyle}>Đường dẫn YouTube (Video hoặc Live Stream)</label>
+              <input 
+                type="text" 
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                placeholder="https://www.youtube.com/watch?v=... hoặc https://youtu.be/..."
+                style={inputStyle}
+              />
+              <p style={{ margin: '5px 0 0 0', fontSize: '0.75rem', color: '#64748b' }}>
+                💡 Hệ thống sẽ tự động nhúng video 16:9 sắc nét vào đầu bài viết.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#b91c1c', fontSize: '0.9rem', fontWeight: 600 }}>
+                <input 
+                  type="checkbox" 
+                  checked={isLive} 
+                  onChange={e => setIsLive(e.target.checked)} 
+                  style={{ width: '16px', height: '16px', accentColor: '#ef4444' }} 
+                />
+                Đang phát Trực tiếp (Hiển thị nhãn 🔴 TRỰC TIẾP)
+              </label>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#334155', fontSize: '0.9rem' }}>
+                <input 
+                  type="checkbox" 
+                  checked={showLiveChat} 
+                  onChange={e => setShowLiveChat(e.target.checked)} 
+                  style={{ width: '16px', height: '16px', accentColor: 'var(--color-brand-cyan)' }} 
+                />
+                Kèm Khung Bình Luận Trực Tiếp (Live Chat)
+              </label>
+            </div>
+          </div>
+
           {/* Box Media */}
           <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
             <h3 style={{ margin: '0 0 15px 0', fontSize: '1rem', color: '#1e293b', borderBottom: '1px solid #f1f5f9', paddingBottom: '10px' }}>🖼️ Đa phương tiện</h3>
@@ -676,7 +742,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
         }}>
           <div style={{
             background: 'white', maxWidth: '800px', margin: '0 auto', padding: '40px', 
-            borderRadius: '12px', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)'
+            borderRadius: '12px', position: 'relative', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', overflowWrap: 'break-word', wordBreak: 'break-word', overflowX: 'hidden'
           }}>
             <div style={{ background: '#fef3c7', color: '#b45309', padding: '15px', borderRadius: '8px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span>⚠️ <b>CHẾ ĐỘ XEM TRƯỚC (PREVIEW)</b></span>
@@ -697,7 +763,7 @@ export default function ArticleEditor({ articleToEdit, defaultCategory, allowedC
 
             <p style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '30px', color: '#334155' }}>{excerpt || '[Chưa nhập lời dẫn]'}</p>
             
-            <div className="article-content" dangerouslySetInnerHTML={{ __html: content ? sanitize(content) : '[Chưa nhập nội dung]' }} style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#1e293b' }} />
+            <div className="article-content" dangerouslySetInnerHTML={{ __html: content ? sanitize(content) : '[Chưa nhập nội dung]' }} style={{ fontSize: '1.1rem', lineHeight: 1.8, color: '#1e293b', overflowWrap: 'break-word', wordBreak: 'break-word' }} />
           </div>
         </div>
       )}
