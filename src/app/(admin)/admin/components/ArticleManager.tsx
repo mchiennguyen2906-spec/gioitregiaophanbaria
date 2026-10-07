@@ -192,7 +192,7 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
               borderRadius: '6px', border: 'none', cursor: 'pointer', fontWeight: 'bold',
               boxShadow: '0 2px 4px rgba(6,182,212,0.3)'
             }}>
-              + TẠO BÀI MỚI
+              {categoryId === 'hinh-anh' ? '+ TẠO ALBUM MỚI' : '+ TẠO BÀI MỚI'}
             </button>
           )}
         </div>
@@ -225,7 +225,21 @@ export default function ArticleManager({ categoryId, categoryName, onEdit, onCre
               <tr key={article.id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background 0.2s', cursor: 'default' }} 
                   onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
                   onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                <td style={{ padding: '15px 12px', fontWeight: '500', color: '#1e293b' }}>{article.title}</td>
+                <td style={{ padding: '12px', fontWeight: '500', color: '#1e293b' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    {article.thumbnailUrl && (
+                      <img src={article.thumbnailUrl} alt="" style={{ width: '45px', height: '45px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0, border: '1px solid #e2e8f0' }} />
+                    )}
+                    <div>
+                      <div style={{ fontSize: '0.95rem' }}>{article.title}</div>
+                      {article.metadata?.images && Array.isArray(article.metadata.images) && (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--color-brand-cyan)', fontWeight: 'bold' }}>
+                          📸 {article.metadata.images.length} hình ảnh
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </td>
                 <td style={{ padding: '15px 12px', color: '#64748b' }}>{article.author} {article.parish ? `(${article.parish})` : ''}</td>
                 <td style={{ padding: '15px 12px', color: '#64748b' }}>{new Date(article.date).toLocaleDateString('vi-VN')}</td>
                 <td style={{ padding: '15px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>

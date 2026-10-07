@@ -121,9 +121,15 @@ export default function AdminDashboard() {
         return (
           <AlbumEditor 
             articleToEdit={articleToEdit || undefined}
-            onSave={() => setActiveMenu('MANAGE_CATEGORY')}
+            onSave={() => {
+              setActiveCategory('hinh-anh');
+              setActiveCategoryName(slugMap['hinh-anh'] || 'Hình ảnh Giới trẻ Giáo phận');
+              setActiveMenu('MANAGE_CATEGORY');
+            }}
             onPublish={() => {
               setArticleToEdit(null);
+              setActiveCategory('hinh-anh');
+              setActiveCategoryName(slugMap['hinh-anh'] || 'Hình ảnh Giới trẻ Giáo phận');
               setActiveMenu('MANAGE_CATEGORY');
             }}
           />
@@ -313,7 +319,14 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveMenu('NEW_COURSE')} style={menuBtnStyle(activeMenu === 'NEW_COURSE')}>
             🎓 Khóa học mới
           </button>
-          <button onClick={() => setActiveMenu('NEW_ALBUM')} style={menuBtnStyle(activeMenu === 'NEW_ALBUM')}>
+          <button 
+            onClick={() => {
+              setActiveCategory('hinh-anh');
+              setActiveCategoryName(slugMap['hinh-anh'] || 'Hình ảnh Giới trẻ Giáo phận');
+              setActiveMenu('NEW_ALBUM');
+            }} 
+            style={menuBtnStyle(activeMenu === 'NEW_ALBUM')}
+          >
             🖼️ Album mới
           </button>
           <button onClick={() => setActiveMenu('NEW_VIDEO')} style={menuBtnStyle(activeMenu === 'NEW_VIDEO')}>

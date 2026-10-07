@@ -21,15 +21,65 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: 'No file uploaded' }, { status: 400 });
     }
 
-    // Size limit 5MB
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ success: false, message: 'File too large, max 5MB allowed' }, { status: 400 });
+    // Size limit 20MB
+    if (file.size > 20 * 1024 * 1024) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'File quá lớn, dung lượng tối đa cho phép là 20MB.', 
+        message: 'File too large, max 20MB allowed' 
+      }, { status: 400 });
+    }
+
+    // Determine extension and normalize MIME type
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
+    let fileType = file.type;
+
+    // MIME inference for camera uploads where browser doesn't send MIME type
+    if (!fileType || fileType === 'application/octet-stream') {
+      const mimeMap: Record<string, string> = {
+        jpg: 'image/jpeg',
+        jpeg: 'image/jpeg',
+        png: 'image/png',
+        webp: 'image/webp',
+        gif: 'image/gif',
+        heic: 'image/heic',
+        heif: 'image/heif',
+        avif: 'image/avif',
+        bmp: 'image/bmp',
+        pdf: 'application/pdf',
+        doc: 'application/msword',
+        docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        xls: 'application/vnd.ms-excel',
+        xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      };
+      if (mimeMap[ext]) {
+        fileType = mimeMap[ext];
+      }
     }
 
     // Type validation
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
-    if (!allowedTypes.includes(file.type) || file.name.toLowerCase().endsWith('.svg')) {
-      return NextResponse.json({ success: false, message: 'Invalid file type. SVG is not allowed for security reasons.' }, { status: 400 });
+    const allowedTypes = [
+      'image/jpeg', 
+      'image/png', 
+      'image/webp', 
+      'image/gif', 
+      'image/heic', 
+      'image/heif', 
+      'image/avif', 
+      'image/bmp',
+      'application/pdf', 
+      'application/msword', 
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
+      'application/vnd.ms-excel', 
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    ];
+    
+    if (!allowedTypes.includes(fileType) || file.name.toLowerCase().endsWith('.svg')) {
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Định dạng file không hợp lệ hoặc không được hỗ trợ. Không cho phép file SVG vì lý do bảo mật.', 
+        message: 'Invalid file type. SVG is not allowed for security reasons.' 
+      }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -37,21 +87,20 @@ export async function POST(request: Request) {
 
     // Save to Supabase Storage
     // Sanitize filename for Supabase Storage (remove unicode, spaces, special chars)
-    const ext = file.name.split('.').pop()?.toLowerCase() || 'bin';
     const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
     const normalizedName = baseName.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const safeName = normalizedName.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+    const safeName = normalizedName.replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'image';
     const filename = `${Date.now()}-${safeName}.${ext}`;
     const { data: uploadData, error } = await supabaseAdmin.storage
       .from('public-files')
       .upload(filename, buffer, {
-        contentType: file.type,
+        contentType: fileType,
         upsert: true
       });
 
     if (error) {
       console.error('Supabase upload error:', error);
-      return NextResponse.json({ success: false, error: 'Upload failed' }, { status: 500 });
+      return NextResponse.json({ success: false, error: 'Upload failed: ' + error.message, message: error.message }, { status: 500 });
     }
 
     const { data: publicUrlData } = supabaseAdmin.storage

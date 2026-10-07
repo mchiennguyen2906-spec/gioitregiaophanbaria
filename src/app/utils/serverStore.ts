@@ -13,7 +13,7 @@ export const supabaseServer = createClient(supabaseUrl, supabaseAnonKey, {
     fetch: (url, options) => {
       return fetch(url, {
         ...options,
-        next: { revalidate: 3600 } // ISR: Cache 1 hour
+        next: { revalidate: 10 } // Fresh updates within 10s
       });
     }
   }

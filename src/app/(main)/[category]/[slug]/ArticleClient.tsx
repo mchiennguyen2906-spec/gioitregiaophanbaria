@@ -4,7 +4,8 @@ import styles from '../../../page.module.css';
 import LoiChuaWidget from '../../../components/LoiChuaWidget';
 import { sanitize } from '../../../utils/sanitize';
 import { getTitle, slugMap, categoryMap, getParentCategory } from '../../../utils/categoryMap';
-import { getArticlesFromStore, getDonationsFromStore, Article, DonationProgram } from '../../../utils/store';
+import { getArticlesFromStore, getDonationsFromStore, Article, DonationProgram, mapArticleFromDB } from '../../../utils/store';
+import { supabase } from '../../../utils/supabaseClient';
 import EventRegistrationForm from '../../../components/EventRegistrationForm';
 import QuestionFormPopup from '../../../components/QuestionFormPopup';
 
@@ -32,6 +33,28 @@ export default function ArticleClient({
   const [subcategoryArticles, setSubcategoryArticles] = useState<Article[]>(initialSubcategoryArticles);
   const [donations, setDonations] = useState<DonationProgram[]>(initialDonations);
   const [embedDomain, setEmbedDomain] = useState('www.gioitregiaophanbaria.com');
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const rawMeta = articleDetail?.metadata;
+  let parsedMeta = rawMeta;
+  if (typeof rawMeta === 'string') {
+    try { parsedMeta = JSON.parse(rawMeta); } catch (e) { parsedMeta = {}; }
+  }
+  const albumImages: Array<{ id?: number | string; url: string; caption?: string; isThumbnail?: boolean }> = 
+    (parsedMeta?.images && Array.isArray(parsedMeta.images))
+      ? parsedMeta.images
+      : [];
+
+  useEffect(() => {
+    if (lightboxIndex === null || albumImages.length === 0) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIndex(null);
+      if (e.key === 'ArrowRight') setLightboxIndex((prev) => (prev !== null ? (prev + 1) % albumImages.length : null));
+      if (e.key === 'ArrowLeft') setLightboxIndex((prev) => (prev !== null ? (prev - 1 + albumImages.length) % albumImages.length : null));
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [lightboxIndex, albumImages.length]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -54,12 +77,27 @@ export default function ArticleClient({
 
   const isEventRegistration = category === 'dao-tao' && slug === 'su-kien';
 
+  // Tự động đồng bộ bài viết mới nhất nếu SSR cache hoặc bài vừa được cập nhật
   useEffect(() => {
-    const syncData = () => {
+    if (!articleDetail?.id) return;
+    const syncLatestArticle = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('articles')
+          .select('*')
+          .eq('id', articleDetail.id)
+          .single();
+        if (data && !error) {
+          setArticleDetail(mapArticleFromDB(data));
+        }
+      } catch (err) {
+        console.error('Lỗi sync article:', err);
+      }
     };
-    window.addEventListener('storage_update', syncData);
-    return () => window.removeEventListener('storage_update', syncData);
-  }, [slug]);
+    syncLatestArticle();
+    window.addEventListener('storage_update', syncLatestArticle);
+    return () => window.removeEventListener('storage_update', syncLatestArticle);
+  }, [articleDetail?.id]);
 
   const isArticleCompleted = (articleId: string) => {
     return donations.some(d => d.isCompleted && d.linkedArticleId === articleId);
@@ -211,7 +249,7 @@ export default function ArticleClient({
                     "{articleDetail.excerpt}"
                   </div>
                   <div className="article-content-wrapper" dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflowWrap: 'break-word', wordBreak: 'break-word' }} />
-                </div>
+                  </div>
               ) : (
                 // Giao diện bài viết thông thường
                 <div>
@@ -345,6 +383,273 @@ export default function ArticleClient({
                   )}
 
                   <div className="article-content-wrapper" dangerouslySetInnerHTML={{ __html: sanitize(articleDetail.content) }} style={{ lineHeight: '1.8', color: '#1e293b', fontSize: '1.05rem', overflowWrap: 'break-word', wordBreak: 'break-word' }} />
+                </div>
+              )}
+
+              {/* BỘ SƯU TẬP ALBUM HÌNH ẢNH (HIỂN THỊ CHO MỌI CHUYÊN MỤC) */}
+              {albumImages.length > 0 && (
+                <div style={{ marginTop: '25px', marginBottom: '35px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '14px 20px',
+                    background: 'linear-gradient(135deg, var(--color-brand-cyan) 0%, #0e7490 100%)',
+                    borderRadius: '10px',
+                    color: 'white',
+                    marginBottom: '20px',
+                    boxShadow: '0 4px 12px rgba(8,145,178,0.2)'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                      <span style={{ fontSize: '1.4rem' }}>📸</span>
+                      <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
+                        Bộ Sưu Tập Hình Ảnh ({albumImages.length} hình ảnh)
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '0.85rem', opacity: 0.9, background: 'rgba(255,255,255,0.2)', padding: '4px 12px', borderRadius: '20px' }}>
+                      Bấm vào ảnh để xem toàn màn hình
+                    </span>
+                  </div>
+
+                  {/* Lưới hình ảnh */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    {albumImages.map((img: any, idx: number) => (
+                      <div
+                        key={img.id || idx}
+                        onClick={() => setLightboxIndex(idx)}
+                        style={{
+                          position: 'relative',
+                          borderRadius: '10px',
+                          overflow: 'hidden',
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+                          background: '#e2e8f0',
+                          aspectRatio: '4/3',
+                          border: img.isThumbnail ? '3px solid var(--color-brand-cyan)' : '1px solid #e2e8f0',
+                          transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+                        }}
+                      >
+                        <img
+                          loading="lazy"
+                          src={img.url}
+                          alt={img.caption || articleDetail.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        />
+                        {img.isThumbnail && (
+                          <div style={{
+                            position: 'absolute',
+                            top: 8,
+                            left: 8,
+                            background: 'var(--color-brand-cyan)',
+                            color: 'white',
+                            fontSize: '0.72rem',
+                            padding: '3px 8px',
+                            borderRadius: '4px',
+                            fontWeight: 'bold',
+                            zIndex: 2,
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                          }}>
+                            ★ ẢNH BÌA
+                          </div>
+                        )}
+                        <div style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: 'linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 60%)',
+                          display: 'flex',
+                          alignItems: 'flex-end',
+                          padding: '10px 12px',
+                          opacity: img.caption ? 1 : 0.85
+                        }}>
+                          <p style={{ color: 'white', fontSize: '0.85rem', margin: 0, lineHeight: 1.3, textShadow: '0 1px 2px rgba(0,0,0,0.8)' }}>
+                            {img.caption || `Ảnh #${idx + 1}`}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* LIGHTBOX MODAL TOÀN MÀN HÌNH */}
+              {lightboxIndex !== null && albumImages[lightboxIndex] && (
+                <div
+                  style={{
+                    position: 'fixed',
+                    inset: 0,
+                    background: 'rgba(0, 0, 0, 0.95)',
+                    zIndex: 999999,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    padding: '16px',
+                    backdropFilter: 'blur(5px)'
+                  }}
+                  onClick={() => setLightboxIndex(null)}
+                >
+                  {/* Top Bar */}
+                  <div
+                    style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white', padding: '0 10px' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div style={{ fontSize: '1rem', fontWeight: 'bold', maxWidth: '70%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      📸 {articleDetail.title} — <span style={{ color: '#38bdf8' }}>Ảnh {lightboxIndex + 1} / {albumImages.length}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                      <a
+                        href={albumImages[lightboxIndex].url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          color: '#38bdf8',
+                          textDecoration: 'none',
+                          fontSize: '0.9rem',
+                          fontWeight: 'bold',
+                          background: 'rgba(56,189,248,0.15)',
+                          padding: '6px 14px',
+                          borderRadius: '6px',
+                          border: '1px solid rgba(56,189,248,0.3)'
+                        }}
+                      >
+                        ⬇ Mở ảnh gốc
+                      </a>
+                      <button
+                        onClick={() => setLightboxIndex(null)}
+                        style={{
+                          background: 'rgba(255,255,255,0.2)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '40px',
+                          height: '40px',
+                          fontSize: '1.6rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          lineHeight: 1
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Main Viewer */}
+                  <div
+                    style={{
+                      flex: 1,
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '10px 0'
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {albumImages.length > 1 && (
+                      <button
+                        onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev - 1 + albumImages.length) % albumImages.length : 0))}
+                        title="Ảnh trước (Phím mũi tên Trái)"
+                        style={{
+                          position: 'absolute',
+                          left: '15px',
+                          background: 'rgba(255,255,255,0.2)',
+                          color: 'white',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '50%',
+                          width: '48px',
+                          height: '48px',
+                          fontSize: '1.5rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 10,
+                          backdropFilter: 'blur(4px)'
+                        }}
+                      >
+                        ◀
+                      </button>
+                    )}
+
+                    <img
+                      src={albumImages[lightboxIndex].url}
+                      alt={albumImages[lightboxIndex].caption || 'Album photo'}
+                      style={{
+                        maxWidth: '92vw',
+                        maxHeight: '74vh',
+                        objectFit: 'contain',
+                        borderRadius: '8px',
+                        boxShadow: '0 10px 35px rgba(0,0,0,0.6)'
+                      }}
+                    />
+
+                    {albumImages.length > 1 && (
+                      <button
+                        onClick={() => setLightboxIndex((prev) => (prev !== null ? (prev + 1) % albumImages.length : 0))}
+                        title="Ảnh sau (Phím mũi tên Phải)"
+                        style={{
+                          position: 'absolute',
+                          right: '15px',
+                          background: 'rgba(255,255,255,0.2)',
+                          color: 'white',
+                          border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '50%',
+                          width: '48px',
+                          height: '48px',
+                          fontSize: '1.5rem',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          zIndex: 10,
+                          backdropFilter: 'blur(4px)'
+                        }}
+                      >
+                        ▶
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Bottom Caption & Thumbnail Strip */}
+                  <div
+                    style={{ textAlign: 'center', color: '#e2e8f0', padding: '5px 0' }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {albumImages[lightboxIndex].caption ? (
+                      <p style={{ margin: '0 0 10px 0', fontSize: '1rem', fontStyle: 'italic', color: '#f8fafc' }}>
+                        "{albumImages[lightboxIndex].caption}"
+                      </p>
+                    ) : null}
+
+                    {/* Thanh cuộn thumbnail thu nhỏ */}
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', overflowX: 'auto', padding: '6px 0', maxWidth: '90vw', margin: '0 auto' }}>
+                      {albumImages.map((thumb: any, tIdx: number) => (
+                        <img
+                          key={tIdx}
+                          src={thumb.url}
+                          onClick={() => setLightboxIndex(tIdx)}
+                          style={{
+                            width: '54px',
+                            height: '40px',
+                            objectFit: 'cover',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            border: tIdx === lightboxIndex ? '2px solid #38bdf8' : '1px solid rgba(255,255,255,0.2)',
+                            opacity: tIdx === lightboxIndex ? 1 : 0.5,
+                            transform: tIdx === lightboxIndex ? 'scale(1.1)' : 'scale(1)',
+                            transition: 'all 0.15s ease',
+                            flexShrink: 0
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

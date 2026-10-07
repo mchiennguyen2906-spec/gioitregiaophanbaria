@@ -51,7 +51,10 @@ export default function HomeClient({ initialArticles }: { initialArticles: Artic
   const courseArticles = getCategoryData(['lich-hoc']).all.filter(a => a.isHomeFeatured);
   const eventArticles = getCategoryData(['su-kien']).all.filter(a => a.isHomeFeatured);
   const featuredVideo = getCategoryData(['thanh-ca']).all.find(a => a.isHomeFeatured);
-  const featuredAlbums = getCategoryData(['hinh-anh']).all.filter(a => a.isHomeFeatured).slice(0, 6);
+  const allAlbums = getCategoryData(['hinh-anh']).all;
+  const featuredAlbums = (allAlbums.filter(a => a.isHomeFeatured).length > 0
+    ? allAlbums.filter(a => a.isHomeFeatured)
+    : allAlbums).slice(0, 8);
 
   // Dữ liệu cho Slider Sứ vụ & Tình nguyện
   const missionSlides = articles.filter(a => a.categoryId === 'su-kien' && a.isHomeFeatured).map(a => ({
