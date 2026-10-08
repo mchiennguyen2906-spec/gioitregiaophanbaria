@@ -160,7 +160,9 @@ export default function AdminDashboard() {
                  categoryName={activeCategoryName} 
                  onEdit={(article) => {
                    setArticleToEdit(article);
-                   if (article.categoryId === 'guong-mat') {
+                   if (Array.isArray((article as any).metadata?.images) && (article as any).metadata.images.length > 0) {
+                      setActiveMenu('NEW_ALBUM');
+                    } else if (article.categoryId === 'guong-mat') {
                      setActiveMenu('NEW_GUONGMAT');
                    } else if (article.categoryId === 'bieu-mau') {
                      setActiveMenu('NEW_BIEUMAU');

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import toast from 'react-hot-toast';
 import { addArticle, updateArticle, Article } from '../../../utils/store';
+import { categoryMap, slugMap, categoryHierarchy } from '../../../utils/categoryMap';
 
 // Helper nén ảnh bằng HTML5 Canvas nhanh, mượt, không lỗi WebWorker trên mọi thiết bị (kể cả Safari iOS)
 async function compressImage(file: File, maxDim = 1920, quality = 0.85): Promise<{ blob: Blob; fileName: string; contentType: string }> {
@@ -145,6 +146,7 @@ export default function AlbumEditor({
   const [excerpt, setExcerpt] = useState('');
   const [isHomeFeatured, setIsHomeFeatured] = useState(true);
   const [isFeatured, setIsFeatured] = useState(false);
+  const [targetCategory, setTargetCategory] = useState('hinh-anh');
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatusText, setUploadStatusText] = useState('');
@@ -161,6 +163,7 @@ export default function AlbumEditor({
       setExcerpt(articleToEdit.excerpt || '');
       setIsHomeFeatured(articleToEdit.isHomeFeatured !== false);
       setIsFeatured(Boolean(articleToEdit.isFeatured));
+      setTargetCategory(articleToEdit.categoryId || 'hinh-anh');
       if (articleToEdit.metadata?.images && Array.isArray(articleToEdit.metadata.images)) {
         setImages(articleToEdit.metadata.images);
       }
@@ -268,7 +271,7 @@ export default function AlbumEditor({
         title: albumTitle.trim(),
         author: author.trim() || 'Ban Truyền Thông',
         excerpt: excerpt.trim() || `Album gồm ${images.length} hình ảnh: ${albumTitle.trim()}`,
-        categoryId: 'hinh-anh',
+        categoryId: targetCategory,
         content: `<p>${albumTitle.trim()}</p>`,
         status: 'published' as const,
         thumbnailUrl: thumbnailUrl,
@@ -306,7 +309,7 @@ export default function AlbumEditor({
               {articleToEdit ? 'Chỉnh Sửa Album Ảnh' : 'Tạo Album Ảnh Mới'}
             </h2>
             <p style={{ color: '#64748b', margin: '4px 0 0 0', fontSize: '0.9rem' }}>
-              Chuyên mục: <strong>Hình ảnh Giới trẻ Giáo phận</strong>
+              Chuyên mục: <strong>{slugMap[targetCategory] || categoryMap[targetCategory] || targetCategory}</strong>
             </p>
           </div>
         </div>
@@ -659,6 +662,32 @@ export default function AlbumEditor({
 
         {/* Cấu hình hiển thị */}
         <div style={boxStyle}>
+          <h3 style={boxTitleStyle}>Chuyên Mục / Thư Mục</h3>
+          <select
+            value={targetCategory}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (articleToEdit && v !== articleToEdit.categoryId) {
+                toast('Album sẽ được chuyển sang mục "' + (slugMap[v] || v) + '" sau khi bấm Cập nhật.', { icon: '📂' });
+              }
+              setTargetCategory(v);
+            }}
+            style={{ ...inputStyle, padding: '10px', background: 'white' }}
+          >
+            {Object.entries(categoryHierarchy).map(([parent, children]) => (
+              <optgroup key={parent} label={categoryMap[parent] || parent}>
+                {children.map((slug) => (
+                  <option key={parent + slug} value={slug}>{slugMap[slug] || slug}</option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
+          <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '8px 0 0 0' }}>
+            Đăng nhầm mục? Chọn mục đúng rồi bấm "Cập nhật Album" để di chuyển toàn bộ ảnh &amp; thông tin.
+          </p>
+        </div>
+
+        <div style={boxStyle}>
           <h3 style={boxTitleStyle}>Vị Trí Hiển Thị</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '0.9rem', color: '#1e293b' }}>
@@ -688,7 +717,7 @@ export default function AlbumEditor({
           <p style={{ fontSize: '0.85rem', color: '#64748b', margin: 0, lineHeight: 1.6 }}>
             - Số ảnh hiện tại: <strong>{images.length} / 50</strong><br />
             - Ảnh bìa: <strong>{images.find((img) => img.isThumbnail) ? 'Đã chọn' : 'Chưa có'}</strong><br />
-            - Chuyên mục: <strong>Hình ảnh Giới trẻ Giáo phận</strong><br />
+            - Chuyên mục: <strong>{slugMap[targetCategory] || targetCategory}</strong><br />
             - Tự động hiển thị thư viện ảnh Lightbox toàn màn hình khi người xem click vào ảnh.
           </p>
         </div>
